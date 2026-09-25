@@ -1,0 +1,350 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+@source '../**/*.vue';
+
+/* Tailwind v4 class-based dark mode */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+/* Ocultar badge de marca de agua de PrimeUI */
+body > div[style*="position: fixed"],
+body > div[style*="z-index: 99999"],
+a[href*="primevue"],
+.p-license-badge,
+[class*="license"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* ========================================================
+   ESTILOS GLOBAIS DE TABLAS PRIMEVUE (DARK & LIGHT MODE)
+   ======================================================== */
+
+.p-datatable {
+    font-family: inherit !important;
+    border-radius: 0.75rem !important;
+    overflow: hidden !important;
+    border: none !important;
+    width: 100% !important;
+}
+
+.p-datatable .p-datatable-table {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    width: 100% !important;
+}
+
+/* ----------------- MODO OSCURO (DARK MODE) ----------------- */
+
+.dark .p-datatable,
+.dark .p-datatable-wrapper {
+    background-color: transparent !important;
+    color: #e2e8f0 !important;
+}
+
+.dark .p-datatable-header {
+    background-color: transparent !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+    padding: 0.75rem 1rem !important;
+}
+
+.dark .p-datatable-thead > tr > th {
+    background-color: #0b1329 !important; /* Deep navy-slate */
+    color: #94a3b8 !important;            /* Slate-400 */
+    border-bottom: 1px solid #1e293b !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    font-weight: 600 !important;
+    font-size: 0.75rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    padding: 0.85rem 1rem !important;
+    transition: background-color 0.2s ease, color 0.2s ease !important;
+}
+
+.dark .p-datatable-thead > tr > th:hover {
+    background-color: #111e3f !important;
+    color: #cbd5e1 !important;
+}
+
+.dark .p-datatable-tbody > tr {
+    background-color: transparent !important;
+    color: #cbd5e1 !important;
+    border-bottom: 1px solid #1e293b !important;
+    transition: background-color 0.15s ease !important;
+}
+
+.dark .p-datatable-tbody > tr:hover {
+    background-color: rgba(30, 41, 59, 0.5) !important; /* Soft highlight */
+}
+
+.dark .p-datatable-tbody > tr > td {
+    border-bottom: 1px solid #1e293b !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    padding: 0.85rem 1rem !important;
+    font-size: 0.875rem !important;
+    color: #cbd5e1 !important;
+}
+
+.dark .p-datatable-footer {
+    background-color: transparent !important;
+    color: #94a3b8 !important;
+    border-top: 1px solid #1e293b !important;
+}
+
+/* Paginador Modo Oscuro */
+.dark .p-paginator {
+    background-color: #0b1329 !important;
+    border-top: 1px solid #1e293b !important;
+    border-bottom: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    color: #94a3b8 !important;
+    padding: 0.75rem 1rem !important;
+    gap: 0.25rem !important;
+}
+
+.dark .p-paginator .p-paginator-page,
+.dark .p-paginator .p-paginator-first,
+.dark .p-paginator .p-paginator-prev,
+.dark .p-paginator .p-paginator-next,
+.dark .p-paginator .p-paginator-last {
+    color: #94a3b8 !important;
+    background-color: transparent !important;
+    border: 1px solid transparent !important;
+    border-radius: 0.5rem !important;
+    min-width: 2rem !important;
+    height: 2rem !important;
+    font-size: 0.8rem !important;
+    transition: all 0.15s ease !important;
+}
+
+.dark .p-paginator .p-paginator-page:hover,
+.dark .p-paginator .p-paginator-first:hover,
+.dark .p-paginator .p-paginator-prev:hover,
+.dark .p-paginator .p-paginator-next:hover,
+.dark .p-paginator .p-paginator-last:hover {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
+
+.dark .p-paginator .p-paginator-page.p-paginator-page-selected,
+.dark .p-paginator .p-paginator-page.p-highlight {
+    background: linear-gradient(135deg, #ea580c, #f97316) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    border-color: #ea580c !important;
+    box-shadow: 0 2px 8px rgba(234, 88, 12, 0.4) !important;
+}
+
+/* ----------------- MODO CLARO (LIGHT MODE) ----------------- */
+
+html:not(.dark) .p-datatable,
+.light .p-datatable,
+html:not(.dark) .p-datatable-wrapper,
+.light .p-datatable-wrapper {
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+}
+
+html:not(.dark) .p-datatable-header,
+.light .p-datatable-header {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #e2e8f0 !important;
+    padding: 0.75rem 1rem !important;
+}
+
+html:not(.dark) .p-datatable-thead > tr > th,
+.light .p-datatable-thead > tr > th {
+    background-color: #f8fafc !important; /* Soft light slate-50 */
+    color: #475569 !important;            /* Slate-600 */
+    border-bottom: 1px solid #e2e8f0 !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    font-weight: 600 !important;
+    font-size: 0.75rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    padding: 0.85rem 1rem !important;
+    transition: background-color 0.2s ease, color 0.2s ease !important;
+}
+
+html:not(.dark) .p-datatable-thead > tr > th:hover,
+.light .p-datatable-thead > tr > th:hover {
+    background-color: #f1f5f9 !important;
+    color: #1e293b !important;
+}
+
+html:not(.dark) .p-datatable-tbody > tr,
+.light .p-datatable-tbody > tr {
+    background-color: #ffffff !important;
+    color: #334155 !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    transition: background-color 0.15s ease !important;
+}
+
+html:not(.dark) .p-datatable-tbody > tr:hover,
+.light .p-datatable-tbody > tr:hover {
+    background-color: #f8fafc !important; /* Soft gray highlight */
+}
+
+html:not(.dark) .p-datatable-tbody > tr > td,
+.light .p-datatable-tbody > tr > td {
+    border-bottom: 1px solid #f1f5f9 !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    padding: 0.85rem 1rem !important;
+    font-size: 0.875rem !important;
+    color: #334155 !important;
+}
+
+html:not(.dark) .p-datatable-footer,
+.light .p-datatable-footer {
+    background-color: #ffffff !important;
+    color: #64748b !important;
+    border-top: 1px solid #e2e8f0 !important;
+}
+
+/* Paginador Modo Claro */
+html:not(.dark) .p-paginator,
+.light .p-paginator {
+    background-color: #f8fafc !important;
+    border-top: 1px solid #e2e8f0 !important;
+    border-bottom: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    color: #64748b !important;
+    padding: 0.75rem 1rem !important;
+    gap: 0.25rem !important;
+}
+
+html:not(.dark) .p-paginator .p-paginator-page,
+html:not(.dark) .p-paginator .p-paginator-first,
+html:not(.dark) .p-paginator .p-paginator-prev,
+html:not(.dark) .p-paginator .p-paginator-next,
+html:not(.dark) .p-paginator .p-paginator-last,
+.light .p-paginator .p-paginator-page,
+.light .p-paginator .p-paginator-first,
+.light .p-paginator .p-paginator-prev,
+.light .p-paginator .p-paginator-next,
+.light .p-paginator .p-paginator-last {
+    color: #64748b !important;
+    background-color: transparent !important;
+    border: 1px solid transparent !important;
+    border-radius: 0.5rem !important;
+    min-width: 2rem !important;
+    height: 2rem !important;
+    font-size: 0.8rem !important;
+    transition: all 0.15s ease !important;
+}
+
+html:not(.dark) .p-paginator .p-paginator-page:hover,
+html:not(.dark) .p-paginator .p-paginator-first:hover,
+html:not(.dark) .p-paginator .p-paginator-prev:hover,
+html:not(.dark) .p-paginator .p-paginator-next:hover,
+html:not(.dark) .p-paginator .p-paginator-last:hover,
+.light .p-paginator .p-paginator-page:hover {
+    background-color: #e2e8f0 !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+}
+
+html:not(.dark) .p-paginator .p-paginator-page.p-paginator-page-selected,
+html:not(.dark) .p-paginator .p-paginator-page.p-highlight,
+.light .p-paginator .p-paginator-page.p-paginator-page-selected,
+.light .p-paginator .p-paginator-page.p-highlight {
+    background: linear-gradient(135deg, #ea580c, #f97316) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    border-color: #ea580c !important;
+    box-shadow: 0 2px 8px rgba(234, 88, 12, 0.3) !important;
+}
+
+/* Dialogos PrimeVue */
+.dark .p-dialog {
+    background-color: #0f172a !important;
+    border: 1px solid #334155 !important;
+    color: #f8fafc !important;
+}
+.dark .p-dialog .p-dialog-header,
+.dark .p-dialog .p-dialog-content,
+.dark .p-dialog .p-dialog-footer {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+}
+
+html:not(.dark) .p-dialog,
+.light .p-dialog {
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #0f172a !important;
+}
+html:not(.dark) .p-dialog .p-dialog-header,
+html:not(.dark) .p-dialog .p-dialog-content,
+html:not(.dark) .p-dialog .p-dialog-footer,
+.light .p-dialog .p-dialog-header,
+.light .p-dialog .p-dialog-content,
+.light .p-dialog .p-dialog-footer {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+}
+
+/* ========================================================
+   INPUTS CON ÍCONOS (LOGIN, REGISTER, FORMULARIOS)
+   ======================================================== */
+.input-with-icon,
+.p-inputtext.input-with-icon,
+input.p-inputtext.input-with-icon {
+    padding-left: 2.75rem !important;
+}
+
+/* En Modo Oscuro */
+.dark .p-inputtext.input-with-icon,
+.dark .auth-card .p-inputtext {
+    background-color: #0b1329 !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+.dark .p-inputtext.input-with-icon:focus,
+.dark .auth-card .p-inputtext:focus {
+    border-color: #f97316 !important;
+    box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.25) !important;
+}
+
+/* En Modo Claro */
+html:not(.dark) .p-inputtext.input-with-icon,
+.light .p-inputtext.input-with-icon,
+html:not(.dark) .auth-card .p-inputtext,
+.light .auth-card .p-inputtext {
+    background-color: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+}
+
+html:not(.dark) .p-inputtext.input-with-icon:focus,
+.light .p-inputtext.input-with-icon:focus,
+html:not(.dark) .auth-card .p-inputtext:focus,
+.light .auth-card .p-inputtext:focus {
+    border-color: #ea580c !important;
+    box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.2) !important;
+}
+

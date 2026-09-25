@@ -1,0 +1,220 @@
+================================================================================
+  REQUISITOS FUNCIONALES - APLICACIÓN MÓVIL (FLUTTER)
+  Sistema de Restaurante "Las Brazas"
+  Módulo: Pedidos, Envíos / Delivery y Facturación
+================================================================================
+
+LEYENDA DE PRIORIDAD:
+  [🔴 IMPRESCINDIBLE] = Sin este requisito el MVP no puede operar
+  [🟡 NECESARIO]      = Necesario para una experiencia comercial robusta
+  [🟢 OPCIONAL]       = Valor agregado / funcionalidades avanzadas
+
+
+--------------------------------------------------------------------------------
+🔴 1. REQUISITOS IMPRESCINDIBLES (MVP / Fase Crítica)
+--------------------------------------------------------------------------------
+
+A. Catálogo Digital y Selección de Pedido (Dashboard del Cliente)
+------------------------------------------------------------------
+[🔴 RF-01] Visualización del Menú Móvil:
+  La app debe mostrar el catálogo de categorías y platillos con fotos de
+  alta resolución, nombre, descripción, precio y disponibilidad en tiempo real.
+
+[🔴 RF-02] Personalización del Platillo:
+  El cliente debe poder elegir variantes de su platillo (término de la
+  carne, guarniciones, extras) y escribir notas de cocina
+  (ej. "Sin cebolla", "Salsa aparte").
+
+[🔴 RF-03] Carrito de Compras Móvil:
+  El cliente debe poder agregar, modificar cantidades, eliminar ítems
+  y ver el desglose en vivo del subtotal, impuestos y costo estimado de envío.
+
+
+B. Módulo de Envíos y Tipos de Entrega
+---------------------------------------
+[🔴 RF-04] Selección del Tipo de Entrega:
+  El usuario debe poder elegir entre:
+    - Delivery / Envío a Domicilio
+    - Takeaway / Para Recoger en Restaurante
+    - En Mesa / Pedido QR desde la Mesa (si está dentro del local)
+
+[🔴 RF-05] Gestión de Direcciones de Entrega:
+  El usuario debe poder registrar su dirección de entrega
+  (calle, número, piso/departamento, punto de referencia y
+  ubicación en mapa GPS).
+
+[🔴 RF-06] Cálculo de Costo y Tiempo de Entrega:
+  El sistema debe calcular el costo del envío (por zona, radio de km o
+  tarifa fija) y estimar el tiempo aproximado de entrega
+  (ej. 35 - 50 min).
+
+
+C. Pasarela de Pagos y Facturación Básica
+------------------------------------------
+[🔴 RF-07] Métodos de Pago Móvil:
+  El cliente debe poder pagar mediante:
+    - Pago en línea (Tarjeta de débito/crédito vía Stripe, MercadoPago, etc.)
+    - Pago contra entrega (Efectivo o POS inalámbrico)
+    - Pago QR / Transferencia directa
+
+[🔴 RF-08] Datos de Facturación:
+  Al confirmar el pedido, el cliente debe poder solicitar factura
+  ingresando su Razón Social y NIT / RFC / CI.
+
+[🔴 RF-09] Generación de Comprobante Digital:
+  El sistema debe emitir y permitir descargar el comprobante/factura en
+  formato PDF y enviarlo al correo electrónico registrado del cliente.
+
+
+D. Estados del Pedido y Sincronización con Cocina/POS
+-------------------------------------------------------
+[🔴 RF-10] Integración con KDS y Cocina:
+  Al confirmarse el pedido móvil, debe aparecer automáticamente en la
+  pantalla de cocina (KDS) y descontar el inventario de insumos
+  a través del InventoryService existente.
+
+[🔴 RF-11] Línea de Tiempo del Pedido en Tiempo Real:
+  El cliente debe poder ver el estado actual de su orden en tiempo real:
+    Recibido → En Cocina → En Camino (Delivery) → Entregado
+
+
+--------------------------------------------------------------------------------
+🟡 2. REQUISITOS NECESARIOS (Experiencia Comercial Robusta)
+--------------------------------------------------------------------------------
+
+A. Perfil y Autenticación
+---------------------------
+[🟡 RF-12] Login Rápido y Social Auth:
+  Registro e inicio de sesión mediante Email/Contraseña,
+  Google Sign-In y Apple Sign-In.
+
+[🟡 RF-13] Libreta de Direcciones Guardadas:
+  Guardar múltiples direcciones frecuentes
+  (ej. "Casa", "Oficina", "Pareja").
+
+[🟡 RF-14] Historial y Re-ordenar:
+  Consultar historial de compras anteriores y botón de "Volver a pedir"
+  en un solo toque para repetir el mismo pedido.
+
+
+B. Notificaciones y Comunicación
+-----------------------------------
+[🟡 RF-15] Notificaciones Push de Estado:
+  Enviar alertas al teléfono cuando:
+    - El pedido fue aceptado por la cocina
+    - El repartidor recogió la comida y salió hacia la dirección
+    - El repartidor está cerca (zona de 500m)
+
+[🟡 RF-16] Botón Directo de Soporte / WhatsApp:
+  Botón flotante para contactar directamente a la sucursal o al
+  repartidor vía WhatsApp / llamada telefónica.
+
+
+C. Módulo de Repartidores (Vista / App Delivery)
+--------------------------------------------------
+[🟡 RF-17] Asignación de Repartidor:
+  El administrador puede asignar un repartidor propio o permitir que
+  el repartidor tome pedidos disponibles desde su app.
+
+[🟡 RF-18] Navegación GPS para Repartidor:
+  Botón para abrir la ruta directamente en Google Maps o Waze hacia
+  el domicilio del cliente.
+
+[🟡 RF-19] Confirmación de Entrega:
+  El repartidor debe marcar el pedido como entregado con:
+    - Código PIN de 4 dígitos que el cliente muestra en pantalla
+    - O firma digital sobre la pantalla del repartidor
+
+
+--------------------------------------------------------------------------------
+🟢 3. REQUISITOS OPCIONALES / AVANZADOS (Valor Agregado)
+--------------------------------------------------------------------------------
+
+A. Geoposicionamiento en Vivo
+--------------------------------
+[🟢 RF-20] Tracking GPS en Tiempo Real del Repartidor:
+  Mapa interactivo donde el cliente ve el icono del repartidor
+  moviéndose en vivo hacia su domicilio (vía WebSockets / Pusher).
+
+[🟢 RF-21] Geofencing / Radio de Cobertura:
+  Validación automática de si la dirección del cliente está dentro de
+  la zona de reparto del restaurante antes de permitir el checkout.
+
+
+B. Fidelización, Cupones y Promociones
+-----------------------------------------
+[🟢 RF-22] Motor de Cupones de Descuento:
+  Aplicar códigos promocionales al momento del pago
+  (ej. "BRAZAS10", "ENVIOGRATIS").
+
+[🟢 RF-23] Programa de Puntos / Cashback:
+  Acumular puntos por cada peso/dólar consumido para canjear
+  por platillos o descuentos en pedidos futuros.
+
+[🟢 RF-24] Combos y Sugerencias Inteligentes (Upselling):
+  Pop-up o carrusel de venta cruzada antes del pago:
+  ej. "¿Deseas agregar bebida o postre por $2.50 más?"
+
+
+C. Asistente y Recomendaciones IA
+------------------------------------
+[🟢 RF-25] Recomendador Personalizado de Platillos:
+  Sugerir platillos según compras pasadas, hora del día,
+  preferencias dietéticas o alergias registradas del cliente.
+
+[🟢 RF-26] Chatbot de Pedidos por Voz / Lenguaje Natural:
+  Permitir al cliente armar su orden dictándole a la app:
+  ej. "Pídeme una arrachera término medio con papas y una limonada"
+  (conectado al microservicio fast_api / Gemini existente en el proyecto)
+
+
+================================================================================
+ARQUITECTURA RECOMENDADA PARA IMPLEMENTACIÓN EN FLUTTER
+================================================================================
+
+Capas del Sistema:
+
+  [FLUTTER APP - Cliente / Repartidor]
+        │
+        │  REST API + WebSockets (Laravel Sanctum Tokens)
+        ▼
+  [BACKEND LARAVEL 12 - restauranteLasBrazas]
+    - API de Catálogo, Pedidos, Delivery y Facturación
+    - InventoryService (descuento automático de stock)
+    - Notificaciones Push (Laravel Notifications + FCM)
+    - Eventos en tiempo real (Laravel Reverb / Pusher)
+        │
+        ├──► [PANEL KDS Cocina - Vue 3]
+        │     Recibe comandas de delivery en tiempo real
+        │
+        └──► [PASARELA DE PAGOS]
+              Stripe / QR / Tarjetas de crédito/débito
+
+
+Endpoints de API a construir en Laravel (sugerencia inicial):
+  GET    /api/v1/menu                    → Catálogo de categorías y platillos
+  POST   /api/v1/orders                  → Crear nuevo pedido (delivery/pickup)
+  GET    /api/v1/orders/{id}             → Estado de un pedido
+  POST   /api/v1/orders/{id}/pay         → Procesar pago
+  GET    /api/v1/orders/{id}/invoice     → Descargar factura PDF
+  GET    /api/v1/orders/history          → Historial del cliente
+  GET    /api/v1/delivery/pending        → Pedidos pendientes para repartidor
+  POST   /api/v1/delivery/{id}/confirm   → Confirmar entrega del repartidor
+  GET    /api/v1/customer/addresses      → Direcciones guardadas del cliente
+  POST   /api/v1/customer/addresses      → Agregar nueva dirección
+  POST   /api/v1/coupons/validate        → Validar código de descuento
+
+
+Tecnologías Flutter sugeridas:
+  - State Management:    Riverpod 2 / BLoC
+  - HTTP Client:         Dio + Retrofit
+  - Mapas y GPS:         Google Maps Flutter / Mapbox
+  - Pagos en línea:      flutter_stripe / mercadopago_sdk
+  - Notificaciones Push: firebase_messaging (FCM)
+  - Tiempo Real:         web_socket_channel / laravel_echo_flutter
+  - Auth Social:         google_sign_in / sign_in_with_apple
+  - PDF / Impresión:     printing / pdf
+
+================================================================================
+  Creado: 2026-08-31  |  Sistema: Las Brazas  |  Autor: Antigravity
+================================================================================
