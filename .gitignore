@@ -28,6 +28,8 @@
 /storage/logs/*.log
 !/storage/logs/.gitignore
 /vendor
+/docs
+/scratch
 Homestead.json
 Homestead.yaml
 Thumbs.db
