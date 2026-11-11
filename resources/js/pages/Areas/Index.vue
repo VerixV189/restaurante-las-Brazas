@@ -18,7 +18,7 @@ import TabPanels from 'primevue/tabpanels';
 import TabPanel from 'primevue/tabpanel';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
-import { MapPin, Plus, Edit3, Trash2, Users, Layers, Armchair } from 'lucide-vue-next';
+import { MapPin, Users, Layers, Armchair } from 'lucide-vue-next';
 
 const props = defineProps({
   areas: Array,
@@ -200,13 +200,13 @@ function quickChangeTableStatus(table, newStatus) {
 
     <div class="space-y-6">
       <!-- Header Banner -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="bg-white border border-slate-200 shadow-sm dark:bg-slate-900 dark:border-slate-800 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors duration-200">
         <div>
-          <h2 class="text-xl font-bold text-slate-100 flex items-center gap-2">
+          <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
             <MapPin class="w-6 h-6 text-orange-500" />
             Zonas y Mesas del Restaurante
           </h2>
-          <p class="text-sm text-slate-400">
+          <p class="text-sm text-slate-500 dark:text-slate-400">
             Organiza los ambientes (Salón, Terraza, VIP) y gestiona la capacidad y disponibilidad de cada mesa.
           </p>
         </div>
@@ -214,13 +214,13 @@ function quickChangeTableStatus(table, newStatus) {
           <Button
             label="Nueva Zona"
             icon="pi pi-plus"
-            class="bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700"
+            class="bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 dark:border-slate-700"
             @click="openCreateAreaModal"
           />
           <Button
             label="Nueva Mesa"
             icon="pi pi-plus"
-            class="bg-orange-600 border-none hover:bg-orange-500"
+            class="bg-orange-600 border-none hover:bg-orange-500 text-white"
             @click="openCreateTableModal"
             :disabled="areas.length === 0"
           />
@@ -249,11 +249,11 @@ function quickChangeTableStatus(table, newStatus) {
           <TabPanel value="0" class="pt-4">
             <!-- Vista de Mesas Agrupadas por Zona -->
             <div v-for="area in areas" :key="area.id" class="mb-8 last:mb-0">
-              <div class="flex items-center justify-between border-b border-slate-800/80 pb-2 mb-4">
+              <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-2 mb-4">
                 <div class="flex items-center gap-2">
                   <span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span>
-                  <h3 class="text-base font-bold text-slate-200">{{ area.name }}</h3>
-                  <span class="text-xs text-slate-400">({{ area.tables?.length || 0 }} mesas)</span>
+                  <h3 class="text-base font-bold text-slate-800 dark:text-slate-200">{{ area.name }}</h3>
+                  <span class="text-xs text-slate-500 dark:text-slate-400">({{ area.tables?.length || 0 }} mesas)</span>
                 </div>
               </div>
 
@@ -262,29 +262,29 @@ function quickChangeTableStatus(table, newStatus) {
                 <div
                   v-for="table in area.tables"
                   :key="table.id"
-                  class="bg-slate-950/70 border border-slate-800 rounded-xl p-4 flex flex-col justify-between hover:border-slate-700 transition-all group"
+                  class="bg-slate-50 border border-slate-200 hover:border-orange-400 dark:bg-slate-950/70 dark:border-slate-800 dark:hover:border-slate-700 rounded-xl p-4 flex flex-col justify-between transition-all group shadow-xs"
                 >
                   <div>
                     <div class="flex items-center justify-between mb-2">
-                      <h4 class="font-bold text-slate-100 text-base">{{ table.table_number }}</h4>
+                      <h4 class="font-bold text-slate-800 dark:text-slate-100 text-base">{{ table.table_number }}</h4>
                       <Tag
                         :value="getStatusBadge(table.status).label"
                         :severity="getStatusBadge(table.status).severity"
                       />
                     </div>
-                    <div class="flex items-center gap-2 text-xs text-slate-400 mb-3">
-                      <Users class="w-3.5 h-3.5 text-slate-500" />
-                      <span>Capacidad: <strong class="text-slate-200">{{ table.capacity }} personas</strong></span>
+                    <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mb-3">
+                      <Users class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+                      <span>Capacidad: <strong class="text-slate-700 dark:text-slate-200">{{ table.capacity }} personas</strong></span>
                     </div>
                   </div>
 
                   <!-- Quick Actions & Status -->
-                  <div class="pt-3 border-t border-slate-800/60 flex items-center justify-between">
+                  <div class="pt-3 border-t border-slate-200 dark:border-slate-800/60 flex items-center justify-between">
                     <!-- Selector Rápido de Estado -->
                     <select
                       :value="table.status"
                       @change="quickChangeTableStatus(table, $event.target.value)"
-                      class="bg-slate-900 border border-slate-700 text-[11px] rounded-lg px-2 py-1 text-slate-300 focus:outline-none"
+                      class="bg-white border border-slate-300 text-slate-700 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-300 text-[11px] rounded-lg px-2 py-1 focus:outline-none focus:border-orange-500"
                     >
                       <option value="available">🟢 Libre</option>
                       <option value="occupied">🔴 Ocupada</option>
@@ -293,8 +293,8 @@ function quickChangeTableStatus(table, newStatus) {
                     </select>
 
                     <div class="flex gap-1">
-                      <Button icon="pi pi-pencil" class="p-button-text p-button-sm text-blue-400 p-1" @click="openEditTableModal(table)" />
-                      <Button icon="pi pi-trash" class="p-button-text p-button-sm text-red-400 p-1" @click="confirmDeleteTable(table)" />
+                      <Button icon="pi pi-pencil" text rounded size="small" severity="info" class="!w-7 !h-7 !p-0 text-blue-600 dark:text-blue-400" @click="openEditTableModal(table)" />
+                      <Button icon="pi pi-trash" text rounded size="small" severity="danger" class="!w-7 !h-7 !p-0 text-red-600 dark:text-red-400" @click="confirmDeleteTable(table)" />
                     </div>
                   </div>
                 </div>
@@ -346,20 +346,20 @@ function quickChangeTableStatus(table, newStatus) {
     >
       <form @submit.prevent="submitAreaForm" class="space-y-4 pt-2">
         <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Nombre de Zona *</label>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Nombre de Zona *</label>
           <InputText
             v-model="areaForm.name"
-            class="w-full bg-slate-800 border-slate-700 text-slate-100"
+            class="w-full"
             placeholder="Ej: Terraza Principal, Salón VIP"
             required
           />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Descripción</label>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Descripción</label>
           <Textarea
             v-model="areaForm.description"
             rows="3"
-            class="w-full bg-slate-800 border-slate-700 text-slate-100"
+            class="w-full"
             placeholder="Detalles sobre este espacio..."
           />
         </div>
@@ -368,7 +368,7 @@ function quickChangeTableStatus(table, newStatus) {
           <Button
             type="submit"
             :label="isEditingArea ? 'Actualizar' : 'Guardar'"
-            class="bg-orange-600 border-none hover:bg-orange-500"
+            class="bg-orange-600 border-none hover:bg-orange-500 text-white"
             :loading="areaForm.processing"
           />
         </div>
@@ -384,28 +384,28 @@ function quickChangeTableStatus(table, newStatus) {
     >
       <form @submit.prevent="submitTableForm" class="space-y-4 pt-2">
         <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Zona / Ambiente *</label>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Zona / Ambiente *</label>
           <Select
             v-model="tableForm.area_id"
             :options="areas"
             optionLabel="name"
             optionValue="id"
             placeholder="Selecciona el área"
-            class="w-full bg-slate-800 border-slate-700 text-slate-100"
+            class="w-full"
             required
           />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Identificador de Mesa *</label>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Identificador de Mesa *</label>
           <InputText
             v-model="tableForm.table_number"
-            class="w-full bg-slate-800 border-slate-700 text-slate-100"
+            class="w-full"
             placeholder="Ej: Mesa 1, Mesa VIP 2, Barra 4"
             required
           />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Capacidad (Personas / Sillas) *</label>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Capacidad (Personas / Sillas) *</label>
           <InputNumber
             v-model="tableForm.capacity"
             :min="1"
@@ -415,13 +415,13 @@ function quickChangeTableStatus(table, newStatus) {
           />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Estado Inicial</label>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Estado Inicial</label>
           <Select
             v-model="tableForm.status"
             :options="statusOptions"
             optionLabel="label"
             optionValue="value"
-            class="w-full bg-slate-800 border-slate-700 text-slate-100"
+            class="w-full"
             required
           />
         </div>
@@ -430,7 +430,7 @@ function quickChangeTableStatus(table, newStatus) {
           <Button
             type="submit"
             :label="isEditingTable ? 'Actualizar' : 'Guardar'"
-            class="bg-orange-600 border-none hover:bg-orange-500"
+            class="bg-orange-600 border-none hover:bg-orange-500 text-white"
             :loading="tableForm.processing"
           />
         </div>

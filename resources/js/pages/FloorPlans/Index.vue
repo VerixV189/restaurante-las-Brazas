@@ -3,25 +3,16 @@ import { ref, computed } from 'vue';
 import axios from 'axios';
 import AdminLayout from '../../layouts/AdminLayout.vue';
 import Button from 'primevue/button';
-import InputNumber from 'primevue/inputnumber';
-import Select from 'primevue/select';
 import Tag from 'primevue/tag';
 import { useToast } from 'primevue/usetoast';
 import {
   Layers,
   UploadCloud,
   Sparkles,
-  Zap,
   Save,
-  CheckCircle2,
-  AlertTriangle,
   Armchair,
   Maximize2,
   Users,
-  RotateCcw,
-  Eye,
-  Info,
-  MapPin,
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -64,7 +55,6 @@ function triggerFileInput() {
 
 // Cargar plano de demostración precargado
 function loadSampleBlueprint() {
-  // Crear un canvas con un plano simple sintético
   const canvas = document.createElement('canvas');
   canvas.width = 900;
   canvas.height = 650;
@@ -242,8 +232,8 @@ const totalDetectedCapacity = computed(() => {
         <div class="lg:col-span-4 space-y-5">
 
           <!-- 1. Cargar Plano -->
-          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-4">
-            <div class="flex items-center gap-2 text-slate-100 font-bold text-sm">
+          <div class="bg-white border border-slate-200 shadow-sm dark:bg-slate-900 dark:border-slate-800 rounded-3xl p-5 space-y-4 transition-colors duration-200">
+            <div class="flex items-center gap-2 text-slate-800 dark:text-slate-100 font-bold text-sm">
               <UploadCloud class="w-4 h-4 text-orange-500" />
               <span>1. Imagen del Plano Arquitectónico</span>
             </div>
@@ -258,10 +248,10 @@ const totalDetectedCapacity = computed(() => {
 
             <div
               @click="triggerFileInput"
-              class="border-2 border-dashed border-slate-700 hover:border-orange-500/60 rounded-2xl p-4 text-center cursor-pointer transition-all bg-slate-950/60 hover:bg-orange-500/5 group"
+              class="border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500/60 rounded-2xl p-4 text-center cursor-pointer transition-all bg-slate-50 dark:bg-slate-950/60 hover:bg-orange-500/5 group"
             >
-              <UploadCloud class="w-8 h-8 mx-auto text-slate-500 group-hover:text-orange-400 transition-colors mb-2" />
-              <p class="text-xs font-semibold text-slate-300">
+              <UploadCloud class="w-8 h-8 mx-auto text-slate-400 dark:text-slate-500 group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors mb-2" />
+              <p class="text-xs font-semibold text-slate-700 dark:text-slate-300">
                 {{ selectedFile ? selectedFile.name : 'Haz clic para subir imagen o plano' }}
               </p>
               <p class="text-[10px] text-slate-500 mt-1">PNG, JPG, WEBP (Hasta 5MB)</p>
@@ -270,53 +260,53 @@ const totalDetectedCapacity = computed(() => {
             <button
               type="button"
               @click="loadSampleBlueprint"
-              class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-colors border border-slate-700"
+              class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
             >
-              <Sparkles class="w-3.5 h-3.5 text-amber-400" />
+              <Sparkles class="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
               <span>Cargar Plano de Demostración</span>
             </button>
           </div>
 
           <!-- 2. Dimensiones y Filtros -->
-          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-4">
-            <div class="flex items-center gap-2 text-slate-100 font-bold text-sm">
-              <Maximize2 class="w-4 h-4 text-purple-400" />
+          <div class="bg-white border border-slate-200 shadow-sm dark:bg-slate-900 dark:border-slate-800 rounded-3xl p-5 space-y-4 transition-colors duration-200">
+            <div class="flex items-center gap-2 text-slate-800 dark:text-slate-100 font-bold text-sm">
+              <Maximize2 class="w-4 h-4 text-purple-600 dark:text-purple-400" />
               <span>2. Dimensiones Reales (Metros)</span>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Ancho Local (m)</label>
+                <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1">Ancho Local (m)</label>
                 <input
                   v-model.number="localAnchoM"
                   type="number"
                   step="0.5"
                   min="1"
-                  class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-orange-500"
+                  class="w-full bg-slate-50 border border-slate-300 text-slate-800 dark:bg-slate-950 dark:border-slate-700 dark:text-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-orange-500"
                 />
               </div>
               <div>
-                <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Alto Local (m)</label>
+                <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1">Alto Local (m)</label>
                 <input
                   v-model.number="localAltoM"
                   type="number"
                   step="0.5"
                   min="1"
-                  class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-orange-500"
+                  class="w-full bg-slate-50 border border-slate-300 text-slate-800 dark:bg-slate-950 dark:border-slate-700 dark:text-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-orange-500"
                 />
               </div>
             </div>
 
-            <div class="pt-2 border-t border-slate-800">
-              <span class="block text-[11px] font-semibold text-slate-400 uppercase mb-2">Filtros de Mesas & Sillas (m)</span>
+            <div class="pt-2 border-t border-slate-200 dark:border-slate-800">
+              <span class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase mb-2">Filtros de Mesas & Sillas (m)</span>
               <div class="grid grid-cols-2 gap-2 text-[11px]">
                 <div>
                   <label class="text-slate-500">Mesa Min:</label>
-                  <input v-model.number="mesaMinM" type="number" step="0.1" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-1.5 text-slate-300 text-xs" />
+                  <input v-model.number="mesaMinM" type="number" step="0.1" class="w-full bg-slate-50 border border-slate-300 text-slate-800 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-300 rounded-lg p-1.5 text-xs" />
                 </div>
                 <div>
                   <label class="text-slate-500">Mesa Max:</label>
-                  <input v-model.number="mesaMaxM" type="number" step="0.1" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-1.5 text-slate-300 text-xs" />
+                  <input v-model.number="mesaMaxM" type="number" step="0.1" class="w-full bg-slate-50 border border-slate-300 text-slate-800 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-300 rounded-lg p-1.5 text-xs" />
                 </div>
               </div>
             </div>
@@ -333,17 +323,17 @@ const totalDetectedCapacity = computed(() => {
           </div>
 
           <!-- 3. Sincronización a Base de Datos -->
-          <div v-if="layoutResult" class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-4 animate-fade-in">
-            <div class="flex items-center gap-2 text-slate-100 font-bold text-sm">
-              <Save class="w-4 h-4 text-emerald-400" />
+          <div v-if="layoutResult" class="bg-white border border-slate-200 shadow-sm dark:bg-slate-900 dark:border-slate-800 rounded-3xl p-5 space-y-4 transition-colors duration-200">
+            <div class="flex items-center gap-2 text-slate-800 dark:text-slate-100 font-bold text-sm">
+              <Save class="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
               <span>3. Guardar en Base de Datos</span>
             </div>
 
             <div>
-              <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Zona / Salón de Destino *</label>
+              <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1">Zona / Salón de Destino *</label>
               <select
                 v-model="selectedAreaId"
-                class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
+                class="w-full bg-slate-50 border border-slate-300 text-slate-800 dark:bg-slate-950 dark:border-slate-700 dark:text-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500"
               >
                 <option v-for="area in areas" :key="area.id" :value="area.id">
                   {{ area.name }} ({{ area.tables?.length || 0 }} mesas existentes)
@@ -356,7 +346,7 @@ const totalDetectedCapacity = computed(() => {
                 :loading="isOptimizing"
                 label="Optimizar"
                 icon="pi pi-bolt"
-                class="flex-1 bg-slate-800 hover:bg-slate-700 text-purple-300 border border-purple-500/30 text-xs font-bold py-2.5 rounded-xl"
+                class="flex-1 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-300 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-purple-300 dark:border-purple-500/30 text-xs font-bold py-2.5 rounded-xl"
                 @click="optimizeLayout"
               />
 
@@ -376,19 +366,19 @@ const totalDetectedCapacity = computed(() => {
         <div class="lg:col-span-8 space-y-4">
 
           <!-- Barra de Métricas Detectadas -->
-          <div v-if="layoutResult" class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3">
+          <div v-if="layoutResult" class="bg-white border border-slate-200 shadow-sm dark:bg-slate-900 dark:border-slate-800 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3">
             <div class="flex items-center gap-4 text-xs">
-              <div class="flex items-center gap-1.5 text-slate-300">
-                <Armchair class="w-4 h-4 text-emerald-400" />
-                <span>Mesas: <strong class="text-emerald-400 font-bold text-sm">{{ layoutResult.objects?.length || 0 }}</strong></span>
+              <div class="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+                <Armchair class="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+                <span>Mesas: <strong class="text-emerald-600 dark:text-emerald-400 font-bold text-sm">{{ layoutResult.objects?.length || 0 }}</strong></span>
               </div>
-              <div class="flex items-center gap-1.5 text-slate-300">
-                <Users class="w-4 h-4 text-blue-400" />
-                <span>Aforo Total: <strong class="text-blue-400 font-bold text-sm">{{ totalDetectedCapacity }} personas</strong></span>
+              <div class="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+                <Users class="w-4 h-4 text-blue-500 dark:text-blue-400" />
+                <span>Aforo Total: <strong class="text-blue-600 dark:text-blue-400 font-bold text-sm">{{ totalDetectedCapacity }} personas</strong></span>
               </div>
-              <div class="flex items-center gap-1.5 text-slate-300">
-                <Maximize2 class="w-4 h-4 text-purple-400" />
-                <span>Superficie: <strong class="text-slate-200">{{ (localAnchoM * localAltoM).toFixed(1) }} m²</strong></span>
+              <div class="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+                <Maximize2 class="w-4 h-4 text-purple-500 dark:text-purple-400" />
+                <span>Superficie: <strong class="text-slate-800 dark:text-slate-200">{{ (localAnchoM * localAltoM).toFixed(1) }} m²</strong></span>
               </div>
             </div>
 
@@ -400,16 +390,16 @@ const totalDetectedCapacity = computed(() => {
           </div>
 
           <!-- Contenedor del Visor SVG del Plano -->
-          <div class="relative bg-slate-950 border-2 border-slate-800 rounded-3xl overflow-hidden min-h-[520px] flex items-center justify-center shadow-2xl">
+          <div class="relative bg-slate-900 dark:bg-slate-950 border-2 border-slate-300 dark:border-slate-800 rounded-3xl overflow-hidden min-h-[520px] flex items-center justify-center shadow-lg">
             <!-- Grid de Fondo tipo Blueprint -->
-            <div class="absolute inset-0 bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:20px_20px] opacity-30"></div>
+            <div class="absolute inset-0 bg-[radial-gradient(#475569_1px,transparent_1px)] [background-size:20px_20px] opacity-30"></div>
 
             <!-- Si hay imagen cargada / resultado -->
             <div v-if="imagePreviewUrl" class="relative max-w-full max-h-[520px] overflow-hidden p-2">
               <img
                 :src="imagePreviewUrl"
                 alt="Plano"
-                class="block w-full max-h-[500px] object-contain rounded-xl opacity-80"
+                class="block w-full max-h-[500px] object-contain rounded-xl opacity-85"
               />
 
               <!-- Overlay SVG para dibujar contornos, mesas y sillas -->
@@ -476,27 +466,27 @@ const totalDetectedCapacity = computed(() => {
 
             <!-- Estado Vacío -->
             <div v-else class="text-center p-8 space-y-3 z-10">
-              <div class="w-16 h-16 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center mx-auto text-slate-500">
+              <div class="w-16 h-16 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center mx-auto text-slate-400">
                 <Layers class="w-8 h-8" />
               </div>
-              <h4 class="text-base font-bold text-slate-200">Visor de Planos Desactivado</h4>
-              <p class="text-xs text-slate-400 max-w-sm mx-auto">
+              <h4 class="text-base font-bold text-slate-100">Visor de Planos Desactivado</h4>
+              <p class="text-xs text-slate-300 max-w-sm mx-auto">
                 Carga una imagen o haz clic en "Cargar Plano de Demostración" para comenzar a detectar el layout arquitectónico con YOLO.
               </p>
             </div>
           </div>
 
           <!-- Leyenda de Colores -->
-          <div class="flex items-center justify-center gap-6 text-xs text-slate-400 bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
-            <span class="flex items-center gap-1.5">
-              <span class="w-3.5 h-3.5 rounded bg-emerald-500/40 border border-emerald-500 inline-block"></span>
+          <div class="flex flex-wrap items-center justify-center gap-6 text-xs text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <span class="flex items-center gap-1.5 font-medium">
+              <span class="w-3.5 h-3.5 rounded bg-emerald-500/30 border border-emerald-500 inline-block"></span>
               Mesas Detectadas (YOLO)
             </span>
-            <span class="flex items-center gap-1.5">
+            <span class="flex items-center gap-1.5 font-medium">
               <span class="w-3 h-3 rounded-full bg-blue-500 border border-blue-400 inline-block"></span>
               Sillas / Aforo Asignado
             </span>
-            <span class="flex items-center gap-1.5">
+            <span class="flex items-center gap-1.5 font-medium">
               <span class="w-3.5 h-1 border-t-2 border-dashed border-orange-500 inline-block"></span>
               Perímetro del Salón
             </span>

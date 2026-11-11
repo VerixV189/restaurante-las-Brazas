@@ -308,6 +308,88 @@ html:not(.dark) .p-dialog .p-dialog-footer,
 }
 
 /* ========================================================
+   TABS PRIMEVUE (DARK & LIGHT MODE)
+   ======================================================== */
+.p-tabs,
+.p-tabpanels,
+.p-tabpanel {
+    background-color: transparent !important;
+    color: inherit !important;
+}
+
+.p-tablist,
+.p-tablist-content,
+.p-tablist-tab-list {
+    background-color: transparent !important;
+    border-color: inherit !important;
+}
+
+html:not(.dark) .p-tab {
+    color: #64748b !important;
+    background-color: transparent !important;
+}
+
+html:not(.dark) .p-tab:hover {
+    color: #0f172a !important;
+}
+
+html:not(.dark) .p-tab-active {
+    color: #ea580c !important;
+    border-color: #ea580c !important;
+}
+
+.dark .p-tab {
+    color: #94a3b8 !important;
+    background-color: transparent !important;
+}
+
+.dark .p-tab:hover {
+    color: #f8fafc !important;
+}
+
+.dark .p-tab-active {
+    color: #fb923c !important;
+    border-color: #f97316 !important;
+}
+
+/* ========================================================
+   INPUTS Y SELECTS PRIMEVUE EN MODALES Y VISTAS
+   ======================================================== */
+html:not(.dark) .p-select,
+html:not(.dark) .p-inputtext,
+html:not(.dark) .p-inputnumber-input,
+html:not(.dark) .p-textarea {
+    background-color: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+}
+
+html:not(.dark) .p-select-label {
+    color: #0f172a !important;
+}
+
+html:not(.dark) .p-select-label.p-placeholder {
+    color: #64748b !important;
+}
+
+.dark .p-select,
+.dark .p-inputtext,
+.dark .p-inputnumber-input,
+.dark .p-textarea {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+.dark .p-select-label {
+    color: #f8fafc !important;
+}
+
+.dark .p-select-label.p-placeholder {
+    color: #64748b !important;
+}
+
+/* ========================================================
    INPUTS CON ÍCONOS (LOGIN, REGISTER, FORMULARIOS)
    ======================================================== */
 .input-with-icon,

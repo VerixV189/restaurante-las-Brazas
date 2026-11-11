@@ -16,17 +16,13 @@ import {
   Calculator,
   TrendingUp,
   AlertTriangle,
-  FileDown,
   Plus,
   Minus,
   Trash2,
   Boxes,
   Flame,
-  DollarSign,
   Sparkles,
-  ShoppingBag,
   Info,
-  Calendar,
   CheckCircle2,
 } from 'lucide-vue-next';
 
@@ -210,23 +206,23 @@ onMounted(() => {
     <template #header>Predicciones de Demanda & Calculadora de Producción</template>
 
     <div class="space-y-6">
-      <Tabs value="0" class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-2xl">
-        <TabList class="border-b border-slate-800">
-          <Tab value="0" class="text-slate-300 font-bold text-sm">
+      <Tabs value="0" class="bg-white border border-slate-200 shadow-sm dark:bg-slate-900 dark:border-slate-800 rounded-3xl p-5 transition-colors duration-200">
+        <TabList class="border-b border-slate-200 dark:border-slate-800">
+          <Tab value="0" class="text-slate-600 dark:text-slate-300 font-bold text-sm">
             <div class="flex items-center gap-2">
               <Calculator class="w-4 h-4 text-orange-500" />
               <span>Calculadora de Lotes & Compras</span>
             </div>
           </Tab>
-          <Tab value="1" class="text-slate-300 font-bold text-sm">
+          <Tab value="1" class="text-slate-600 dark:text-slate-300 font-bold text-sm">
             <div class="flex items-center gap-2">
-              <TrendingUp class="w-4 h-4 text-purple-400" />
+              <TrendingUp class="w-4 h-4 text-purple-600 dark:text-purple-400" />
               <span>Pronóstico de Demanda Mensual (ML)</span>
             </div>
           </Tab>
-          <Tab value="2" class="text-slate-300 font-bold text-sm">
+          <Tab value="2" class="text-slate-600 dark:text-slate-300 font-bold text-sm">
             <div class="flex items-center gap-2">
-              <AlertTriangle class="w-4 h-4 text-amber-400" />
+              <AlertTriangle class="w-4 h-4 text-amber-500 dark:text-amber-400" />
               <span>Control & Proyección de Mermas</span>
             </div>
           </Tab>
@@ -243,7 +239,7 @@ onMounted(() => {
               <!-- Left Column: Dish Selector (5 Cols) -->
               <div class="lg:col-span-5 space-y-4">
                 <div class="flex items-center justify-between">
-                  <h3 class="text-sm font-bold text-slate-100 flex items-center gap-2">
+                  <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                     <Flame class="w-4 h-4 text-orange-500" />
                     <span>Seleccionar Platillos para Producir</span>
                   </h3>
@@ -254,7 +250,7 @@ onMounted(() => {
                   v-model="dishSearch"
                   type="text"
                   placeholder="Buscar platillo por nombre o categoría..."
-                  class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-orange-500"
+                  class="w-full bg-slate-50 border border-slate-300 text-slate-800 placeholder-slate-400 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-200 rounded-2xl px-4 py-2.5 text-xs focus:outline-none focus:border-orange-500 transition-colors"
                 />
 
                 <!-- Lista de Platillos Disponibles -->
@@ -262,15 +258,15 @@ onMounted(() => {
                   <div
                     v-for="dish in filteredDishes"
                     :key="dish.id"
-                    class="p-3 bg-slate-950/70 border border-slate-800 hover:border-orange-500/40 rounded-2xl flex items-center justify-between transition-all group"
+                    class="p-3 bg-slate-50 hover:bg-orange-50/40 border border-slate-200 hover:border-orange-500/40 dark:bg-slate-950/70 dark:border-slate-800 dark:hover:border-orange-500/40 rounded-2xl flex items-center justify-between transition-all group"
                   >
                     <div>
-                      <h4 class="text-xs font-bold text-slate-100 group-hover:text-orange-400 transition-colors">
+                      <h4 class="text-xs font-bold text-slate-800 dark:text-slate-100 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
                         {{ dish.name }}
                       </h4>
                       <div class="flex items-center gap-2 mt-1">
-                        <span class="text-[10px] text-slate-400">{{ dish.category?.name || 'General' }}</span>
-                        <span class="text-[10px] font-bold text-emerald-400">${{ parseFloat(dish.price).toFixed(2) }}</span>
+                        <span class="text-[10px] text-slate-500 dark:text-slate-400">{{ dish.category?.name || 'General' }}</span>
+                        <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">${{ parseFloat(dish.price).toFixed(2) }}</span>
                         <Tag
                           :value="dish.recipe ? 'Con Receta' : 'Sin Receta'"
                           :severity="dish.recipe ? 'success' : 'warn'"
@@ -281,7 +277,7 @@ onMounted(() => {
 
                     <button
                       @click="addDishToBatch(dish, 10)"
-                      class="px-2.5 py-1.5 bg-orange-600/20 hover:bg-orange-600 text-orange-400 hover:text-white rounded-xl text-xs font-bold transition-all border border-orange-500/30 flex items-center gap-1"
+                      class="px-2.5 py-1.5 bg-orange-500/15 hover:bg-orange-600 text-orange-600 dark:text-orange-400 hover:text-white rounded-xl text-xs font-bold transition-all border border-orange-500/30 flex items-center gap-1 cursor-pointer"
                     >
                       <Plus class="w-3.5 h-3.5" /> +10
                     </button>
@@ -289,13 +285,13 @@ onMounted(() => {
                 </div>
 
                 <!-- Platillos Seleccionados en el Lote Actual -->
-                <div class="pt-4 border-t border-slate-800 space-y-3">
+                <div class="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
                   <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-slate-300 uppercase">Lote Programado ({{ batchItems.length }} platillos)</span>
+                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase">Lote Programado ({{ batchItems.length }} platillos)</span>
                     <button
                       v-if="batchItems.length > 0"
                       @click="clearBatch"
-                      class="text-[10px] text-red-400 hover:text-red-300"
+                      class="text-[11px] font-semibold text-red-600 hover:text-red-500 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
                     >
                       Vaciar Lote
                     </button>
@@ -305,25 +301,25 @@ onMounted(() => {
                     <div
                       v-for="(item, idx) in batchItems"
                       :key="item.dish_id"
-                      class="p-2.5 bg-slate-800/80 border border-slate-700/70 rounded-xl flex items-center justify-between text-xs"
+                      class="p-2.5 bg-slate-100 border border-slate-200 dark:bg-slate-800/80 dark:border-slate-700/70 rounded-xl flex items-center justify-between text-xs"
                     >
                       <div>
-                        <span class="font-bold text-slate-100">{{ item.dish_name }}</span>
-                        <p class="text-[10px] text-slate-400">${{ (item.dish_price * item.portions).toFixed(2) }} estimado</p>
+                        <span class="font-bold text-slate-800 dark:text-slate-100">{{ item.dish_name }}</span>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400">${{ (item.dish_price * item.portions).toFixed(2) }} estimado</p>
                       </div>
 
                       <div class="flex items-center gap-2">
-                        <div class="flex items-center gap-1 bg-slate-900 rounded-lg p-0.5 border border-slate-700">
-                          <button @click="updatePortions(idx, -5)" class="p-1 hover:text-orange-400">
+                        <div class="flex items-center gap-1 bg-white border border-slate-300 dark:bg-slate-900 dark:border-slate-700 rounded-lg p-0.5">
+                          <button @click="updatePortions(idx, -5)" class="p-1 text-slate-600 dark:text-slate-300 hover:text-orange-500 cursor-pointer">
                             <Minus class="w-3 h-3" />
                           </button>
-                          <span class="font-bold px-2 text-slate-100">{{ item.portions }}p</span>
-                          <button @click="updatePortions(idx, 5)" class="p-1 hover:text-orange-400">
+                          <span class="font-bold px-2 text-slate-800 dark:text-slate-100">{{ item.portions }}p</span>
+                          <button @click="updatePortions(idx, 5)" class="p-1 text-slate-600 dark:text-slate-300 hover:text-orange-500 cursor-pointer">
                             <Plus class="w-3 h-3" />
                           </button>
                         </div>
 
-                        <button @click="removeBatchItem(idx)" class="text-red-400 hover:text-red-300 p-1">
+                        <button @click="removeBatchItem(idx)" class="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 p-1 cursor-pointer">
                           <Trash2 class="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -339,35 +335,35 @@ onMounted(() => {
               <!-- Right Column: Results & Shopping List (7 Cols) -->
               <div class="lg:col-span-7 space-y-4">
                 <!-- Top KPI Cards -->
-                <div class="grid grid-cols-3 gap-3">
-                  <div class="p-3.5 bg-slate-950 border border-slate-800 rounded-2xl text-center">
-                    <span class="text-[10px] uppercase font-bold text-slate-400">Costo Total Producción</span>
-                    <h3 class="text-lg font-bold text-orange-400">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div class="p-3.5 bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 rounded-2xl text-center">
+                    <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Costo Total Producción</span>
+                    <h3 class="text-lg font-bold text-orange-600 dark:text-orange-400 mt-0.5">
                       ${{ (batchCalculation?.totalProductionCost || 0).toFixed(2) }}
                     </h3>
                   </div>
 
-                  <div class="p-3.5 bg-slate-950 border border-slate-800 rounded-2xl text-center">
-                    <span class="text-[10px] uppercase font-bold text-slate-400">Inversión en Faltantes</span>
-                    <h3 class="text-lg font-bold text-red-400">
+                  <div class="p-3.5 bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 rounded-2xl text-center">
+                    <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Inversión en Faltantes</span>
+                    <h3 class="text-lg font-bold text-red-600 dark:text-red-400 mt-0.5">
                       ${{ (batchCalculation?.totalCostToBuy || 0).toFixed(2) }}
                     </h3>
                   </div>
 
-                  <div class="p-3.5 bg-slate-950 border border-slate-800 rounded-2xl text-center">
-                    <span class="text-[10px] uppercase font-bold text-slate-400">Insumos con Déficit</span>
-                    <h3 class="text-lg font-bold text-amber-400">
+                  <div class="p-3.5 bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 rounded-2xl text-center">
+                    <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Insumos con Déficit</span>
+                    <h3 class="text-lg font-bold text-amber-600 dark:text-amber-400 mt-0.5">
                       {{ batchCalculation?.totalDeficitItemsCount || 0 }} faltantes
                     </h3>
                   </div>
                 </div>
 
                 <!-- Tabla de Insumos Requeridos -->
-                <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-3">
+                <div class="bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 rounded-2xl p-4 space-y-3">
                   <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                      <Boxes class="w-4 h-4 text-purple-400" />
-                      <h4 class="text-xs font-bold text-slate-100">Desglose de Insumos Requeridos vs. Stock</h4>
+                      <Boxes class="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                      <h4 class="text-xs font-bold text-slate-800 dark:text-slate-100">Desglose de Insumos Requeridos vs. Stock</h4>
                     </div>
 
                     <Button
@@ -414,7 +410,7 @@ onMounted(() => {
                       <template #body="{ data }">
                         <span
                           class="font-bold"
-                          :class="data.deficit > 0 ? 'text-red-600 dark:text-red-400' : 'text-slate-400 dark:text-slate-500'"
+                          :class="data.deficit > 0 ? 'text-red-600 dark:text-red-400' : 'text-slate-500'"
                         >
                           ${{ data.cost_to_buy.toFixed(2) }}
                         </span>
@@ -443,33 +439,33 @@ onMounted(() => {
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
               <!-- Formulario de Consulta ML (5 Cols) -->
-              <div class="lg:col-span-5 bg-slate-950 border border-slate-800 rounded-3xl p-5 space-y-4 shadow-xl">
+              <div class="lg:col-span-5 bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 rounded-3xl p-5 space-y-4 shadow-sm">
                 <div class="flex items-center gap-2">
-                  <div class="w-8 h-8 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center border border-purple-500/30">
+                  <div class="w-8 h-8 rounded-xl bg-purple-600/15 text-purple-600 dark:text-purple-400 flex items-center justify-center border border-purple-500/30">
                     <Sparkles class="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 class="text-sm font-bold text-slate-100">Modelo Predictivo Scikit-Learn</h3>
-                    <p class="text-[11px] text-slate-400">Estima consumo de materia prima por plato y mes.</p>
+                    <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100">Modelo Predictivo Scikit-Learn</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Estima consumo de materia prima por plato y mes.</p>
                   </div>
                 </div>
 
                 <div class="space-y-3 pt-2">
                   <div>
-                    <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Insumo a Evaluar *</label>
+                    <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1">Insumo a Evaluar *</label>
                     <select
                       v-model="mlInsumo"
-                      class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-purple-500"
+                      class="w-full bg-white border border-slate-300 text-slate-800 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-purple-500"
                     >
                       <option v-for="ing in ingredients" :key="ing.id" :value="ing.name">{{ ing.name }} ({{ ing.unit }})</option>
                     </select>
                   </div>
 
                   <div>
-                    <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Platillo Asociado *</label>
+                    <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1">Platillo Asociado *</label>
                     <select
                       v-model="mlPlato"
-                      class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-purple-500"
+                      class="w-full bg-white border border-slate-300 text-slate-800 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-purple-500"
                     >
                       <option v-for="dish in dishes" :key="dish.id" :value="dish.name">{{ dish.name }}</option>
                     </select>
@@ -477,23 +473,23 @@ onMounted(() => {
 
                   <div class="grid grid-cols-2 gap-3">
                     <div>
-                      <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Mes *</label>
+                      <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1">Mes *</label>
                       <select
                         v-model="mlMes"
-                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-purple-500"
+                        class="w-full bg-white border border-slate-300 text-slate-800 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-purple-500"
                       >
                         <option v-for="m in mesesList" :key="m.value" :value="m.value">{{ m.label }}</option>
                       </select>
                     </div>
 
                     <div>
-                      <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Margen Merma (%)</label>
+                      <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase mb-1">Margen Merma (%)</label>
                       <input
                         v-model.number="mlDesperdicio"
                         type="number"
                         min="0"
                         max="50"
-                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-purple-500"
+                        class="w-full bg-white border border-slate-300 text-slate-800 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-purple-500"
                       />
                     </div>
                   </div>
@@ -510,11 +506,11 @@ onMounted(() => {
 
               <!-- Resultados del Pronóstico ML (7 Cols) -->
               <div class="lg:col-span-7 space-y-4">
-                <div v-if="mlResult?.prediction" class="bg-gradient-to-tr from-purple-950/40 via-slate-900 to-slate-900 border border-purple-500/30 rounded-3xl p-6 shadow-2xl space-y-5">
+                <div v-if="mlResult?.prediction" class="bg-purple-50/70 dark:bg-gradient-to-tr dark:from-purple-950/40 dark:via-slate-900 dark:to-slate-900 border border-purple-300 dark:border-purple-500/30 rounded-3xl p-6 shadow-md space-y-5">
                   <div class="flex items-center justify-between">
                     <div>
-                      <span class="text-xs text-purple-300 font-semibold uppercase">Proyección Mensual</span>
-                      <h3 class="text-lg font-bold text-slate-100">{{ mlInsumo }}</h3>
+                      <span class="text-xs text-purple-600 dark:text-purple-300 font-semibold uppercase">Proyección Mensual</span>
+                      <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">{{ mlInsumo }}</h3>
                     </div>
                     <Tag
                       :value="mlResult.engine === 'scikit_learn_pkl' ? 'Modelo .pkl' : 'Modelo Estadístico'"
@@ -523,31 +519,31 @@ onMounted(() => {
                     />
                   </div>
 
-                  <div class="grid grid-cols-3 gap-3">
-                    <div class="p-4 bg-slate-950/80 rounded-2xl border border-slate-800 text-center">
-                      <span class="text-[10px] text-slate-400 uppercase font-bold">Consumo Estimado</span>
-                      <h4 class="text-2xl font-black text-purple-400 mt-1">
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="p-4 bg-white dark:bg-slate-950/80 rounded-2xl border border-slate-200 dark:border-slate-800 text-center">
+                      <span class="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold">Consumo Estimado</span>
+                      <h4 class="text-2xl font-black text-purple-600 dark:text-purple-400 mt-1">
                         {{ mlResult.prediction.cantidad_predicha }} {{ mlResult.prediction.unidad || 'kg' }}
                       </h4>
                     </div>
 
-                    <div class="p-4 bg-slate-950/80 rounded-2xl border border-slate-800 text-center">
-                      <span class="text-[10px] text-slate-400 uppercase font-bold">Merma Proyectada</span>
-                      <h4 class="text-2xl font-black text-amber-400 mt-1">
+                    <div class="p-4 bg-white dark:bg-slate-950/80 rounded-2xl border border-slate-200 dark:border-slate-800 text-center">
+                      <span class="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold">Merma Proyectada</span>
+                      <h4 class="text-2xl font-black text-amber-600 dark:text-amber-400 mt-1">
                         {{ mlResult.prediction.desperdicio_predicho }} {{ mlResult.prediction.unidad || 'kg' }}
                       </h4>
                     </div>
 
-                    <div class="p-4 bg-slate-950/80 rounded-2xl border border-slate-800 text-center">
-                      <span class="text-[10px] text-slate-400 uppercase font-bold">Nivel de Confianza</span>
-                      <h4 class="text-2xl font-black text-emerald-400 mt-1">
+                    <div class="p-4 bg-white dark:bg-slate-950/80 rounded-2xl border border-slate-200 dark:border-slate-800 text-center">
+                      <span class="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold">Nivel de Confianza</span>
+                      <h4 class="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
                         {{ mlResult.prediction.confianza || '94.2%' }}
                       </h4>
                     </div>
                   </div>
 
-                  <div class="p-3 bg-purple-900/20 border border-purple-500/20 rounded-2xl text-xs text-purple-200 flex items-center gap-2">
-                    <Info class="w-4 h-4 text-purple-400 shrink-0" />
+                  <div class="p-3 bg-purple-100/70 dark:bg-purple-900/20 border border-purple-300 dark:border-purple-500/20 rounded-2xl text-xs text-purple-800 dark:text-purple-200 flex items-center gap-2">
+                    <Info class="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
                     <span>
                       Factor estacional aplicado para <strong>{{ mesesList.find(m => m.value === mlMes)?.label }}</strong>:
                       {{ mlResult.prediction.factor_estacional ? `x${mlResult.prediction.factor_estacional}` : 'Normal' }}
@@ -555,11 +551,11 @@ onMounted(() => {
                   </div>
                 </div>
 
-                <div v-else class="text-center p-12 bg-slate-950 border border-slate-800 rounded-3xl space-y-3">
-                  <div class="w-14 h-14 rounded-full bg-slate-900 flex items-center justify-center mx-auto text-purple-400 border border-slate-800">
+                <div v-else class="text-center p-12 bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 rounded-3xl space-y-3">
+                  <div class="w-14 h-14 rounded-full bg-white dark:bg-slate-900 flex items-center justify-center mx-auto text-purple-600 dark:text-purple-400 border border-slate-200 dark:border-slate-800">
                     <TrendingUp class="w-6 h-6" />
                   </div>
-                  <h4 class="text-sm font-bold text-slate-200">Sin pronóstico generado</h4>
+                  <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200">Sin pronóstico generado</h4>
                   <p class="text-xs text-slate-500 max-w-sm mx-auto">
                     Selecciona un insumo, platillo y mes a la izquierda para proyectar la demanda mediante el modelo de Machine Learning.
                   </p>
@@ -574,32 +570,32 @@ onMounted(() => {
           <!-- ═══════════════════════════════════════════════════════════ -->
           <TabPanel value="2" class="pt-5 space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div class="p-5 bg-slate-950 border border-slate-800 rounded-3xl space-y-2">
-                <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+              <div class="p-5 bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 rounded-3xl space-y-2">
+                <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
                   <CheckCircle2 class="w-4 h-4" />
                 </div>
-                <h4 class="text-xs font-bold text-slate-100">Planificación por Lote</h4>
-                <p class="text-xs text-slate-400">
+                <h4 class="text-xs font-bold text-slate-800 dark:text-slate-100">Planificación por Lote</h4>
+                <p class="text-xs text-slate-600 dark:text-slate-400">
                   Comprar justo los insumos requeridos para el lote de producción disminuye en un <strong>28%</strong> las mermas por vencimiento en carnes frescas.
                 </p>
               </div>
 
-              <div class="p-5 bg-slate-950 border border-slate-800 rounded-3xl space-y-2">
-                <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
+              <div class="p-5 bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 rounded-3xl space-y-2">
+                <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center">
                   <AlertTriangle class="w-4 h-4" />
                 </div>
-                <h4 class="text-xs font-bold text-slate-100">Margen de Seguridad</h4>
-                <p class="text-xs text-slate-400">
+                <h4 class="text-xs font-bold text-slate-800 dark:text-slate-100">Margen de Seguridad</h4>
+                <p class="text-xs text-slate-600 dark:text-slate-400">
                   El modelo recomienda un margen de sobre-stock del <strong>8% al 12%</strong> en fines de semana y temporadas altas como Diciembre y Julio.
                 </p>
               </div>
 
-              <div class="p-5 bg-slate-950 border border-slate-800 rounded-3xl space-y-2">
-                <div class="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center">
+              <div class="p-5 bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 rounded-3xl space-y-2">
+                <div class="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center">
                   <Sparkles class="w-4 h-4" />
                 </div>
-                <h4 class="text-xs font-bold text-slate-100">Auditorías Automáticas</h4>
-                <p class="text-xs text-slate-400">
+                <h4 class="text-xs font-bold text-slate-800 dark:text-slate-100">Auditorías Automáticas</h4>
+                <p class="text-xs text-slate-600 dark:text-slate-400">
                   Cada venta registrada en el POS descuenta atómicamente los insumos por receta mediante el <strong>InventoryService</strong> de Las Brazas.
                 </p>
               </div>

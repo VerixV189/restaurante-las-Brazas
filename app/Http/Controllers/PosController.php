@@ -10,6 +10,7 @@ use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
+use App\Models\InventoryMovement;
 use App\Services\InventoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,11 +29,11 @@ class PosController extends Controller
 
     public function index(): Response
     {
-        // Áreas con sus mesas y órdenes activas
+        // Áreas con sus mesas y órdenes activas (corregido el filtro de estados válidos)
         $areas = Area::with(['tables' => function ($query) {
             $query->with(['orders' => function ($q) {
-                $q->whereIn('status', ['pending', 'in_progress'])
-                  ->with(['items.dish', 'customer', 'user'])
+                $q->whereIn('status', ['pending', 'in_kitchen', 'ready', 'served'])
+                  ->with(['items.dish', 'customer', 'user', 'payments'])
                   ->latest();
             }]);
         }])->get();
@@ -47,10 +48,17 @@ class PosController extends Controller
         $dishes = Dish::where('is_available', true)->with('category')->get();
         $customers = Customer::orderBy('name')->get();
 
-        // Órdenes activas en curso (en salón y para llevar)
+        // Órdenes activas en curso (en salón, para llevar y delivery)
         $activeOrders = Order::whereIn('status', ['pending', 'in_kitchen', 'ready', 'served'])
-            ->with(['table.area', 'items.dish', 'customer', 'user'])
+            ->with(['table.area', 'items.dish', 'customer', 'user', 'payments'])
             ->latest()
+            ->get();
+
+        // Pedidos de App Móvil / Envíos a Domicilio (Delivery) y Para Llevar (Takeaway)
+        $deliveryOrders = Order::whereIn('order_type', ['delivery', 'takeaway'])
+            ->with(['items.dish', 'customer', 'user', 'payments'])
+            ->latest()
+            ->take(30)
             ->get();
 
         return Inertia::render('Pos/Index', [
@@ -59,11 +67,12 @@ class PosController extends Controller
             'dishes' => $dishes,
             'customers' => $customers,
             'activeOrders' => $activeOrders,
+            'deliveryOrders' => $deliveryOrders,
         ]);
     }
 
     /**
-     * Crear una nueva orden / abrir mesa con comanda inicial.
+     * Crear una nueva orden (Salón, Para Llevar o Delivery).
      */
     public function storeOrder(Request $request)
     {
@@ -71,6 +80,8 @@ class PosController extends Controller
             'table_id' => 'nullable|exists:tables,id',
             'customer_id' => 'nullable|exists:customers,id',
             'order_type' => 'required|in:dine_in,takeaway,delivery',
+            'delivery_address' => 'nullable|string|max:500',
+            'notes' => 'nullable|string|max:500',
             'items' => 'required|array|min:1',
             'items.*.dish_id' => 'required|exists:dishes,id',
             'items.*.quantity' => 'required|integer|min:1',
@@ -96,16 +107,25 @@ class PosController extends Controller
                 ];
             }
 
+            $deliveryFee = ($validated['order_type'] === 'delivery' && $subtotal < 50) ? 3.00 : 0.00;
+            $totalAmount = $subtotal + $deliveryFee;
+
             // Crear Orden
             $order = Order::create([
-                'table_id' => $validated['table_id'] ?? null,
+                'table_id' => $validated['order_type'] === 'dine_in' ? ($validated['table_id'] ?? null) : null,
                 'user_id' => Auth::id(),
                 'customer_id' => $validated['customer_id'] ?? null,
                 'order_type' => $validated['order_type'],
                 'status' => 'in_kitchen',
                 'subtotal' => $subtotal,
                 'tax' => 0,
-                'total_amount' => $subtotal,
+                'delivery_fee' => $deliveryFee,
+                'total_amount' => $totalAmount,
+                'delivery_address' => $validated['delivery_address'] ?? null,
+                'delivery_pin' => $validated['order_type'] === 'delivery'
+                    ? str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT)
+                    : null,
+                'notes' => $validated['notes'] ?? null,
             ]);
 
             // Guardar items de comanda
@@ -115,8 +135,8 @@ class PosController extends Controller
             }
 
             // Si es mesa en salón, marcar mesa como ocupada
-            if (!empty($validated['table_id'])) {
-                Table::where('id', $validated['table_id'])->update(['status' => 'occupied']);
+            if ($order->table_id) {
+                Table::where('id', $order->table_id)->update(['status' => 'occupied']);
             }
 
             return $order;
@@ -154,11 +174,40 @@ class PosController extends Controller
             $newSubtotal = $order->items()->sum('subtotal');
             $order->update([
                 'subtotal' => $newSubtotal,
-                'total_amount' => $newSubtotal + (float) $order->tax,
+                'total_amount' => $newSubtotal + (float) $order->tax + (float) $order->delivery_fee - (float) $order->discount,
             ]);
         });
 
         return redirect()->back()->with('success', 'Platillo agregado a la comanda.');
+    }
+
+    /**
+     * Despachar pedido de Delivery (marcar como "En Camino").
+     */
+    public function dispatchOrder(Order $order)
+    {
+        $order->update([
+            'status' => in_array($order->status, ['pending', 'in_kitchen']) ? 'ready' : $order->status,
+            'dispatched_at' => now(),
+            'driver_id' => $order->driver_id ?? Auth::id(),
+        ]);
+
+        return redirect()->back()->with('success', "Pedido #{$order->id} despachado y marcado En Camino.");
+    }
+
+    /**
+     * Marcar pedido Delivery / Takeaway como Entregado al cliente.
+     */
+    public function deliverOrder(Order $order)
+    {
+        $hasPaid = $order->payments()->exists() || $order->status === 'paid';
+        $order->update([
+            'delivered_at' => now(),
+            'dispatched_at' => $order->dispatched_at ?? now(),
+            'status' => $hasPaid ? 'paid' : 'served',
+        ]);
+
+        return redirect()->back()->with('success', "Pedido #{$order->id} marcado como Entregado.");
     }
 
     /**
@@ -182,29 +231,37 @@ class PosController extends Controller
                 'paid_at' => now(),
             ]);
 
-            // 2. Marcar orden como pagada
-            $order->update(['status' => 'paid']);
+            // 2. Marcar orden como pagada (y entregada si era delivery/takeaway)
+            $updates = ['status' => 'paid'];
+            if (in_array($order->order_type, ['delivery', 'takeaway']) && !$order->delivered_at) {
+                $updates['delivered_at'] = now();
+                $updates['dispatched_at'] = $order->dispatched_at ?? now();
+            }
+            $order->update($updates);
 
             // 3. Liberar mesa asociada
             if ($order->table_id) {
                 Table::where('id', $order->table_id)->update(['status' => 'available']);
             }
 
-            // 4. DESCUENTO AUTOMÁTICO DE INVENTARIO POR RECETA
-            $order->loadMissing('items.dish.recipe.ingredients');
-            foreach ($order->items as $item) {
-                if ($item->dish) {
-                    $this->inventoryService->deductForDish(
-                        dish: $item->dish,
-                        quantity: (int) $item->quantity,
-                        userId: Auth::id(),
-                        reason: "Venta Comanda #{$order->id} (Mesa: " . ($order->table?->table_number ?? 'Para llevar') . ")"
-                    );
+            // 4. DESCUENTO AUTOMÁTICO DE INVENTARIO POR RECETA (evitar doble descuento si vino de App Móvil)
+            $alreadyDeducted = InventoryMovement::where('reason', "Pedido móvil #{$order->id}")->exists();
+            if (!$alreadyDeducted) {
+                $order->loadMissing('items.dish.recipe.ingredients');
+                foreach ($order->items as $item) {
+                    if ($item->dish) {
+                        $this->inventoryService->deductForDish(
+                            dish: $item->dish,
+                            quantity: (int) $item->quantity,
+                            userId: Auth::id(),
+                            reason: "Venta Comanda #{$order->id} (" . ($order->table?->table_number ?? strtoupper($order->order_type)) . ")"
+                        );
+                    }
                 }
             }
         });
 
-        return redirect()->back()->with('success', "Cuenta de Comanda #{$order->id} cerrada y cobrada con éxito. Inventario descontado.");
+        return redirect()->back()->with('success', "Cuenta de Comanda #{$order->id} cerrada y cobrada con éxito.");
     }
 
     /**

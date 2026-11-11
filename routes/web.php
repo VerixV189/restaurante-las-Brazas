@@ -46,6 +46,9 @@ Route::middleware('auth')->group(function () {
     // Dashboard - accesible por todos los roles
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Chat de Asistente de IA (accesible por todos los roles autenticados)
+    Route::post('/ai/chat', [\App\Http\Controllers\AiChatController::class, 'sendMessage'])->name('ai.chat');
+
     // ── Menú, Platillos y Fichas Técnicas / Recetas (Administrador, Chef) ──────
     Route::middleware('role:Administrador,Chef')->group(function () {
         Route::resource('categories', CategoryController::class)->except(['create', 'edit', 'show']);
@@ -96,6 +99,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/pos', [\App\Http\Controllers\PosController::class, 'index'])->name('pos.index');
         Route::post('/pos/orders', [\App\Http\Controllers\PosController::class, 'storeOrder'])->name('pos.orders.store');
         Route::post('/pos/orders/{order}/items', [\App\Http\Controllers\PosController::class, 'addItem'])->name('pos.orders.addItem');
+        Route::post('/pos/orders/{order}/dispatch', [\App\Http\Controllers\PosController::class, 'dispatchOrder'])->name('pos.orders.dispatch');
+        Route::post('/pos/orders/{order}/deliver', [\App\Http\Controllers\PosController::class, 'deliverOrder'])->name('pos.orders.deliver');
         Route::post('/pos/orders/{order}/close', [\App\Http\Controllers\PosController::class, 'closeOrder'])->name('pos.orders.close');
         Route::post('/pos/orders/{order}/cancel', [\App\Http\Controllers\PosController::class, 'cancelOrder'])->name('pos.orders.cancel');
         Route::get('/pos/orders/{order}/ticket', [\App\Http\Controllers\PosController::class, 'ticketPdf'])->name('pos.orders.ticket');
@@ -115,6 +120,8 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:Administrador')->group(function () {
         Route::get('/reports', [\App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/export/pdf', [\App\Http\Controllers\ReportController::class, 'exportPdf'])->name('reports.export.pdf');
+        Route::get('/reports/export/excel', [\App\Http\Controllers\ReportController::class, 'exportExcel'])->name('reports.export.excel');
+        Route::get('/reports/export/csv', [\App\Http\Controllers\ReportController::class, 'exportCsv'])->name('reports.export.csv');
         Route::post('/reports/ai-query', [\App\Http\Controllers\AiReportController::class, 'query'])->name('reports.ai.query');
     });
 
