@@ -18,6 +18,8 @@ class Reservation extends Model
         'guest_count',
         'status',
         'special_requests',
+        'area_id',
+        'children_count',
     ];
 
     protected $casts = [

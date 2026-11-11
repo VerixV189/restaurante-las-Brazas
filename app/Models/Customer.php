@@ -17,6 +17,11 @@ class Customer extends Model
         return $this->hasMany(Reservation::class);
     }
 
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(CustomerAddress::class);
+    }
+
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);

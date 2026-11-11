@@ -20,9 +20,14 @@ class Order extends Model
         'subtotal',
         'tax',
         'total_amount',
+        'driver_id', 'delivery_address', 'delivery_lat', 'delivery_lng', 'delivery_fee',
+        'discount', 'coupon_code', 'invoice_name', 'invoice_tax_id', 'delivery_pin',
+        'notes', 'dispatched_at', 'delivered_at',
     ];
 
     protected $casts = [
+        'dispatched_at' => 'datetime',
+        'delivered_at' => 'datetime',
         'subtotal' => 'decimal:2',
         'tax' => 'decimal:2',
         'total_amount' => 'decimal:2',
