@@ -135,7 +135,7 @@ class DashboardController extends Controller
             ->withSum(['orderItems as revenue' => function ($q) {
                 $q->whereHas('order', fn ($o) => $o->where('status', '!=', 'cancelled'));
             }], 'subtotal')
-            ->orderByRaw('COALESCE(units_sold, 0) DESC, COALESCE(revenue, 0) DESC')
+            ->orderByRaw('units_sold DESC NULLS LAST, revenue DESC NULLS LAST')
             ->take(5)
             ->get();
 

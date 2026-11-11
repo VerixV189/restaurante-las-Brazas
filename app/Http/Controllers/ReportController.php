@@ -72,7 +72,7 @@ class ReportController extends Controller
             ->withSum(['orderItems as total_revenue_generated' => function ($query) {
                 $query->whereHas('order', fn ($q) => $q->where('status', 'paid'));
             }], 'subtotal')
-            ->orderByRaw('COALESCE(total_units_sold, 0) DESC, COALESCE(total_revenue_generated, 0) DESC')
+            ->orderByRaw('total_units_sold DESC NULLS LAST, total_revenue_generated DESC NULLS LAST')
             ->take(10)
             ->get();
 
