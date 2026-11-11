@@ -39,6 +39,11 @@ return [
         'url' => env('FASTAPI_AI_URL', 'http://127.0.0.1:8001'),
     ],
 
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+        'model' => env('GEMINI_MODEL', 'gemini-2.5-flash'),
+    ],
+
     'organizacion_yolo' => [
         'url' => env('ORGANIZACION_YOLO_URL', 'http://127.0.0.1:5001'),
     ],

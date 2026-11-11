@@ -5,8 +5,8 @@ import Toast from 'primevue/toast';
 import ConfirmDialog from 'primevue/confirmdialog';
 import Avatar from 'primevue/avatar';
 import Tag from 'primevue/tag';
-import Button from 'primevue/button';
 import { useTheme } from '../composables/useTheme';
+import AiChatSidebar from '../components/AiChatSidebar.vue';
 import {
   LayoutDashboard,
   UtensilsCrossed,
@@ -34,6 +34,7 @@ import {
 
 const page = usePage();
 const sidebarOpen = ref(true);
+const aiChatOpen = ref(false);
 const { isDark, initTheme, toggleTheme } = useTheme();
 
 onMounted(() => {
@@ -258,20 +259,32 @@ function isUrlActive(url) {
     <div class="flex-1 flex flex-col min-w-0">
       <!-- Top Navbar -->
       <header class="h-16 bg-white/80 dark:bg-slate-900/60 backdrop-blur border-b border-slate-200 dark:border-slate-800 px-6 flex items-center justify-between sticky top-0 z-10 transition-colors duration-200">
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-4 flex-1 min-w-0 mr-4">
           <button
             @click="sidebarOpen = !sidebarOpen"
-            class="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 transition-colors"
+            class="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 transition-colors shrink-0"
             title="Alternar Menú"
           >
             <Menu class="w-6 h-6" />
           </button>
-          <h1 class="text-lg font-semibold text-slate-800 dark:text-slate-100">
+          <div class="text-lg font-semibold text-slate-800 dark:text-slate-100 flex-1 min-w-0">
             <slot name="header">Panel de Administración</slot>
-          </h1>
+          </div>
         </div>
 
         <div class="flex items-center gap-3">
+          <!-- AI Assistant Navbar Button -->
+          <button
+            @click="aiChatOpen = !aiChatOpen"
+            type="button"
+            class="flex items-center gap-2 px-3 py-1.5 rounded-xl border font-medium text-xs transition-all duration-200 shadow-sm bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-orange-500/10 border-orange-500/30 text-orange-600 hover:border-orange-500 hover:bg-orange-500/20 dark:from-orange-500/20 dark:via-amber-500/20 dark:to-orange-500/20 dark:border-orange-500/40 dark:text-orange-300 dark:hover:border-orange-400 group cursor-pointer"
+            title="Abrir Asistente Virtual IA"
+            id="btn-open-ai-chat"
+          >
+            <Sparkles class="w-3.5 h-3.5 text-amber-500 animate-pulse group-hover:scale-110 transition-transform" />
+            <span class="font-semibold hidden sm:inline">Asistente IA</span>
+          </button>
+
           <!-- Theme Switcher Button -->
           <button
             @click="toggleTheme"
@@ -296,5 +309,21 @@ function isUrlActive(url) {
         <slot />
       </main>
     </div>
+
+    <!-- Floating AI Chat Button -->
+    <button
+      v-if="!aiChatOpen"
+      @click="aiChatOpen = true"
+      type="button"
+      class="fixed bottom-6 right-6 z-40 flex items-center gap-2.5 px-4 py-3 rounded-full bg-gradient-to-r from-orange-600 to-amber-500 text-white font-medium text-sm shadow-xl shadow-orange-500/30 hover:shadow-orange-500/50 hover:scale-105 active:scale-95 transition-all duration-200 group cursor-pointer"
+      title="Preguntar al Asistente IA"
+      id="fab-open-ai-chat"
+    >
+      <Sparkles class="w-5 h-5 text-amber-200 animate-pulse group-hover:rotate-12 transition-transform" />
+      <span class="font-bold tracking-wide">Asistente IA</span>
+    </button>
+
+    <!-- AI Chat Sidebar Drawer -->
+    <AiChatSidebar v-model:visible="aiChatOpen" />
   </div>
 </template>
