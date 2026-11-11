@@ -372,43 +372,47 @@ function getMarginBadge(margin) {
 <template>
   <AdminLayout>
     <template #header>
-      <div class="flex flex-wrap items-center justify-between gap-3 w-full">
-        <span>Reportes y Analíticas Comerciales</span>
+      <span>Reportes y Analíticas Comerciales</span>
+    </template>
 
-        <!-- Botones de Exportación: PDF, Excel, CSV -->
-        <div class="flex flex-wrap items-center gap-2">
+    <div class="space-y-6">
+      <!-- ── BARRA SUPERIOR DE EXPORTACIÓN (PDF, EXCEL, CSV) ─────────────── -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm rounded-2xl px-5 py-3.5 flex flex-wrap items-center justify-between gap-4 transition-colors duration-200">
+        <div>
+          <h2 class="text-sm font-bold text-slate-800 dark:text-slate-100">Exportación de Informes Ejecutivos</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Descarga el balance financiero, matriz de rentabilidad y platillos más vendidos.</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2.5">
           <a
             href="/reports/export/pdf"
             target="_blank"
-            class="px-3 py-1.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm hover:shadow-orange-600/20"
+            class="px-3.5 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm hover:shadow-orange-600/20"
             title="Descargar Reporte en PDF"
           >
-            <FileDown class="w-3.5 h-3.5" />
-            <span>PDF</span>
+            <FileDown class="w-4 h-4" />
+            <span>Exportar PDF</span>
           </a>
 
           <a
             href="/reports/export/excel"
-            class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm hover:shadow-emerald-600/20"
+            class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm hover:shadow-emerald-600/20"
             title="Descargar Reporte en Excel (.xls)"
           >
-            <FileSpreadsheet class="w-3.5 h-3.5" />
-            <span>Excel</span>
+            <FileSpreadsheet class="w-4 h-4" />
+            <span>Exportar Excel (.xls)</span>
           </a>
 
           <a
             href="/reports/export/csv"
-            class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm hover:shadow-blue-600/20"
+            class="px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm hover:shadow-blue-600/20"
             title="Descargar Reporte en CSV"
           >
-            <FileText class="w-3.5 h-3.5" />
-            <span>CSV</span>
+            <FileText class="w-4 h-4" />
+            <span>Exportar CSV</span>
           </a>
         </div>
       </div>
-    </template>
-
-    <div class="space-y-6">
 
       <!-- ── ASISTENTE IA CON GEMINI Y DICTADO POR VOZ ─────────────── -->
       <div class="relative overflow-hidden bg-gradient-to-r from-purple-50 via-indigo-50/70 to-purple-50 dark:from-purple-950/50 dark:via-slate-900 dark:to-indigo-950/50 border-2 border-purple-200 dark:border-purple-500/30 rounded-3xl p-6 shadow-md transition-colors duration-200">

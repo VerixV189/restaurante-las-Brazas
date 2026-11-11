@@ -64,7 +64,7 @@ class ReportController extends Controller
             ];
         })->filter(fn ($c) => $c['total_sales'] > 0)->values();
 
-        // 4. Top Platillos Más Vendidos
+        // 4. Top Platillos Más Vendidos (NULLS LAST para PostgreSQL)
         $topDishes = Dish::with('category')
             ->withSum(['orderItems as total_units_sold' => function ($query) {
                 $query->whereHas('order', fn ($q) => $q->where('status', 'paid'));
@@ -72,7 +72,7 @@ class ReportController extends Controller
             ->withSum(['orderItems as total_revenue_generated' => function ($query) {
                 $query->whereHas('order', fn ($q) => $q->where('status', 'paid'));
             }], 'subtotal')
-            ->orderByDesc('total_units_sold')
+            ->orderByRaw('COALESCE(total_units_sold, 0) DESC, COALESCE(total_revenue_generated, 0) DESC')
             ->take(10)
             ->get();
 

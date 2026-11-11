@@ -127,7 +127,7 @@ class DashboardController extends Controller
             'transfer' => round((float) Payment::where('payment_method', 'transfer')->sum('amount'), 2),
         ];
 
-        // 6. Top Platillos Estrella
+        // 6. Top Platillos Estrella (NULLS LAST para PostgreSQL)
         $topDishes = Dish::with('category')
             ->withSum(['orderItems as units_sold' => function ($q) {
                 $q->whereHas('order', fn ($o) => $o->where('status', '!=', 'cancelled'));
@@ -135,7 +135,7 @@ class DashboardController extends Controller
             ->withSum(['orderItems as revenue' => function ($q) {
                 $q->whereHas('order', fn ($o) => $o->where('status', '!=', 'cancelled'));
             }], 'subtotal')
-            ->orderByDesc('units_sold')
+            ->orderByRaw('COALESCE(units_sold, 0) DESC, COALESCE(revenue, 0) DESC')
             ->take(5)
             ->get();
 

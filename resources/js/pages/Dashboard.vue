@@ -168,21 +168,34 @@ function getOrderBadge(order) {
 <template>
   <AdminLayout>
     <template #header>
-      <div class="flex flex-wrap items-center justify-between gap-3 w-full">
-        <span>Dashboard Ejecutivo & Operativo en Vivo</span>
+      <span>Dashboard Ejecutivo & Operativo en Vivo</span>
+    </template>
+
+    <div class="space-y-6">
+      <!-- ── BARRA DE CONTROL Y FILTRO DE PERIODO CON ESPACIADO CÓMODO ── -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm rounded-2xl px-5 py-3.5 flex flex-wrap items-center justify-between gap-4 transition-colors duration-200">
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
+            <TrendingUp class="w-5 h-5" />
+          </div>
+          <div>
+            <h2 class="text-sm font-bold text-slate-800 dark:text-slate-100">Indicadores Clave de Rendimiento (KPIs)</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Filtra los ingresos, comandas y envíos de la App según el periodo seleccionado.</p>
+          </div>
+        </div>
 
         <!-- Controles Dinámicos de Periodo y Refresco -->
-        <div class="flex flex-wrap items-center gap-2">
-          <div class="flex rounded-xl bg-slate-100 dark:bg-slate-800 p-1 border border-slate-200 dark:border-slate-700">
+        <div class="flex flex-wrap items-center gap-2.5">
+          <div class="flex flex-wrap rounded-xl bg-slate-100 dark:bg-slate-800 p-1.5 border border-slate-200 dark:border-slate-700 gap-1">
             <button
               v-for="p in periodOptions"
               :key="p.key"
               type="button"
               @click="selectedPeriod = p.key"
               :class="[
-                'px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer',
+                'px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer',
                 selectedPeriod === p.key
-                  ? 'bg-orange-600 text-white shadow-xs'
+                  ? 'bg-orange-600 text-white shadow-sm'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
               ]"
             >
@@ -192,16 +205,16 @@ function getOrderBadge(order) {
 
           <Button
             icon="pi pi-refresh"
+            label="Sincronizar"
+            size="small"
             :loading="isRefreshing"
-            class="bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 dark:border-slate-700 !p-2 rounded-xl"
+            class="bg-emerald-600 hover:bg-emerald-500 text-white border-none !px-3.5 !py-2 rounded-xl text-xs font-bold shadow-sm"
             @click="refreshDashboard"
             title="Sincronizar KPIs ahora"
           />
         </div>
       </div>
-    </template>
 
-    <div class="space-y-6">
       <!-- ── FILA 1: 4 KPIS FINANCIEROS Y DE CANALES (DINÁMICOS POR PERIODO) ── -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- 1. Ingresos del Periodo -->
