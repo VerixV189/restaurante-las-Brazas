@@ -284,9 +284,16 @@ function renderMarkdown(text) {
       <div class="h-18 px-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/80 dark:bg-slate-950/50 backdrop-blur shrink-0">
         <div class="flex items-center gap-3">
           <div class="relative">
-            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center text-white shadow-md shadow-orange-600/30">
-              <Flame class="w-6 h-6 animate-pulse" />
-            </div>
+            <img
+              src="/images/logo-light.jpg"
+              alt="Las Brazas"
+              class="w-11 h-11 rounded-2xl object-cover shadow-md border border-slate-200 dark:hidden"
+            />
+            <img
+              src="/images/logo-dark.jpg"
+              alt="Las Brazas"
+              class="w-11 h-11 rounded-2xl object-cover shadow-md border border-slate-700 hidden dark:block"
+            />
             <!-- Online status green dot -->
             <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full"></span>
           </div>

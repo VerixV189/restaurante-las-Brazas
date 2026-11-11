@@ -230,9 +230,11 @@ function submitTestimonial() {
       <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         <!-- Logo -->
         <Link href="/" class="flex items-center gap-3 group">
-          <div class="bg-gradient-to-tr from-orange-600 to-amber-500 p-2.5 rounded-2xl text-white shadow-lg shadow-orange-600/20 group-hover:scale-105 transition-transform">
-            <Flame class="w-7 h-7" />
-          </div>
+          <img
+            src="/images/logo-dark.jpg"
+            alt="Las Brazas Steakhouse"
+            class="w-14 h-14 rounded-2xl object-cover shadow-lg border border-slate-800 group-hover:scale-105 transition-transform"
+          />
           <div>
             <span class="font-extrabold text-2xl tracking-wide bg-gradient-to-r from-orange-400 via-amber-300 to-yellow-200 bg-clip-text text-transparent">
               Las Brazas
@@ -789,9 +791,11 @@ function submitTestimonial() {
       <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
         <div class="space-y-4">
           <div class="flex items-center gap-3">
-            <div class="bg-orange-600 p-2 rounded-xl text-white">
-              <Flame class="w-5 h-5" />
-            </div>
+            <img
+              src="/images/logo-dark.jpg"
+              alt="Las Brazas Steakhouse"
+              class="w-12 h-12 rounded-xl object-cover border border-slate-800"
+            />
             <span class="font-extrabold text-xl text-white">Las Brazas</span>
           </div>
           <p class="text-xs text-slate-400 leading-relaxed">

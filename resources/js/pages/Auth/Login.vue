@@ -75,8 +75,12 @@ function fillAdminCredentials() {
       <div class="auth-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-xl dark:shadow-2xl dark:shadow-slate-950 transition-colors">
         <!-- Logo & Title -->
         <div class="text-center space-y-2 mb-6">
-          <div class="inline-flex bg-gradient-to-tr from-orange-600 to-amber-500 p-3 rounded-2xl text-white shadow-lg shadow-orange-600/30 mb-1">
-            <Flame class="w-7 h-7" />
+          <div class="inline-flex mb-1">
+            <img
+              :src="isDark ? '/images/logo-dark.jpg' : '/images/logo-light.jpg'"
+              alt="Las Brazas Steakhouse"
+              class="w-28 h-28 rounded-2xl object-cover shadow-lg border border-slate-200 dark:border-slate-800 transition-all duration-300"
+            />
           </div>
           <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Acceso a Las Brazas</h1>
           <p class="text-xs text-slate-500 dark:text-slate-400">Ingresa tus credenciales de comensal o personal administrativo</p>

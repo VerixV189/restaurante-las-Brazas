@@ -175,14 +175,21 @@ function isUrlActive(url) {
       ]"
     >
       <!-- Logo Header -->
-      <div class="h-16 flex items-center justify-between px-4 border-b border-slate-200 dark:border-slate-800">
-        <Link href="/" class="flex items-center gap-3 overflow-hidden">
-          <div class="bg-gradient-to-tr from-orange-600 to-amber-500 p-2 rounded-xl text-white shrink-0 shadow-sm shadow-orange-500/20">
-            <Flame class="w-6 h-6" />
+      <div class="h-20 flex items-center justify-between px-4 border-b border-slate-200 dark:border-slate-800">
+        <Link href="/" class="flex items-center gap-3 overflow-hidden group">
+          <img
+            :src="isDark ? '/images/logo-dark.jpg' : '/images/logo-light.jpg'"
+            alt="Logo Las Brazas Steakhouse"
+            class="w-12 h-12 rounded-xl object-cover shrink-0 shadow-sm border border-slate-200 dark:border-slate-700 group-hover:scale-105 transition-transform"
+          />
+          <div v-if="sidebarOpen" class="overflow-hidden">
+            <span class="block font-extrabold text-base tracking-wide bg-gradient-to-r from-orange-600 to-amber-500 dark:from-orange-400 dark:to-amber-200 bg-clip-text text-transparent truncate">
+              LAS BRAZAS
+            </span>
+            <span class="block text-[10px] font-bold tracking-widest uppercase text-slate-500 dark:text-slate-400 truncate">
+              Steakhouse
+            </span>
           </div>
-          <span v-if="sidebarOpen" class="font-bold text-lg tracking-wide bg-gradient-to-r from-orange-600 to-amber-500 dark:from-orange-400 dark:to-amber-200 bg-clip-text text-transparent truncate">
-            Las Brazas
-          </span>
         </Link>
       </div>
 
