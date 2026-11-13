@@ -252,22 +252,22 @@ function submitTestimonial() {
         </Link>
 
         <!-- Navigation Links -->
-        <nav class="hidden lg:flex items-center gap-7 text-sm font-medium text-slate-600 dark:text-slate-300">
-          <a href="#menu" class="hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Menú</a>
-          <a href="#identidad" class="hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Misión & Visión</a>
-          <a href="#tecnologia" class="hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Fortalezas</a>
-          <a href="#experiencia" class="hover:text-orange-600 dark:hover:text-orange-400 transition-colors">La Experiencia</a>
-          <a href="#testimonios" class="hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Testimonios</a>
-          <a href="#contacto" class="hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Contacto</a>
+        <nav class="hidden lg:flex items-center gap-5 xl:gap-7 text-xs xl:text-sm font-medium text-slate-600 dark:text-slate-300">
+          <a href="#menu" class="whitespace-nowrap hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Menú</a>
+          <a href="#identidad" class="whitespace-nowrap hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Misión & Visión</a>
+          <a href="#tecnologia" class="whitespace-nowrap hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Fortalezas</a>
+          <a href="#experiencia" class="whitespace-nowrap hover:text-orange-600 dark:hover:text-orange-400 transition-colors">La Experiencia</a>
+          <a href="#testimonios" class="whitespace-nowrap hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Testimonios</a>
+          <a href="#contacto" class="whitespace-nowrap hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Contacto</a>
         </nav>
 
         <!-- Action Buttons -->
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 shrink-0">
           <!-- Theme Switcher -->
           <button
             type="button"
             @click="toggleTheme"
-            class="p-2 rounded-xl border transition-all duration-200 flex items-center justify-center text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border-slate-300 dark:text-slate-300 dark:hover:text-amber-400 dark:bg-slate-800/90 dark:hover:bg-slate-800 dark:border-slate-700 shadow-sm cursor-pointer"
+            class="p-2 rounded-xl border transition-all duration-200 flex items-center justify-center text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border-slate-300 dark:text-slate-300 dark:hover:text-amber-400 dark:bg-slate-800/90 dark:hover:bg-slate-800 dark:border-slate-700 shadow-sm cursor-pointer shrink-0"
             :title="isDark ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'"
             aria-label="Alternar tema"
           >
@@ -278,21 +278,26 @@ function submitTestimonial() {
           <Button
             label="Reservar Mesa"
             icon="pi pi-calendar"
-            class="bg-gradient-to-r from-orange-600 to-amber-500 border-none font-semibold text-white shadow-md shadow-orange-600/20 hover:shadow-orange-600/40 hover:scale-[1.02] transition-all text-xs"
+            severity="warn"
+            class="!bg-gradient-to-r !from-orange-600 !to-amber-500 !border-none font-semibold !text-white shadow-md shadow-orange-600/20 hover:shadow-orange-600/40 hover:scale-[1.02] transition-all text-xs whitespace-nowrap"
             @click="openReservationModal()"
           />
-          <Link href="/register" class="hidden sm:inline-block">
+          <Link href="/register" class="hidden sm:inline-block shrink-0">
             <Button
               icon="pi pi-user-plus"
               label="Registrarse"
-              class="p-button-outlined text-orange-600 dark:text-orange-400 border-orange-500/40 hover:bg-orange-500/10 text-xs"
+              severity="warn"
+              outlined
+              class="!text-orange-600 dark:!text-orange-400 !border-orange-500/40 hover:!bg-orange-500/10 text-xs whitespace-nowrap"
             />
           </Link>
-          <Link href="/login">
+          <Link href="/login" class="shrink-0">
             <Button
               icon="pi pi-user"
               label="Iniciar Sesión"
-              class="p-button-outlined text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs"
+              severity="secondary"
+              outlined
+              class="!text-slate-700 dark:!text-slate-300 !border-slate-300 dark:!border-slate-700 hover:!bg-slate-100 dark:hover:!bg-slate-800 text-xs whitespace-nowrap"
             />
           </Link>
         </div>
@@ -355,7 +360,7 @@ function submitTestimonial() {
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <!-- Tarjeta Misión -->
-        <div class="relative bg-white dark:bg-gradient-to-b dark:from-slate-900/90 dark:to-slate-900/40 border border-slate-200 dark:border-slate-800/80 hover:border-orange-500/50 p-8 sm:p-10 rounded-3xl transition-all duration-300 shadow-sm hover:shadow-xl group flex flex-col justify-between">
+        <div class="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-orange-500/50 p-8 sm:p-10 rounded-3xl transition-all duration-300 shadow-sm hover:shadow-xl group flex flex-col justify-between">
           <div class="space-y-6">
             <div class="flex items-center justify-between">
               <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 p-0.5 shadow-lg shadow-orange-600/20">
@@ -395,7 +400,7 @@ function submitTestimonial() {
         </div>
 
         <!-- Tarjeta Visión -->
-        <div class="relative bg-white dark:bg-gradient-to-b dark:from-slate-900/90 dark:to-slate-900/40 border border-slate-200 dark:border-slate-800/80 hover:border-amber-500/50 p-8 sm:p-10 rounded-3xl transition-all duration-300 shadow-sm hover:shadow-xl group flex flex-col justify-between">
+        <div class="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-amber-500/50 p-8 sm:p-10 rounded-3xl transition-all duration-300 shadow-sm hover:shadow-xl group flex flex-col justify-between">
           <div class="space-y-6">
             <div class="flex items-center justify-between">
               <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-yellow-400 p-0.5 shadow-lg shadow-amber-500/20">
@@ -762,7 +767,7 @@ function submitTestimonial() {
         <div
           v-for="test in testimonials"
           :key="test.id"
-          class="bg-white dark:bg-gradient-to-b dark:from-slate-900/90 dark:to-slate-900/40 border border-slate-200 dark:border-slate-800/80 hover:border-orange-500/40 p-7 rounded-3xl transition-all duration-300 shadow-sm hover:shadow-xl flex flex-col justify-between group"
+          class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-orange-500/40 p-7 rounded-3xl transition-all duration-300 shadow-sm hover:shadow-xl flex flex-col justify-between group"
         >
           <div class="space-y-4">
             <!-- Header de tarjeta -->
