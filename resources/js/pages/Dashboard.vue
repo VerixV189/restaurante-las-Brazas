@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import AdminLayout from '../layouts/AdminLayout.vue';
 import Chart from 'primevue/chart';
 import DataTable from 'primevue/datatable';
@@ -42,6 +42,46 @@ const props = defineProps({
 });
 
 const toast = useToast();
+const page = usePage();
+const userRole = computed(() => page.props.auth?.user?.role || 'Administrador');
+const isAdmin = computed(() => userRole.value === 'Administrador');
+const canAccessPos = computed(() => ['Administrador', 'Mesero'].includes(userRole.value));
+const canAccessKitchen = computed(() => ['Administrador', 'Chef'].includes(userRole.value));
+const canAccessInventory = computed(() => ['Administrador', 'Chef'].includes(userRole.value));
+const canAccessReservations = computed(() => ['Administrador', 'Recepcionista', 'Mesero'].includes(userRole.value));
+
+const roleHeaderTitle = computed(() => {
+  if (userRole.value === 'Chef') return 'Panel Operativo de Cocina, Recetas & Almacén (Chef)';
+  if (userRole.value === 'Mesero') return 'Panel Operativo de Salón, Mesas & Comandas (Mesero)';
+  if (userRole.value === 'Recepcionista') return 'Panel de Recepción, Aforo & Reservas (Hostess)';
+  return 'Dashboard Ejecutivo & Operativo en Vivo';
+});
+
+const roleQuickActions = computed(() => {
+  if (userRole.value === 'Chef') {
+    return [
+      { label: '🔥 Monitor de Cocina (KDS)', href: '/kitchen' },
+      { label: '📖 Recetas & Fichas Técnicas', href: '/recipes' },
+      { label: '📦 Inventario / Insumos', href: '/ingredients' },
+      { label: '📊 Predicciones & Lotes IA', href: '/predictions' },
+    ];
+  }
+  if (userRole.value === 'Mesero') {
+    return [
+      { label: '🛒 Abrir Punto de Venta (POS)', href: '/pos' },
+      { label: '📅 Reservas & Estado de Mesas', href: '/reservations' },
+    ];
+  }
+  if (userRole.value === 'Recepcionista') {
+    return [
+      { label: '📅 Gestionar Reservas', href: '/reservations' },
+      { label: '🗺️ Zonas y Mesas', href: '/areas' },
+      { label: '✨ Planos IA (YOLO)', href: '/floor-plans' },
+      { label: '👥 Directorio de Clientes', href: '/customers' },
+    ];
+  }
+  return [];
+});
 
 // Dynamic Period Filter ('today', 'week', 'month', 'all')
 const selectedPeriod = ref('all');
@@ -168,10 +208,35 @@ function getOrderBadge(order) {
 <template>
   <AdminLayout>
     <template #header>
-      <span>Dashboard Ejecutivo & Operativo en Vivo</span>
+      <span>{{ roleHeaderTitle }}</span>
     </template>
 
     <div class="space-y-6">
+      <!-- ── ACCESOS RÁPIDOS SEGÚN ROL (CHEF, MESERO, RECEPCIONISTA) ── -->
+      <div
+        v-if="roleQuickActions.length > 0"
+        class="bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 text-white rounded-2xl p-5 shadow-md flex flex-wrap items-center justify-between gap-4"
+      >
+        <div>
+          <span class="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-black/25">
+            Rol Activo: {{ userRole }}
+          </span>
+          <h3 class="text-base sm:text-lg font-extrabold mt-1">
+            Módulos Operativos de {{ userRole }}
+          </h3>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <Link
+            v-for="act in roleQuickActions"
+            :key="act.href"
+            :href="act.href"
+            class="px-4 py-2 rounded-xl bg-white text-orange-600 hover:bg-orange-50 font-extrabold text-xs shadow-sm transition-transform active:scale-95"
+          >
+            {{ act.label }}
+          </Link>
+        </div>
+      </div>
+
       <!-- ── BARRA DE CONTROL Y FILTRO DE PERIODO CON ESPACIADO CÓMODO ── -->
       <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm rounded-2xl px-5 py-3.5 flex flex-wrap items-center justify-between gap-4 transition-colors duration-200">
         <div class="flex items-center gap-3">
@@ -234,7 +299,7 @@ function getOrderBadge(order) {
           </div>
           <div class="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
             <span class="text-slate-500 dark:text-slate-400">{{ currentMetrics.paid_orders_count }} cuentas cobradas</span>
-            <Link href="/reports" class="text-orange-600 dark:text-orange-400 font-semibold flex items-center gap-0.5 hover:underline">
+            <Link v-if="isAdmin" href="/reports" class="text-orange-600 dark:text-orange-400 font-semibold flex items-center gap-0.5 hover:underline">
               Ver reportes <ArrowUpRight class="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -255,7 +320,7 @@ function getOrderBadge(order) {
           </div>
           <div class="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
             <span class="text-slate-500 dark:text-slate-400">Total órdenes: <strong>{{ currentMetrics.orders_count }}</strong></span>
-            <Link href="/pos" class="text-purple-600 dark:text-purple-400 font-semibold flex items-center gap-0.5 hover:underline">
+            <Link v-if="canAccessPos" href="/pos" class="text-purple-600 dark:text-purple-400 font-semibold flex items-center gap-0.5 hover:underline">
               Ir al POS <ArrowUpRight class="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -277,7 +342,7 @@ function getOrderBadge(order) {
           </div>
           <div class="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
             <span class="text-slate-500 dark:text-slate-400">En este periodo: <strong>{{ currentMetrics.delivery_count }}</strong> envíos</span>
-            <Link href="/pos" class="text-orange-600 dark:text-orange-400 font-semibold flex items-center gap-0.5 hover:underline">
+            <Link v-if="canAccessPos" href="/pos" class="text-orange-600 dark:text-orange-400 font-semibold flex items-center gap-0.5 hover:underline">
               Gestionar envíos <ArrowUpRight class="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -321,7 +386,7 @@ function getOrderBadge(order) {
             <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100 mt-0.5">
               {{ stats.active_kitchen_orders }} órdenes · <span class="text-orange-600 dark:text-orange-400">{{ stats.active_cooking_dishes }} platos</span>
             </h3>
-            <Link href="/kitchen" class="text-[11px] text-orange-600 dark:text-orange-400 hover:underline font-medium">
+            <Link v-if="canAccessKitchen" href="/kitchen" class="text-[11px] text-orange-600 dark:text-orange-400 hover:underline font-medium">
               Abrir Monitor KDS →
             </Link>
           </div>
@@ -353,7 +418,7 @@ function getOrderBadge(order) {
             <h3 class="text-xl font-bold text-amber-600 dark:text-amber-400 mt-0.5">
               {{ stats.low_stock_ingredients }} <span class="text-xs font-normal text-slate-500">de {{ stats.total_ingredients }} insumos</span>
             </h3>
-            <Link href="/ingredients" class="text-[11px] text-amber-600 dark:text-amber-400 hover:underline font-medium">
+            <Link v-if="canAccessInventory" href="/ingredients" class="text-[11px] text-amber-600 dark:text-amber-400 hover:underline font-medium">
               Revisar almacén →
             </Link>
           </div>
@@ -369,7 +434,7 @@ function getOrderBadge(order) {
             <h3 class="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
               {{ stats.today_reservations }} hoy · <span class="text-slate-700 dark:text-slate-200">{{ stats.total_customers }} clientes</span>
             </h3>
-            <Link href="/reservations" class="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline font-medium">
+            <Link v-if="canAccessReservations" href="/reservations" class="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline font-medium">
               {{ stats.pending_reservations }} pendientes de confirmar →
             </Link>
           </div>
@@ -483,7 +548,7 @@ function getOrderBadge(order) {
             </div>
           </div>
 
-          <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-right">
+          <div v-if="canAccessKitchen" class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-right">
             <Link href="/dishes" class="text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline">
               Administrar Menú Completo →
             </Link>
@@ -502,6 +567,7 @@ function getOrderBadge(order) {
             </div>
           </div>
           <Link
+            v-if="canAccessPos"
             href="/pos"
             class="px-3.5 py-1.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold transition-colors"
           >

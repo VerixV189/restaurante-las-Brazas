@@ -128,6 +128,12 @@ const allNavItems = [
     roles: ['Administrador', 'Chef'],
   },
   {
+    name: 'Central Delivery GPS',
+    href: '/delivery',
+    icon: Truck,
+    roles: ['Administrador', 'Repartidor'],
+  },
+  {
     name: 'Reportes',
     href: '/reports',
     icon: BarChart3,
@@ -188,7 +194,7 @@ const clientNavItems = [
 
 // Filter nav items based on authenticated user role
 const userRole = computed(() => page.props.auth?.user?.role || '');
-const isStaffRole = computed(() => ['Administrador', 'Chef', 'Mesero', 'Recepcionista'].includes(userRole.value));
+const isStaffRole = computed(() => ['Administrador', 'Chef', 'Mesero', 'Recepcionista', 'Repartidor'].includes(userRole.value));
 
 const navItems = computed(() => {
   if (!isStaffRole.value) {
@@ -281,7 +287,9 @@ function isUrlActive(url) {
                 'bg-blue-500/20 text-blue-600 dark:text-blue-300': userRole === 'Chef',
                 'bg-green-500/20 text-green-600 dark:text-green-300': userRole === 'Mesero',
                 'bg-purple-500/20 text-purple-600 dark:text-purple-300': userRole === 'Recepcionista',
-                'bg-slate-500/20 text-slate-600 dark:text-slate-300': !['Administrador','Chef','Mesero','Recepcionista'].includes(userRole),
+                'bg-cyan-500/20 text-cyan-600 dark:text-cyan-300': userRole === 'Repartidor',
+                'bg-emerald-500/20 text-emerald-600 dark:text-emerald-300': userRole === 'Cliente',
+                'bg-slate-500/20 text-slate-600 dark:text-slate-300': !['Administrador','Chef','Mesero','Recepcionista','Repartidor','Cliente'].includes(userRole),
               }"
             >{{ userRole }}</span>
           </div>

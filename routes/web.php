@@ -138,6 +138,14 @@ Route::middleware('auth')->group(function () {
         Route::post('/reports/ai-query', [\App\Http\Controllers\AiReportController::class, 'query'])->name('reports.ai.query');
     });
 
+    // ── Central Logística de Reparto / Delivery (Administrador, Repartidor) ──
+    Route::middleware('role:Administrador,Repartidor')->group(function () {
+        Route::get('/delivery', [\App\Http\Controllers\DeliveryWebController::class, 'index'])->name('delivery.index');
+        Route::post('/delivery/{id}/take', [\App\Http\Controllers\DeliveryWebController::class, 'take'])->name('delivery.take');
+        Route::post('/delivery/{id}/pickup', [\App\Http\Controllers\DeliveryWebController::class, 'pickup'])->name('delivery.pickup');
+        Route::post('/delivery/{id}/confirm', [\App\Http\Controllers\DeliveryWebController::class, 'confirm'])->name('delivery.confirm');
+    });
+
     // ── Logs de Auditoría (solo Administrador) ────────────────────────────────
     Route::middleware('role:Administrador')->group(function () {
         Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');

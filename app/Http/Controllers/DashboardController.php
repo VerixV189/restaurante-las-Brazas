@@ -22,6 +22,9 @@ class DashboardController extends Controller
     public function index(Request $request): Response
     {
         $roleName = $request->user()?->role?->name ?? 'Cliente';
+        if ($roleName === 'Repartidor') {
+            return app(DeliveryWebController::class)->index($request);
+        }
         if (! in_array($roleName, ['Administrador', 'Chef', 'Mesero', 'Recepcionista'])) {
             return app(ClientPortalController::class)->index($request);
         }
