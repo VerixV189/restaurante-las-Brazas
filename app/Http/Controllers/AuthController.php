@@ -30,6 +30,14 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $user = Auth::user();
+            if (! $user->is_active && ! $user->hasVerifiedEmail()) {
+                Auth::logout();
+                return back()->withErrors([
+                    'email' => 'Tu cuenta aún no ha sido verificada. Revisa tu correo y haz clic en el enlace de verificación para activarla.',
+                ]);
+            }
+
             $request->session()->regenerate();
             return redirect()->intended('/dashboard');
         }
@@ -75,7 +83,7 @@ class AuthController extends Controller
             'email'             => $validated['email'],
             'phone'             => $validated['phone'] ?? null,
             'password'          => Hash::make($validated['password']),
-            'is_active'         => true,
+            'is_active'         => false,
             'email_verified_at' => null,
         ]);
 
@@ -125,10 +133,14 @@ class AuthController extends Controller
         }
 
         if ($user->hasVerifiedEmail()) {
+            if (! $user->is_active) {
+                $user->update(['is_active' => true]);
+            }
             return redirect()->route('login')->with('success', 'Tu cuenta ya ha sido verificada previamente. Puedes iniciar sesión.');
         }
 
         $user->markEmailAsVerified();
+        $user->update(['is_active' => true]);
 
         return redirect()->route('login')->with(
             'success',

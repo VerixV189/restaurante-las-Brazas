@@ -43,8 +43,21 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 // ─────────────────────────────────────────────────────────────────────────────
 Route::middleware('auth')->group(function () {
 
-    // Dashboard - accesible por todos los roles
+    // Dashboard - accesible por todos los roles (si es Cliente, carga su Portal Marketplace)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/client', [\App\Http\Controllers\ClientPortalController::class, 'index'])->name('client.portal');
+
+    // Endpoints del Portal del Cliente (Marketplace, Carrito, Pedidos, Direcciones, Cupones y Reservas)
+    Route::prefix('client')->group(function () {
+        Route::post('/coupons/validate', [\App\Http\Controllers\ClientPortalController::class, 'validateCoupon'])->name('client.coupons.validate');
+        Route::post('/orders', [\App\Http\Controllers\ClientPortalController::class, 'storeOrder'])->name('client.orders.store');
+        Route::post('/orders/{id}/cancel', [\App\Http\Controllers\ClientPortalController::class, 'cancelOrder'])->name('client.orders.cancel');
+        Route::get('/orders/{id}/invoice', [\App\Http\Controllers\ClientPortalController::class, 'invoice'])->name('client.orders.invoice');
+        Route::post('/addresses', [\App\Http\Controllers\ClientPortalController::class, 'storeAddress'])->name('client.addresses.store');
+        Route::delete('/addresses/{id}', [\App\Http\Controllers\ClientPortalController::class, 'destroyAddress'])->name('client.addresses.destroy');
+        Route::post('/reservations', [\App\Http\Controllers\ClientPortalController::class, 'storeReservation'])->name('client.reservations.store');
+        Route::post('/reservations/{id}/cancel', [\App\Http\Controllers\ClientPortalController::class, 'cancelReservation'])->name('client.reservations.cancel');
+    });
 
     // Chat de Asistente de IA (accesible por todos los roles autenticados)
     Route::post('/ai/chat', [\App\Http\Controllers\AiChatController::class, 'sendMessage'])->name('ai.chat');

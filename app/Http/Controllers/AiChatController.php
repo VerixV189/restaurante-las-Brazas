@@ -31,10 +31,14 @@ class AiChatController extends Controller
         $history = $validated['history'] ?? [];
 
         $reply = $this->aiChatService->generateReply($user, $message, $history);
+        $interactive = $this->aiChatService->extractInteractivePayload($user, $message, $reply);
 
         return response()->json([
             'success' => true,
             'reply' => $reply,
+            'suggested_items' => $interactive['suggested_items'],
+            'suggested_coupons' => $interactive['suggested_coupons'],
+            'created_reservation' => $interactive['created_reservation'],
             'timestamp' => now()->format('H:i'),
         ]);
     }

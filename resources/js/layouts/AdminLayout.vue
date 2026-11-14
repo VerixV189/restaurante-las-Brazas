@@ -147,16 +147,64 @@ const allNavItems = [
   },
 ];
 
+// Navigation items exclusive for Cliente role (Marketplace & Client Portal)
+const clientNavItems = [
+  {
+    name: 'Marketplace / Menú',
+    href: '/dashboard?tab=menu',
+    icon: Flame,
+  },
+  {
+    name: 'Mi Carrito & Envío',
+    href: '/dashboard?tab=cart',
+    icon: ShoppingCart,
+  },
+  {
+    name: 'Mis Pedidos & Envíos',
+    href: '/dashboard?tab=orders',
+    icon: Truck,
+  },
+  {
+    name: 'Promos & Puntos',
+    href: '/dashboard?tab=promos',
+    icon: Sparkles,
+  },
+  {
+    name: 'Mis Reservas',
+    href: '/dashboard?tab=reservations',
+    icon: CalendarCheck,
+  },
+  {
+    name: 'Agente IA Gastronómico',
+    href: '/dashboard?tab=ai',
+    icon: Sparkles,
+  },
+  {
+    name: 'Mi Perfil & Direcciones',
+    href: '/dashboard?tab=profile',
+    icon: UserCircle,
+  },
+];
+
 // Filter nav items based on authenticated user role
 const userRole = computed(() => page.props.auth?.user?.role || '');
+const isStaffRole = computed(() => ['Administrador', 'Chef', 'Mesero', 'Recepcionista'].includes(userRole.value));
 
-const navItems = computed(() =>
-  allNavItems.filter(item =>
+const navItems = computed(() => {
+  if (!isStaffRole.value) {
+    return clientNavItems;
+  }
+  return allNavItems.filter(item =>
     item.roles.length === 0 || item.roles.includes(userRole.value)
-  )
-);
+  );
+});
 
 function isUrlActive(url) {
+  if (url.includes('?tab=')) {
+    const targetTab = url.split('?tab=')[1];
+    if (page.url === '/dashboard' && targetTab === 'menu') return true;
+    return page.url.includes(`tab=${targetTab}`);
+  }
   return page.url.startsWith(url);
 }
 </script>

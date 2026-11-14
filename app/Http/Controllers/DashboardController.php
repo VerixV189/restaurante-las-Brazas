@@ -13,13 +13,19 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
 use App\Models\ActivityLog;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        $roleName = $request->user()?->role?->name ?? 'Cliente';
+        if (! in_array($roleName, ['Administrador', 'Chef', 'Mesero', 'Recepcionista'])) {
+            return app(ClientPortalController::class)->index($request);
+        }
+
         // 1. Métricas de Catálogo, Mesas, Cocina, Reservas e Inventario en Tiempo Real
         $totalDishes = Dish::count();
         $availableDishes = Dish::where('is_available', true)->count();

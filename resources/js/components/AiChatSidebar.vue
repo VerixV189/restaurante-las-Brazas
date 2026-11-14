@@ -132,6 +132,7 @@ const quickSuggestions = computed(() => {
     ];
   }
   return [
+    { label: '🛒 Pedir Arrachera + Cerveza', prompt: 'Pídeme una Arrachera término medio y una Cerveza Artesanal' },
     { label: '🥩 Mejores cortes', prompt: '¿Cuáles son los cortes de carne más recomendados?' },
     { label: '🎯 Presupuesto $350', prompt: '¿Qué me recomiendas pedir con un presupuesto de $350?' },
     { label: '➕ Reservar para 4p', prompt: 'Reserva una mesa para 4 personas mañana a las 20:00' },
@@ -140,6 +141,16 @@ const quickSuggestions = computed(() => {
     { label: '🪑 Mesas Libres', prompt: '¿Qué mesas están libres ahora?' },
   ];
 });
+
+function addSuggestedToCart(items) {
+  window.dispatchEvent(new CustomEvent('lasbrazas:add-to-cart', { detail: items }));
+  closeChat();
+}
+
+function applySuggestedCoupon(code) {
+  window.dispatchEvent(new CustomEvent('lasbrazas:apply-coupon', { detail: code }));
+  closeChat();
+}
 
 function sendSuggestion(prompt) {
   inputMessage.value = prompt;
@@ -179,8 +190,13 @@ async function sendMessage() {
         id: 'ai-' + Date.now(),
         role: 'assistant',
         text: response.data.reply,
+        suggestedItems: response.data.suggested_items || [],
+        suggestedCoupons: response.data.suggested_coupons || [],
         timestamp: response.data.timestamp || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       });
+      if (response.data.created_reservation) {
+        window.dispatchEvent(new CustomEvent('lasbrazas:refresh-portal'));
+      }
     } else {
       messages.value.push({
         id: 'err-' + Date.now(),
@@ -370,6 +386,53 @@ function renderMarkdown(text) {
               ]"
             >
               <div v-html="renderMarkdown(msg.text)" class="prose prose-sm dark:prose-invert max-w-none"></div>
+
+              <!-- Tarjetas interactivas de platillos sugeridos por el Agente IA -->
+              <div v-if="msg.suggestedItems && msg.suggestedItems.length > 0" class="mt-3 pt-2.5 border-t border-slate-200/80 dark:border-slate-700/70 space-y-2">
+                <div
+                  v-for="item in msg.suggestedItems"
+                  :key="item.dish_id"
+                  class="flex items-center justify-between gap-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200/70 dark:border-slate-700"
+                >
+                  <div class="min-w-0 flex-1">
+                    <p class="font-bold text-xs text-slate-900 dark:text-white truncate">
+                      {{ item.quantity }}x {{ item.name }}
+                    </p>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                      ${{ Number(item.price).toFixed(2) }} c/u {{ item.notes ? `• ${item.notes}` : '' }}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    @click="addSuggestedToCart([item])"
+                    class="px-2.5 py-1 rounded-lg bg-orange-600 hover:bg-orange-500 text-white font-bold text-[11px] shrink-0 transition-colors cursor-pointer"
+                  >
+                    + Carrito
+                  </button>
+                </div>
+
+                <button
+                  v-if="msg.suggestedItems.length > 1"
+                  type="button"
+                  @click="addSuggestedToCart(msg.suggestedItems)"
+                  class="w-full py-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
+                >
+                  🛒 Agregar los {{ msg.suggestedItems.length }} platillos al carrito
+                </button>
+              </div>
+
+              <!-- Botones interactivos de cupones sugeridos -->
+              <div v-if="msg.suggestedCoupons && msg.suggestedCoupons.length > 0" class="mt-2.5 pt-2 border-t border-slate-200/80 dark:border-slate-700/70 flex flex-wrap gap-1.5">
+                <button
+                  v-for="c in msg.suggestedCoupons"
+                  :key="c.code"
+                  type="button"
+                  @click="applySuggestedCoupon(c.code)"
+                  class="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 font-bold text-[11px] transition-colors cursor-pointer"
+                >
+                  🎟️ Aplicar {{ c.code }}
+                </button>
+              </div>
             </div>
 
             <!-- Timestamp -->

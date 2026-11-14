@@ -221,7 +221,176 @@ class AiChatService
                  . "⏱️ *Recuerda que tienes 15 minutos de tolerancia. Ya puedes ver tu reserva reflejada en el módulo de Reservaciones.*";
         }
 
+        // Detectar intención de ARMAR O HACER UN PEDIDO por voz/texto ("pídeme...", "quiero pedir...", "ordenar...", "agrega al carrito...")
+        if (
+            str_contains($q, 'pídeme') || str_contains($q, 'pideme') ||
+            str_contains($q, 'quiero pedir') || str_contains($q, 'hazme un pedido') ||
+            str_contains($q, 'hacer un pedido') || str_contains($q, 'ordenar ') ||
+            str_contains($q, 'ordéname') || str_contains($q, 'ordename') ||
+            str_contains($q, 'agrega al carrito') || str_contains($q, 'agregar al carrito')
+        ) {
+            $matchedItems = $this->parseDishesFromMessage($message, $context['categories']);
+            if (! empty($matchedItems)) {
+                $total = 0;
+                $lines = [];
+                foreach ($matchedItems as $item) {
+                    $sub = $item['price'] * $item['quantity'];
+                    $total += $sub;
+                    $noteStr = ! empty($item['notes']) ? " *({$item['notes']})*" : '';
+                    $lines[] = "• **{$item['quantity']}x {$item['name']}**{$noteStr} — $" . number_format($sub, 2);
+                }
+
+                return "🛒 **¡He preparado tu orden inteligente, {$user->name}!** 🔥\n\n"
+                     . implode("\n", $lines) . "\n\n"
+                     . "💰 **Subtotal Estimado:** $" . number_format($total, 2) . "\n\n"
+                     . "👇 *Usa los botones interactivos aquí abajo para **agregar todo a tu carrito** o **enviar el pedido directo a cocina**.*";
+            }
+        }
+
         return null;
+    }
+
+    /**
+     * Extrae platillos sugeridos y cupones accionables para mostrar tarjetas interactivas en el Chat IA.
+     */
+    public function extractInteractivePayload(User $user, string $message, string $reply): array
+    {
+        $q = mb_strtolower($message, 'UTF-8');
+        $categories = Category::with(['dishes' => fn ($dq) => $dq->where('is_available', true)])->get();
+
+        // 1. Si el usuario pidió ordenar platillos específicos
+        $parsedOrderItems = $this->parseDishesFromMessage($message, $categories);
+
+        // 2. Si no es orden directa, buscar platillos mencionados en la respuesta del asistente (máx 4 tarjetas)
+        if (empty($parsedOrderItems)) {
+            $allDishes = $categories->flatMap(fn ($c) => $c->dishes->map(fn ($d) => ['dish' => $d, 'cat' => $c->name]));
+            $replyLower = mb_strtolower($reply, 'UTF-8');
+            foreach ($allDishes as $entry) {
+                $d = $entry['dish'];
+                if (str_contains($replyLower, mb_strtolower($d->name, 'UTF-8'))) {
+                    $parsedOrderItems[] = $this->formatSuggestedDish($d, $entry['cat'], 1, $this->detectCookingNotes($q, $d->name));
+                    if (count($parsedOrderItems) >= 4) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 3. Cupones activos si se habló de cupones/descuentos
+        $suggestedCoupons = [];
+        if (str_contains($q, 'cupon') || str_contains($q, 'cupón') || str_contains($q, 'descuento') || str_contains($q, 'promo')) {
+            $suggestedCoupons = Coupon::where('is_active', true)->get()->map(fn ($c) => [
+                'code' => $c->code,
+                'type' => $c->type,
+                'value' => (float) $c->value,
+                'min_order' => (float) $c->min_order,
+            ])->values()->all();
+        }
+
+        return [
+            'suggested_items' => $parsedOrderItems,
+            'suggested_coupons' => $suggestedCoupons,
+            'created_reservation' => str_contains($reply, '¡Reserva Creada Exitosamente por el Agente IA!'),
+        ];
+    }
+
+    private function parseDishesFromMessage(string $message, $categories): array
+    {
+        $q = mb_strtolower($message, 'UTF-8');
+        $allDishes = $categories->flatMap(fn ($c) => $c->dishes->map(fn ($d) => ['dish' => $d, 'cat' => $c->name]));
+        $matched = [];
+
+        foreach ($allDishes as $entry) {
+            $dish = $entry['dish'];
+            $nameLower = mb_strtolower($dish->name, 'UTF-8');
+            $keywords = array_values(array_filter(
+                explode(' ', preg_replace('/[^a-záéíóúñ0-9\s]/u', '', $nameLower)),
+                fn ($w) => mb_strlen($w) >= 4 && ! in_array($w, ['para', 'brazas', 'casa', 'corte', 'gramos'])
+            ));
+
+            $found = str_contains($q, $nameLower);
+            if (! $found) {
+                foreach ($keywords as $kw) {
+                    if (str_contains($q, $kw)) {
+                        $found = true;
+                        break;
+                    }
+                }
+            }
+
+            if ($found) {
+                $qty = 1;
+                foreach ($keywords as $kw) {
+                    if (preg_match('/(\d+|un|una|dos|tres|cuatro)\s+(?:[a-záéíóúñ]+\s+)?' . preg_quote($kw, '/') . '/u', $q, $m)) {
+                        $qty = match ($m[1]) {
+                            'dos' => 2,
+                            'tres' => 3,
+                            'cuatro' => 4,
+                            'un', 'una' => 1,
+                            default => max(1, (int) $m[1]),
+                        };
+                        break;
+                    }
+                }
+
+                $matched[$dish->id] = $this->formatSuggestedDish(
+                    $dish,
+                    $entry['cat'],
+                    $qty,
+                    $this->detectCookingNotes($q, $dish->name)
+                );
+            }
+        }
+
+        return array_values($matched);
+    }
+
+    private function detectCookingNotes(string $q, string $dishName): ?string
+    {
+        $notes = [];
+        if (str_contains($q, 'término medio') || str_contains($q, 'termino medio') || str_contains($q, 'a punto')) {
+            $notes[] = 'Término Medio (A punto)';
+        } elseif (str_contains($q, 'tres cuartos') || str_contains($q, '3/4')) {
+            $notes[] = 'Tres Cuartos (Jugoso)';
+        } elseif (str_contains($q, 'bien cocido')) {
+            $notes[] = 'Bien Cocido';
+        } elseif (str_contains($q, 'sellado') || str_contains($q, 'vuelta y vuelta') || str_contains($q, 'inglés')) {
+            $notes[] = 'Vuelta y vuelta (Sellado)';
+        } elseif (stripos($dishName, 'arrachera') !== false || stripos($dishName, 'bife') !== false || stripos($dishName, 'picaña') !== false || stripos($dishName, 'tomahawk') !== false) {
+            $notes[] = 'Término Medio (A punto)';
+        }
+
+        if (str_contains($q, 'sin cebolla')) {
+            $notes[] = 'Sin cebolla';
+        }
+        if (str_contains($q, 'sin sal')) {
+            $notes[] = 'Bajo en sal';
+        }
+
+        return ! empty($notes) ? implode(' • ', $notes) : null;
+    }
+
+    private function formatSuggestedDish($dish, string $catName, int $qty = 1, ?string $notes = null): array
+    {
+        $imageUrl = $dish->image_url;
+        if (empty($imageUrl)) {
+            $imageUrl = stripos($dish->name, 'arrachera') !== false
+                ? url('/images/arrachera.png')
+                : 'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=600&auto=format&fit=crop';
+        } elseif (! str_starts_with($imageUrl, 'http')) {
+            $imageUrl = url($imageUrl);
+        }
+
+        return [
+            'dish_id' => $dish->id,
+            'name' => $dish->name,
+            'category_name' => $catName,
+            'price' => (float) $dish->price,
+            'image_url' => $imageUrl,
+            'prep_time_minutes' => (int) $dish->prep_time_minutes,
+            'quantity' => $qty,
+            'notes' => $notes,
+        ];
     }
 
     /**
