@@ -57,6 +57,117 @@ const toast = useToast();
 const selectedCategory = ref('all');
 const reserveModalOpen = ref(false);
 const testimonialModalOpen = ref(false);
+const saasModalOpen = ref(false);
+const billingCycle = ref('monthly'); // 'monthly' | 'annual'
+
+const saasPlans = [
+  {
+    id: 'starter',
+    name: 'Plan Parrilla Starter',
+    badge: 'Arranque Cloud',
+    monthlyPrice: 49,
+    annualPrice: 39,
+    description: 'Ideal para restaurantes y asadores de 1 sucursal que inician su digitalización operativa en la nube.',
+    infra: 'Google Cloud Run + Cloud SQL',
+    popular: false,
+    features: [
+      'Terminal Punto de Venta (POS) Web táctil y arqueo de caja',
+      'Catálogo digital, categorías y gestión de hasta 15 mesas',
+      'Control de inventario de insumos y alertas de stock mínimo',
+      'Emisión de tickets PDF y facturación computarizada (SIAT)',
+      'Hospedaje en la nube con certificado SSL y backups diarios',
+    ],
+  },
+  {
+    id: 'pro',
+    name: 'Plan Steakhouse Pro',
+    badge: 'Más Popular • Activo en Las Brazas',
+    monthlyPrice: 99,
+    annualPrice: 79,
+    description: 'Ecosistema omnicanal completo con App Móvil Flutter, Monitor KDS de Cocina e Inteligencia Artificial.',
+    infra: 'AWS EC2 (t3.small) + RDS MySQL + S3',
+    popular: true,
+    features: [
+      'Todo lo del Plan Starter + Mesas y Zonas ilimitadas',
+      'Monitor de Cocina en Tiempo Real (KDS) para parrilleros',
+      'App Móvil Flutter (Play Store) con Delivery, PIN 4 dígitos y Cupones',
+      'Descuento atómico por Receta Técnica y control anti-duplicado',
+      'Reservas digitales por aforo horario (±2h) y tolerancia 15 min',
+      'Agente Virtual con IA (Gemini) para comensales y gerencia',
+    ],
+  },
+  {
+    id: 'enterprise',
+    name: 'Plan Enterprise Multi-Sede',
+    badge: 'Cadenas & Franquicias',
+    monthlyPrice: 189,
+    annualPrice: 149,
+    description: 'Arquitectura dedicada de alta disponibilidad para cadenas gastronómicas con múltiples sucursales.',
+    infra: 'AWS / Azure Dedicado + Balanceador',
+    popular: false,
+    features: [
+      'Todo lo del Plan Pro + Múltiples sucursales y almacenes',
+      'Gestor de Planos de Salón con visión artificial (YOLO IA)',
+      'Predicción inteligente de demanda y lotes de compra (PDF/Excel)',
+      'Auditoría completa de actividades (RBAC para 6 roles operativos)',
+      'Acuerdo de Nivel de Servicio (SLA 99.9%) y soporte técnico 24/7',
+    ],
+  },
+];
+
+const saasContactForm = ref({
+  restaurant_name: '',
+  contact_name: '',
+  contact_email: '',
+  contact_phone: '',
+  selected_plan: 'Plan Steakhouse Pro ($99 USD/mes)',
+  cloud_provider: 'Amazon Web Services (AWS)',
+  branches_count: 1,
+  message: '',
+});
+
+function openSaasModal(plan = null) {
+  if (plan) {
+    const price = billingCycle.value === 'monthly' ? plan.monthlyPrice : plan.annualPrice;
+    saasContactForm.value.selected_plan = `${plan.name} ($${price} USD/mes - ${billingCycle.value === 'monthly' ? 'Mensual' : 'Anual'})`;
+    saasContactForm.value.cloud_provider = plan.infra;
+  }
+  saasModalOpen.value = true;
+}
+
+function submitSaasContact() {
+  if (!saasContactForm.value.restaurant_name.trim() || !saasContactForm.value.contact_name.trim() || !saasContactForm.value.contact_phone.trim()) {
+    toast.add({
+      severity: 'warn',
+      summary: 'Datos requeridos',
+      detail: 'Por favor completa el nombre del restaurante, persona de contacto y teléfono.',
+      life: 3500,
+    });
+    return;
+  }
+
+  const targetRestaurant = saasContactForm.value.restaurant_name;
+  const targetPlan = saasContactForm.value.selected_plan;
+  saasModalOpen.value = false;
+
+  toast.add({
+    severity: 'success',
+    summary: '¡Solicitud de Licencia SaaS Recibida!',
+    detail: `BrazasTech S.R.L. registró la solicitud de "${targetRestaurant}" para el ${targetPlan}. Un especialista comercial te contactará en breve.`,
+    life: 5500,
+  });
+
+  saasContactForm.value = {
+    restaurant_name: '',
+    contact_name: '',
+    contact_email: '',
+    contact_phone: '',
+    selected_plan: 'Plan Steakhouse Pro ($99 USD/mes)',
+    cloud_provider: 'Amazon Web Services (AWS)',
+    branches_count: 1,
+    message: '',
+  };
+}
 
 const filteredDishes = computed(() => {
   if (selectedCategory.value === 'all') return props.dishes;
@@ -258,6 +369,7 @@ function submitTestimonial() {
           <a href="#tecnologia" class="whitespace-nowrap hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Fortalezas</a>
           <a href="#experiencia" class="whitespace-nowrap hover:text-orange-600 dark:hover:text-orange-400 transition-colors">La Experiencia</a>
           <a href="#testimonios" class="whitespace-nowrap hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Testimonios</a>
+          <a href="#modelo-saas" class="whitespace-nowrap px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold hover:bg-orange-500/20 transition-colors">Modelo SaaS</a>
           <a href="#contacto" class="whitespace-nowrap hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Contacto</a>
         </nav>
 
@@ -811,6 +923,235 @@ function submitTestimonial() {
       </div>
     </section>
 
+    <!-- ═══════════════════════════════════════════════════════════════════════════
+         SECTOR MODELO SaaS (SOFTWARE AS A SERVICE) & CONTACTO COMERCIAL B2B
+         ═══════════════════════════════════════════════════════════════════════════ -->
+    <section id="modelo-saas" class="bg-slate-100/90 dark:bg-slate-900/60 border-t border-slate-200 dark:border-slate-800/80 py-24 px-6 transition-colors duration-200">
+      <div class="max-w-7xl mx-auto space-y-16">
+        <!-- Encabezado y Selector de Ciclo de Facturación -->
+        <div class="text-center max-w-3xl mx-auto space-y-4">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-600 dark:text-orange-400 text-xs font-bold uppercase tracking-widest">
+            <Cpu class="w-4 h-4" /> BrazasTech Cloud SaaS • Licenciamiento B2B
+          </div>
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white">
+            Modelo <span class="bg-gradient-to-r from-orange-600 to-amber-500 dark:from-orange-400 dark:to-amber-300 bg-clip-text text-transparent">SaaS</span> para Restaurantes & Parrillas
+          </h2>
+          <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base leading-relaxed">
+            Impulsado por <strong>BrazasTech Soluciones de Software S.R.L.</strong> (registrado ante SEPREC y SENAPI). Digitaliza tu restaurante con nuestro ecosistema en la nube (POS, Monitor KDS, Inventario por Receta, IA y App Móvil en Google Play Store) mediante suscripción mensual o anual todo incluido.
+          </p>
+
+          <!-- Toggle Mensual / Anual -->
+          <div class="inline-flex items-center p-1.5 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm mt-2">
+            <button
+              type="button"
+              @click="billingCycle = 'monthly'"
+              :class="[
+                'px-5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer',
+                billingCycle === 'monthly'
+                  ? 'bg-orange-600 text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              ]"
+            >
+              Suscripción Mensual
+            </button>
+            <button
+              type="button"
+              @click="billingCycle = 'annual'"
+              :class="[
+                'px-5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2',
+                billingCycle === 'annual'
+                  ? 'bg-orange-600 text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              ]"
+            >
+              <span>Suscripción Anual</span>
+              <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-[10px] font-extrabold">
+                -20% Ahorro
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tarjetas de Planes SaaS -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+          <div
+            v-for="plan in saasPlans"
+            :key="plan.id"
+            :class="[
+              'relative rounded-3xl p-8 flex flex-col justify-between transition-all duration-300',
+              plan.popular
+                ? 'bg-white dark:bg-slate-900 border-2 border-orange-500 shadow-2xl shadow-orange-500/10 lg:-translate-y-2'
+                : 'bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-orange-500/40 shadow-sm hover:shadow-xl'
+            ]"
+          >
+            <div class="space-y-6">
+              <div class="flex items-center justify-between gap-2">
+                <span
+                  :class="[
+                    'px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border',
+                    plan.popular
+                      ? 'bg-orange-500 text-white border-orange-500'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                  ]"
+                >
+                  {{ plan.badge }}
+                </span>
+                <span class="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                  Licencia SaaS
+                </span>
+              </div>
+
+              <div>
+                <h3 class="text-2xl font-black text-slate-900 dark:text-white">{{ plan.name }}</h3>
+                <p class="text-xs text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
+                  {{ plan.description }}
+                </p>
+              </div>
+
+              <div class="py-4 border-y border-slate-200 dark:border-slate-800">
+                <div class="flex items-baseline gap-1.5">
+                  <span class="text-4xl font-black text-slate-900 dark:text-white">
+                    ${{ billingCycle === 'monthly' ? plan.monthlyPrice : plan.annualPrice }}
+                  </span>
+                  <span class="text-xs font-bold text-slate-500 dark:text-slate-400">
+                    USD / mes
+                  </span>
+                </div>
+                <p class="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-1">
+                  Infraestructura incluida: {{ plan.infra }}
+                </p>
+              </div>
+
+              <ul class="space-y-3">
+                <li
+                  v-for="(feat, idx) in plan.features"
+                  :key="idx"
+                  class="flex items-start gap-2.5 text-xs text-slate-700 dark:text-slate-300"
+                >
+                  <CheckCircle2 class="w-4 h-4 text-orange-500 dark:text-orange-400 shrink-0 mt-0.5" />
+                  <span>{{ feat }}</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="pt-8 mt-6">
+              <Button
+                :label="plan.popular ? 'Contratar / Solicitar Demo Pro' : 'Solicitar este Plan SaaS'"
+                icon="pi pi-send"
+                :class="[
+                  'w-full font-bold rounded-xl py-3 text-xs border-none transition-all',
+                  plan.popular
+                    ? '!bg-gradient-to-r !from-orange-600 !to-amber-500 !text-white shadow-lg shadow-orange-600/25 hover:scale-[1.01]'
+                    : '!bg-slate-900 dark:!bg-slate-800 !text-white hover:!bg-orange-600'
+                ]"
+                @click="openSaasModal(plan)"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloque Directo de Contacto Comercial B2B y Garantías Legales SaaS -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 sm:p-10 shadow-lg grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          <!-- Información de Licenciamiento, Cloud y Marco Legal -->
+          <div class="lg:col-span-5 space-y-6">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
+              <ShieldCheck class="w-4 h-4" /> Respaldo Legal & Tecnológico en Bolivia
+            </div>
+            <h3 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white leading-tight">
+              Contacto Comercial & Cotización de Licencia SaaS
+            </h3>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              ¿Deseas implementar <strong>BrazasTech POS, KDS & Mobile</strong> en tu restaurante o cadena gastronómica? Déjanos tus datos y nuestro equipo de ingeniería te configurará un entorno en la nube listo para operar.
+            </p>
+
+            <div class="space-y-3 pt-2 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-300">
+              <div class="flex items-start gap-3">
+                <Award class="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
+                <div>
+                  <strong class="text-slate-900 dark:text-white">Propiedad Intelectual y Facturación SIAT:</strong>
+                  <p class="text-slate-500 dark:text-slate-400">Software registrado ante el SENAPI por BrazasTech S.R.L. Emisión de factura comercial electrónica en línea (SIN).</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3">
+                <Cpu class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                <div>
+                  <strong class="text-slate-900 dark:text-white">Despliegue Multi-Cloud & Open Source OSI:</strong>
+                  <p class="text-slate-500 dark:text-slate-400">Compatible con AWS (EC2/RDS/S3), Microsoft Azure y Google Cloud Run, construido sobre tecnologías con licencias OSI (MIT / BSD-3).</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3">
+                <Smartphone class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                <div>
+                  <strong class="text-slate-900 dark:text-white">Publicación Móvil Oficial:</strong>
+                  <p class="text-slate-500 dark:text-slate-400">Incluye despliegue de la App Móvil en Google Play Store verificada con Google Play Protect y protegida con Laravel Sanctum.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Formulario Directo de Contacto para Modelo SaaS -->
+          <div class="lg:col-span-7 bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8">
+            <form @submit.prevent="submitSaasContact" class="space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Nombre del Restaurante / Empresa *</label>
+                  <InputText v-model="saasContactForm.restaurant_name" class="w-full" placeholder="Ej: Parrilla El Gaucho S.R.L." required />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Persona de Contacto / Cargo *</label>
+                  <InputText v-model="saasContactForm.contact_name" class="w-full" placeholder="Ej: Ing. Roberto Céspedes (Gerente)" required />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Teléfono / WhatsApp *</label>
+                  <InputText v-model="saasContactForm.contact_phone" class="w-full" placeholder="+591 700-12345" required />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Correo Corporativo</label>
+                  <InputText type="email" v-model="saasContactForm.contact_email" class="w-full" placeholder="gerencia@restaurante.bo" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="sm:col-span-2">
+                  <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Plan de Licencia SaaS</label>
+                  <InputText v-model="saasContactForm.selected_plan" class="w-full" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">N° de Sucursales</label>
+                  <InputNumber v-model="saasContactForm.branches_count" :min="1" :max="50" class="w-full" />
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Infraestructura Cloud Preferida / Requerimientos</label>
+                <Textarea
+                  v-model="saasContactForm.message"
+                  rows="2"
+                  class="w-full"
+                  placeholder="Indica cantidad de mesas, si requieres migración de datos o despliegue en AWS / Azure / Google Cloud..."
+                />
+              </div>
+
+              <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+                <span class="text-[11px] text-slate-500 dark:text-slate-400">
+                  Al enviar aceptas nuestros <Link href="/terms" class="text-orange-600 dark:text-orange-400 underline">Términos y Políticas de Privacidad</Link>.
+                </span>
+                <Button
+                  type="submit"
+                  label="Solicitar Demo & Cotización SaaS"
+                  icon="pi pi-check-circle"
+                  class="!bg-gradient-to-r !from-orange-600 !to-amber-500 !border-none !text-white font-bold rounded-xl px-6 py-3 text-xs shadow-lg shadow-orange-600/25 w-full sm:w-auto"
+                />
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Footer Section -->
     <footer id="contacto" class="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800/80 py-16 px-6 transition-colors duration-200">
       <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
@@ -972,6 +1313,58 @@ function submitTestimonial() {
         <div class="flex justify-end gap-2 pt-4">
           <Button type="button" label="Cancelar" severity="secondary" text @click="testimonialModalOpen = false" />
           <Button type="submit" label="Publicar Testimonio" severity="warn" class="bg-orange-600 border-none font-semibold text-white" />
+        </div>
+      </form>
+    </Dialog>
+
+    <!-- SaaS License / Demo Request Modal -->
+    <Dialog v-model:visible="saasModalOpen" header="Contratar Licencia SaaS / Solicitar Demo — BrazasTech S.R.L." modal class="w-full max-w-lg">
+      <form @submit.prevent="submitSaasContact" class="space-y-4 pt-2">
+        <div class="p-3.5 rounded-xl bg-orange-500/10 border border-orange-500/30 text-xs text-slate-700 dark:text-slate-200 flex items-center justify-between gap-2">
+          <div>
+            <span class="block text-[10px] uppercase font-bold text-orange-600 dark:text-orange-400">Plan Seleccionado</span>
+            <strong class="text-sm">{{ saasContactForm.selected_plan }}</strong>
+          </div>
+          <span class="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold">
+            {{ saasContactForm.cloud_provider }}
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Nombre del Restaurante / Empresa *</label>
+            <InputText v-model="saasContactForm.restaurant_name" class="w-full" placeholder="Ej: Asador Santa Cruz S.R.L." required />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Persona de Contacto *</label>
+            <InputText v-model="saasContactForm.contact_name" class="w-full" placeholder="Ej: Carlos Justiniano" required />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Teléfono / WhatsApp *</label>
+            <InputText v-model="saasContactForm.contact_phone" class="w-full" placeholder="+591 700-12345" required />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Correo Corporativo</label>
+            <InputText type="email" v-model="saasContactForm.contact_email" class="w-full" placeholder="gerencia@restaurante.bo" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Comentarios o Requerimientos de Despliegue</label>
+          <Textarea
+            v-model="saasContactForm.message"
+            rows="2"
+            class="w-full"
+            placeholder="Indica número de mesas, terminales POS requeridas o preferencia de nube (AWS / Azure / GCP)..."
+          />
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3">
+          <Button type="button" label="Cancelar" severity="secondary" text @click="saasModalOpen = false" />
+          <Button type="submit" label="Enviar Solicitud de Licencia SaaS" severity="warn" class="!bg-orange-600 !border-none font-semibold !text-white" />
         </div>
       </form>
     </Dialog>
