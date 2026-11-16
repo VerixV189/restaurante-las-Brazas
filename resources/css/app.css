@@ -14,16 +14,9 @@
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
-/* Ocultar badge de marca de agua de PrimeUI */
-body > div[style*="position: fixed"],
-body > div[style*="z-index: 99999"],
-a[href*="primevue"],
-.p-license-badge,
-[class*="license"] {
+/* Ocultar únicamente badges de licencia si existieran, sin afectar modales (p-dialog-mask) ni toasts (p-toast) */
+.p-license-badge {
     display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
 }
 
 /* ========================================================
