@@ -85,7 +85,7 @@ const saasPlans = [
     monthlyPrice: 99,
     annualPrice: 79,
     description: 'Ecosistema omnicanal completo con App Móvil Flutter, Monitor KDS de Cocina e Inteligencia Artificial.',
-    infra: 'AWS EC2 (t3.small) + RDS MySQL + S3',
+    infra: 'AWS EC2 (c7i-flex.large) + RDS + S3',
     popular: true,
     features: [
       'Todo lo del Plan Starter + Mesas y Zonas ilimitadas',
