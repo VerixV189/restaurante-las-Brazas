@@ -193,47 +193,47 @@ function confirmDelete(supplier) {
     >
       <form @submit.prevent="submitForm" class="space-y-4 pt-2">
         <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Nombre de la Empresa *</label>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Nombre de la Empresa *</label>
           <InputText
             v-model="form.company_name"
-            class="w-full bg-slate-800 border-slate-700 text-slate-100"
+            class="w-full"
             placeholder="Ej: Carnes & Cortes del Norte S.A."
             required
           />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Nombre de Contacto / Vendedor</label>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Nombre de Contacto / Vendedor</label>
           <InputText
             v-model="form.contact_name"
-            class="w-full bg-slate-800 border-slate-700 text-slate-100"
+            class="w-full"
             placeholder="Ej: Juan Pérez"
           />
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Teléfono</label>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Teléfono</label>
             <InputText
               v-model="form.phone"
-              class="w-full bg-slate-800 border-slate-700 text-slate-100"
+              class="w-full"
               placeholder="555-1234"
             />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Correo</label>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Correo</label>
             <InputText
               v-model="form.email"
               type="email"
-              class="w-full bg-slate-800 border-slate-700 text-slate-100"
+              class="w-full"
               placeholder="ventas@proveedor.com"
             />
           </div>
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Dirección / Notas</label>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Dirección / Notas</label>
           <Textarea
             v-model="form.address"
             rows="2"
-            class="w-full bg-slate-800 border-slate-700 text-slate-100 text-sm"
+            class="w-full text-sm"
             placeholder="Dirección física o condiciones de entrega..."
           />
         </div>
@@ -242,7 +242,7 @@ function confirmDelete(supplier) {
           <Button
             type="submit"
             :label="isEditing ? 'Actualizar' : 'Guardar'"
-            class="bg-orange-600 border-none hover:bg-orange-500"
+            class="bg-orange-600 border-none hover:bg-orange-500 text-white"
             :loading="form.processing"
           />
         </div>
@@ -257,25 +257,25 @@ function confirmDelete(supplier) {
       class="w-full max-w-lg"
     >
       <div v-if="selectedSupplier" class="space-y-4 pt-2">
-        <div class="p-4 bg-slate-800/50 rounded-xl border border-slate-700/50">
-          <h3 class="text-lg font-bold text-slate-100">{{ selectedSupplier.company_name }}</h3>
-          <p class="text-xs text-slate-400">Contacto: {{ selectedSupplier.contact_name || 'N/A' }} | Tel: {{ selectedSupplier.phone || 'N/A' }}</p>
-          <p v-if="selectedSupplier.address" class="text-xs text-slate-400 mt-1">📍 {{ selectedSupplier.address }}</p>
+        <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700/50">
+          <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">{{ selectedSupplier.company_name }}</h3>
+          <p class="text-xs text-slate-600 dark:text-slate-400">Contacto: {{ selectedSupplier.contact_name || 'N/A' }} | Tel: {{ selectedSupplier.phone || 'N/A' }}</p>
+          <p v-if="selectedSupplier.address" class="text-xs text-slate-600 dark:text-slate-400 mt-1">📍 {{ selectedSupplier.address }}</p>
         </div>
 
         <div>
-          <h4 class="text-xs font-bold uppercase text-slate-400 mb-2">Insumos en Inventario</h4>
+          <h4 class="text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-2">Insumos en Inventario</h4>
           <div v-if="selectedSupplier.ingredients && selectedSupplier.ingredients.length > 0" class="space-y-1.5 max-h-56 overflow-y-auto pr-1">
             <div
               v-for="ing in selectedSupplier.ingredients"
               :key="ing.id"
-              class="flex items-center justify-between p-2 rounded-lg bg-slate-800/40 text-xs"
+              class="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-transparent text-xs"
             >
               <div>
-                <span class="text-slate-200 font-medium">{{ ing.name }}</span>
-                <span class="text-[10px] text-slate-400 ml-2">Stock: {{ parseFloat(ing.current_stock) }} {{ ing.unit_of_measure }}</span>
+                <span class="text-slate-800 dark:text-slate-200 font-medium">{{ ing.name }}</span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400 ml-2">Stock: {{ parseFloat(ing.current_stock) }} {{ ing.unit_of_measure }}</span>
               </div>
-              <span class="font-semibold text-emerald-400">${{ parseFloat(ing.cost_per_unit).toFixed(2) }} / {{ ing.unit_of_measure }}</span>
+              <span class="font-semibold text-emerald-600 dark:text-emerald-400">${{ parseFloat(ing.cost_per_unit).toFixed(2) }} / {{ ing.unit_of_measure }}</span>
             </div>
           </div>
           <div v-else class="text-xs text-slate-500 italic py-2">

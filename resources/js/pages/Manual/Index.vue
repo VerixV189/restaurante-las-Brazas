@@ -561,14 +561,14 @@ onBeforeUnmount(() => {
                 :href="pdfUrl"
                 target="_blank"
                 rel="noopener"
-                class="inline-flex items-center justify-center gap-1.5 w-full py-2 px-3 rounded-xl text-xs font-bold bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:opacity-90 transition-opacity"
+                class="inline-flex items-center justify-center gap-1.5 w-full py-2 px-3 rounded-xl text-xs font-bold bg-orange-600 hover:bg-orange-500 text-white shadow-sm transition-colors"
               >
                 <ExternalLink class="w-3.5 h-3.5" /> Abrir PDF en Navegador
               </a>
               <a
                 :href="pdfDownloadUrl"
                 download="Manual_Usuario_Completo_Las_Brazas.pdf"
-                class="inline-flex items-center justify-center gap-1.5 w-full py-2 px-3 rounded-xl text-xs font-semibold border border-orange-500/30 text-orange-700 dark:text-orange-300 hover:bg-orange-500/10 transition-colors"
+                class="inline-flex items-center justify-center gap-1.5 w-full py-2 px-3 rounded-xl text-xs font-semibold bg-white dark:bg-slate-900 border border-orange-500/30 text-orange-700 dark:text-orange-300 hover:bg-orange-500/10 transition-colors"
               >
                 <Download class="w-3.5 h-3.5" /> Descargar Archivo PDF
               </a>
@@ -584,17 +584,17 @@ onBeforeUnmount(() => {
           id="introduccion"
           class="scroll-mt-24 rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
         >
-          <div class="relative bg-gradient-to-br from-slate-950 via-slate-900 to-orange-950 text-white p-7 sm:p-10">
-            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(249,115,22,0.22),transparent_55%)] pointer-events-none"></div>
+          <div class="relative bg-gradient-to-br from-orange-50 via-amber-50/60 to-white dark:from-slate-950 dark:via-slate-900 dark:to-orange-950 text-slate-900 dark:text-white p-7 sm:p-10 border-b border-orange-200/70 dark:border-transparent">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(249,115,22,0.14),transparent_55%)] dark:bg-[radial-gradient(circle_at_top_right,rgba(249,115,22,0.22),transparent_55%)] pointer-events-none"></div>
             <div class="relative z-10 max-w-3xl space-y-4">
-              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/20 border border-orange-400/30 text-orange-300 text-xs font-bold">
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 dark:bg-orange-500/20 border border-orange-500/30 dark:border-orange-400/30 text-orange-700 dark:text-orange-300 text-xs font-bold">
                 <Flame class="w-3.5 h-3.5" />
                 RESTAURANTE LAS BRAZAS · GUÍA OFICIAL DEL SISTEMA v{{ appVersion }}
               </div>
               <h1 class="text-2xl sm:text-4xl font-black tracking-tight leading-tight">
                 Manual de Usuario Web e Interactivo
               </h1>
-              <p class="text-sm sm:text-base text-slate-300 leading-relaxed">
+              <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
                 Centro de ayuda oficial del ecosistema gastronómico <strong>Las Brazas Steakhouse</strong>: cubre los 6 perfiles operativos, Punto de Venta POS, Monitor de Cocina en tiempo real, Entregas con confirmación PIN + Firma, Planos Inteligentes de Salón, Chef Virtual IA y Aplicación Móvil.
               </p>
 
@@ -603,7 +603,7 @@ onBeforeUnmount(() => {
                   v-if="pdfAvailable"
                   :href="pdfDownloadUrl"
                   download="Manual_Usuario_Completo_Las_Brazas.pdf"
-                  class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-orange-600 hover:bg-orange-500 text-white shadow-lg shadow-orange-600/30 transition-all"
+                  class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-orange-600 hover:bg-orange-500 text-white shadow-lg shadow-orange-600/25 transition-all"
                 >
                   <Download class="w-4 h-4" />
                   Descargar Manual Completo (.PDF)
@@ -611,7 +611,7 @@ onBeforeUnmount(() => {
                 <button
                   type="button"
                   @click="scrollToSection('roles-permisos')"
-                  class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-white/10 hover:bg-white/20 text-white border border-white/15 transition-all"
+                  class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 dark:bg-white/10 dark:hover:bg-white/20 dark:text-white dark:border-white/15 transition-all"
                 >
                   <Compass class="w-4 h-4" />
                   Explorar por Perfil (6)
@@ -658,8 +658,8 @@ onBeforeUnmount(() => {
         </section>
 
         <!-- PARTE 1 DIVIDER BANNER -->
-        <div class="flex items-center gap-3 px-4 py-3 rounded-2xl bg-slate-900 dark:bg-slate-800 text-white">
-          <span class="px-2.5 py-1 rounded-lg bg-orange-600 text-[11px] font-black uppercase tracking-wider">Parte 1</span>
+        <div class="flex items-center gap-3 px-4 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700">
+          <span class="px-2.5 py-1 rounded-lg bg-orange-600 text-white text-[11px] font-black uppercase tracking-wider">Parte 1</span>
           <span class="text-sm font-bold">Manual Operativo — Perfiles, Permisos, Guías de Uso y Estados</span>
         </div>
 
@@ -895,77 +895,77 @@ onBeforeUnmount(() => {
             <div class="p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               <!-- Visual Diagram -->
               <div class="lg:col-span-7">
-                <div v-if="activeVisualClientTab === 'desktop'" class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-950 text-slate-100 p-4 space-y-4">
-                  <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div v-if="activeVisualClientTab === 'desktop'" class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-100/80 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-4 space-y-4">
+                  <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
                     <div class="flex items-center gap-2 text-xs font-bold">
                       <span class="w-5 h-5 rounded-full bg-orange-600 text-white text-[10px] inline-flex items-center justify-center">①</span>
                       <span>Pestañas del Cliente:</span>
                     </div>
                     <div class="flex flex-wrap gap-1.5 text-[10px] font-semibold">
                       <span class="px-2 py-0.5 rounded bg-orange-600 text-white">Carta</span>
-                      <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300">Carrito</span>
-                      <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300">Pedidos</span>
-                      <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300">Promos</span>
-                      <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300">Reservas</span>
-                      <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300">Chef IA</span>
+                      <span class="px-2 py-0.5 rounded bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-transparent">Carrito</span>
+                      <span class="px-2 py-0.5 rounded bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-transparent">Pedidos</span>
+                      <span class="px-2 py-0.5 rounded bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-transparent">Promos</span>
+                      <span class="px-2 py-0.5 rounded bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-transparent">Reservas</span>
+                      <span class="px-2 py-0.5 rounded bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-transparent">Chef IA</span>
                     </div>
                   </div>
-                  <div class="grid grid-cols-2 gap-3">
-                    <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2 shadow-2xs">
                       <div class="flex justify-between items-center text-xs font-bold">
                         <span>Bife de Chorizo 400g</span>
                         <span class="w-5 h-5 rounded-full bg-orange-600 text-white text-[10px] inline-flex items-center justify-center">②</span>
                       </div>
-                      <p class="text-[10px] text-slate-400">Corte premium a las brazas + guarnición</p>
+                      <p class="text-[10px] text-slate-500 dark:text-slate-400">Corte premium a las brazas + guarnición</p>
                       <div class="flex items-center justify-between pt-1">
-                        <span class="text-xs font-black text-amber-400">Bs. 115</span>
-                        <span class="px-2 py-0.5 rounded bg-orange-600 text-[10px] font-bold">+ Agregar</span>
+                        <span class="text-xs font-black text-orange-600 dark:text-amber-400">Bs. 115</span>
+                        <span class="px-2 py-0.5 rounded bg-orange-600 text-white text-[10px] font-bold">+ Agregar</span>
                       </div>
                     </div>
-                    <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+                    <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2 shadow-2xs">
                       <div class="flex justify-between items-center text-xs font-bold">
                         <span>Parrillada Las Brazas</span>
                         <span class="w-5 h-5 rounded-full bg-emerald-600 text-white text-[10px] inline-flex items-center justify-center">③</span>
                       </div>
-                      <p class="text-[10px] text-slate-400">Aplica cupón BRAZAS15 (-15%)</p>
+                      <p class="text-[10px] text-slate-500 dark:text-slate-400">Aplica cupón BRAZAS15 (-15%)</p>
                       <div class="flex items-center justify-between pt-1">
-                        <span class="text-xs font-black text-amber-400">Bs. 240</span>
-                        <span class="px-2 py-0.5 rounded bg-emerald-600 text-[10px] font-bold">Confirmar</span>
+                        <span class="text-xs font-black text-orange-600 dark:text-amber-400">Bs. 240</span>
+                        <span class="px-2 py-0.5 rounded bg-emerald-600 text-white text-[10px] font-bold">Confirmar</span>
                       </div>
                     </div>
                   </div>
-                  <div class="p-3 rounded-xl bg-slate-900 border border-orange-500/30 flex items-center justify-between text-xs">
+                  <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-orange-500/30 flex items-center justify-between text-xs shadow-2xs">
                     <span class="flex items-center gap-2">
                       <span class="w-5 h-5 rounded-full bg-sky-600 text-white text-[10px] inline-flex items-center justify-center">④</span>
-                      Seguimiento Pedido #1042: <strong>En Cocina</strong> · PIN Entrega: <strong class="text-amber-400">4829</strong>
+                      Seguimiento Pedido #1042: <strong>En Cocina</strong> · PIN Entrega: <strong class="text-orange-600 dark:text-amber-400">4829</strong>
                     </span>
-                    <span class="px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 text-[10px] font-bold">En vivo</span>
+                    <span class="px-2 py-0.5 rounded bg-sky-500/15 text-sky-700 dark:text-sky-300 text-[10px] font-bold">En vivo</span>
                   </div>
                 </div>
 
                 <!-- Mobile Mockup -->
-                <div v-else class="max-w-xs mx-auto rounded-[2rem] border-4 border-slate-800 bg-slate-950 text-white p-4 space-y-3 shadow-xl">
-                  <div class="w-16 h-1.5 rounded-full bg-slate-800 mx-auto"></div>
+                <div v-else class="max-w-xs mx-auto rounded-[2rem] border-4 border-slate-300 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-white p-4 space-y-3 shadow-lg">
+                  <div class="w-16 h-1.5 rounded-full bg-slate-300 dark:bg-slate-800 mx-auto"></div>
                   <div class="flex items-center justify-between text-xs">
-                    <span class="font-black text-orange-400">Las Brazas App</span>
-                    <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px]">En línea</span>
+                    <span class="font-black text-orange-600 dark:text-orange-400">Las Brazas App</span>
+                    <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold">En línea</span>
                   </div>
-                  <div class="p-3 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-500 text-xs space-y-1">
+                  <div class="p-3 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-500 text-white text-xs space-y-1">
                     <div class="font-bold flex items-center justify-between">
                       <span>Estado de tu Pedido #1042</span>
-                      <span class="w-5 h-5 rounded-full bg-slate-950 text-white text-[10px] inline-flex items-center justify-center">①</span>
+                      <span class="w-5 h-5 rounded-full bg-white text-orange-600 text-[10px] inline-flex items-center justify-center font-black">①</span>
                     </div>
-                    <p class="text-[11px] opacity-90">En camino con Repartidor · Tu PIN: <strong>4829</strong></p>
+                    <p class="text-[11px] opacity-95">En camino con Repartidor · Tu PIN: <strong>4829</strong></p>
                   </div>
-                  <div class="p-3 rounded-2xl bg-slate-900 border border-slate-800 text-[11px] space-y-1.5">
+                  <div class="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px] space-y-1.5">
                     <div class="font-bold flex justify-between">
                       <span>② Dirección & Facturación NIT/CI</span>
                     </div>
-                    <p class="text-slate-400">Av. Las Brazas #120 · NIT: 4589120</p>
+                    <p class="text-slate-500 dark:text-slate-400">Av. Las Brazas #120 · NIT: 4589120</p>
                   </div>
-                  <div class="p-3 rounded-2xl bg-slate-900 border border-slate-800 text-[11px] space-y-1.5">
+                  <div class="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px] space-y-1.5">
                     <div class="font-bold">③ Asistente Chef Virtual IA</div>
-                    <p class="text-slate-400">"¿Qué corte recomiendan para 4 personas?"</p>
+                    <p class="text-slate-500 dark:text-slate-400">"¿Qué corte recomiendan para 4 personas?"</p>
                   </div>
                 </div>
               </div>
@@ -1020,37 +1020,37 @@ onBeforeUnmount(() => {
 
           <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start shadow-sm">
             <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-950 text-white p-4 space-y-3">
-                <div class="text-xs font-bold text-orange-400 flex items-center justify-between">
+              <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-100/80 dark:bg-slate-950 text-slate-900 dark:text-white p-4 space-y-3">
+                <div class="text-xs font-bold text-orange-600 dark:text-orange-400 flex items-center justify-between">
                   <span>Punto de Venta POS</span>
-                  <span class="px-2 py-0.5 rounded bg-orange-500/20 text-[10px]">① Selector Mesa</span>
+                  <span class="px-2 py-0.5 rounded bg-orange-500/15 text-[10px]">① Selector Mesa</span>
                 </div>
                 <div class="grid grid-cols-3 gap-2 text-center text-[11px] font-bold">
-                  <div class="p-2 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300">M1 Libre</div>
-                  <div class="p-2 rounded-lg bg-rose-500/20 border border-rose-500/40 text-rose-300">M2 Ocup.</div>
-                  <div class="p-2 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300">M3 Res.</div>
+                  <div class="p-2 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300">M1 Libre</div>
+                  <div class="p-2 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-700 dark:text-rose-300">M2 Ocup.</div>
+                  <div class="p-2 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-300">M3 Res.</div>
                 </div>
-                <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-[11px] space-y-1">
-                  <div class="font-bold text-slate-200">② Modalidad Comanda</div>
-                  <div class="flex gap-1.5 text-[10px]">
-                    <span class="px-2 py-0.5 rounded bg-orange-600">En Local</span>
-                    <span class="px-2 py-0.5 rounded bg-slate-800">Para Llevar</span>
-                    <span class="px-2 py-0.5 rounded bg-slate-800">Delivery</span>
+                <div class="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px] space-y-1">
+                  <div class="font-bold text-slate-700 dark:text-slate-200">② Modalidad Comanda</div>
+                  <div class="flex flex-wrap gap-1.5 text-[10px]">
+                    <span class="px-2 py-0.5 rounded bg-orange-600 text-white">En Local</span>
+                    <span class="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Para Llevar</span>
+                    <span class="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Delivery</span>
                   </div>
                 </div>
               </div>
 
-              <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-950 text-white p-4 space-y-3">
-                <div class="text-xs font-bold text-sky-400 flex items-center justify-between">
+              <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-100/80 dark:bg-slate-950 text-slate-900 dark:text-white p-4 space-y-3">
+                <div class="text-xs font-bold text-sky-600 dark:text-sky-400 flex items-center justify-between">
                   <span>Planos Inteligentes</span>
-                  <span class="px-2 py-0.5 rounded bg-sky-500/20 text-[10px]">③ Detección IA</span>
+                  <span class="px-2 py-0.5 rounded bg-sky-500/15 text-[10px]">③ Detección IA</span>
                 </div>
-                <div class="h-24 rounded-xl border border-dashed border-sky-500/40 bg-slate-900 flex items-center justify-around p-2">
-                  <div class="w-10 h-10 rounded border-2 border-emerald-400 text-[9px] flex items-center justify-center font-bold text-emerald-300">Mesa 1</div>
-                  <div class="w-12 h-10 rounded border-2 border-sky-400 text-[9px] flex items-center justify-center font-bold text-sky-300">Mesa 2</div>
-                  <div class="w-10 h-10 rounded border-2 border-amber-400 text-[9px] flex items-center justify-center font-bold text-amber-300">Mesa 3</div>
+                <div class="h-24 rounded-xl border border-dashed border-sky-500/40 bg-white dark:bg-slate-900 flex items-center justify-around p-2">
+                  <div class="w-10 h-10 rounded border-2 border-emerald-500 dark:border-emerald-400 text-[9px] flex items-center justify-center font-bold text-emerald-700 dark:text-emerald-300">Mesa 1</div>
+                  <div class="w-12 h-10 rounded border-2 border-sky-500 dark:border-sky-400 text-[9px] flex items-center justify-center font-bold text-sky-700 dark:text-sky-300">Mesa 2</div>
+                  <div class="w-10 h-10 rounded border-2 border-amber-500 dark:border-amber-400 text-[9px] flex items-center justify-center font-bold text-amber-700 dark:text-amber-300">Mesa 3</div>
                 </div>
-                <div class="text-[10px] text-slate-400">④ Botón: <strong class="text-white">Sincronizar Mesas</strong> guarda ubicaciones y sillas.</div>
+                <div class="text-[10px] text-slate-600 dark:text-slate-400">④ Botón: <strong class="text-slate-900 dark:text-white">Sincronizar Mesas</strong> guarda ubicaciones y sillas.</div>
               </div>
             </div>
 
@@ -1120,48 +1120,48 @@ onBeforeUnmount(() => {
 
           <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start shadow-sm">
             <div class="lg:col-span-7">
-              <div v-if="activeVisualOpsTab === 'kds'" class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-950 text-white p-4 space-y-3">
-                <div class="flex items-center justify-between text-xs border-b border-slate-800 pb-2">
-                  <span class="font-bold text-amber-400">① Actualización cada 10s · Filtros: Todos / Delivery / Pendiente / En Cocina / Listo</span>
+              <div v-if="activeVisualOpsTab === 'kds'" class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-100/80 dark:bg-slate-950 text-slate-900 dark:text-white p-4 space-y-3">
+                <div class="flex items-center justify-between text-xs border-b border-slate-200 dark:border-slate-800 pb-2">
+                  <span class="font-bold text-amber-700 dark:text-amber-400">① Actualización cada 10s · Filtros: Todos / Delivery / Pendiente / En Cocina / Listo</span>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                  <div class="p-3 rounded-xl bg-slate-900 border-l-4 border-emerald-500 space-y-1.5">
+                  <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-l-emerald-500 space-y-1.5 shadow-2xs">
                     <div class="flex justify-between font-bold">
                       <span>Comanda #1045 · Mesa 4</span>
-                      <span class="text-emerald-400">② 06:40</span>
+                      <span class="text-emerald-600 dark:text-emerald-400">② 06:40</span>
                     </div>
-                    <p class="text-[11px] text-slate-400">2x Bife Ancho (Término Medio)</p>
-                    <span class="inline-block px-2 py-0.5 rounded bg-orange-600 text-[10px] font-bold">Marcar Listo</span>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">2x Bife Ancho (Término Medio)</p>
+                    <span class="inline-block px-2 py-0.5 rounded bg-orange-600 text-white text-[10px] font-bold">Marcar Listo</span>
                   </div>
-                  <div class="p-3 rounded-xl bg-slate-900 border-l-4 border-rose-500 space-y-1.5">
+                  <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-l-rose-500 space-y-1.5 shadow-2xs">
                     <div class="flex justify-between font-bold">
                       <span>Comanda #1039 · Delivery</span>
-                      <span class="text-rose-400">③ 21:15 ⚠️</span>
+                      <span class="text-rose-600 dark:text-rose-400">③ 21:15 ⚠️</span>
                     </div>
-                    <p class="text-[11px] text-slate-400">1x Parrillada Familiar + Chorizo</p>
-                    <span class="inline-block px-2 py-0.5 rounded bg-rose-600 text-[10px] font-bold">Despacho Urgente</span>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">1x Parrillada Familiar + Chorizo</p>
+                    <span class="inline-block px-2 py-0.5 rounded bg-rose-600 text-white text-[10px] font-bold">Despacho Urgente</span>
                   </div>
                 </div>
               </div>
 
-              <div v-else class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-950 text-white p-4 space-y-3">
-                <div class="flex items-center justify-between text-xs border-b border-slate-800 pb-2">
-                  <span class="font-bold text-violet-400">Confirmar Entrega Segura — Pedido #1042</span>
-                  <span class="text-[10px] px-2 py-0.5 rounded bg-violet-500/20 text-violet-300">En Camino</span>
+              <div v-else class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-100/80 dark:bg-slate-950 text-slate-900 dark:text-white p-4 space-y-3">
+                <div class="flex items-center justify-between text-xs border-b border-slate-200 dark:border-slate-800 pb-2">
+                  <span class="font-bold text-violet-700 dark:text-violet-400">Confirmar Entrega Segura — Pedido #1042</span>
+                  <span class="text-[10px] px-2 py-0.5 rounded bg-violet-500/15 text-violet-700 dark:text-violet-300 font-bold">En Camino</span>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                  <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
-                    <div class="font-bold text-slate-200">① PIN de Seguridad (4 dígitos)</div>
+                  <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2 shadow-2xs">
+                    <div class="font-bold text-slate-800 dark:text-slate-200">① PIN de Seguridad (4 dígitos)</div>
                     <div class="flex gap-2 justify-center py-1">
-                      <span class="w-8 h-9 rounded-lg bg-slate-800 border border-violet-500/50 flex items-center justify-center font-mono font-bold text-base">4</span>
-                      <span class="w-8 h-9 rounded-lg bg-slate-800 border border-violet-500/50 flex items-center justify-center font-mono font-bold text-base">8</span>
-                      <span class="w-8 h-9 rounded-lg bg-slate-800 border border-violet-500/50 flex items-center justify-center font-mono font-bold text-base">2</span>
-                      <span class="w-8 h-9 rounded-lg bg-slate-800 border border-violet-500/50 flex items-center justify-center font-mono font-bold text-base">9</span>
+                      <span class="w-8 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 border border-violet-500/40 flex items-center justify-center font-mono font-bold text-base">4</span>
+                      <span class="w-8 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 border border-violet-500/40 flex items-center justify-center font-mono font-bold text-base">8</span>
+                      <span class="w-8 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 border border-violet-500/40 flex items-center justify-center font-mono font-bold text-base">2</span>
+                      <span class="w-8 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 border border-violet-500/40 flex items-center justify-center font-mono font-bold text-base">9</span>
                     </div>
                   </div>
-                  <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
-                    <div class="font-bold text-slate-200">② Firma Digital en Pantalla</div>
-                    <div class="h-12 rounded-lg bg-white flex items-center justify-center text-slate-800 italic font-serif text-sm border border-dashed border-slate-400">
+                  <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2 shadow-2xs">
+                    <div class="font-bold text-slate-800 dark:text-slate-200">② Firma Digital en Pantalla</div>
+                    <div class="h-12 rounded-lg bg-slate-50 dark:bg-white flex items-center justify-center text-slate-800 italic font-serif text-sm border border-dashed border-slate-400">
                       C. Mendoza ✓
                     </div>
                   </div>
@@ -1212,24 +1212,24 @@ onBeforeUnmount(() => {
 
           <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 shadow-sm">
             <!-- Chatbot Box -->
-            <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-950 text-white p-5 space-y-3">
-              <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white p-5 space-y-3">
+              <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
                 <div class="flex items-center gap-2.5">
-                  <div class="w-8 h-8 rounded-xl bg-orange-600 flex items-center justify-center">
+                  <div class="w-8 h-8 rounded-xl bg-orange-600 text-white flex items-center justify-center">
                     <Sparkles class="w-4 h-4" />
                   </div>
                   <div>
                     <div class="text-xs font-extrabold">Chef Virtual Las Brazas</div>
-                    <div class="text-[10px] text-emerald-400">En línea · Atención a Comensales y Equipo</div>
+                    <div class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">En línea · Atención a Comensales y Equipo</div>
                   </div>
                 </div>
-                <span class="px-2 py-0.5 rounded bg-slate-800 text-[10px]">Asistente IA</span>
+                <span class="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-semibold">Asistente IA</span>
               </div>
               <div class="space-y-2 text-xs">
-                <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 shadow-2xs">
                   "¡Hola! Soy el Chef Virtual IA. Puedo sugerirte cortes a la parrilla, aplicar cupones al carrito o verificar disponibilidad de mesas en tiempo real."
                 </div>
-                <div class="p-2.5 rounded-xl bg-orange-600/20 border border-orange-500/30 text-orange-200 text-[11px]">
+                <div class="p-2.5 rounded-xl bg-orange-500/10 dark:bg-orange-600/20 border border-orange-500/30 text-orange-800 dark:text-orange-200 text-[11px]">
                   <strong>Funciones integradas:</strong> Dictado por micrófono, tarjetas rápidas para añadir platos al carrito y reserva instantánea desde el chat.
                 </div>
               </div>

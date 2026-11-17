@@ -18,12 +18,12 @@
     "dependencies": {
         "@inertiajs/vue3": "^3.6.1",
         "@lucide/vue": "^1.31.0",
-        "@primeuix/themes": "^3.0.0",
+        "@primeuix/themes": "2.0.3",
         "@primevue/themes": "^4.5.4",
         "chart.js": "^4.5.1",
         "lucide-vue-next": "^1.0.0",
-        "primeicons": "^8.0.2",
-        "primevue": "^5.0.1",
+        "primeicons": "7.0.0",
+        "primevue": "4.5.5",
         "vue": "^3.5.41"
     }
 }

@@ -14,15 +14,6 @@
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
-/* Ocultar únicamente el badge de marca de agua (z-index: 99999) sin afectar modales (p-dialog-mask) ni toasts (p-toast) */
-body > div[style*="z-index: 99999"]:not([class*="p-"]),
-.p-license-badge {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-}
-
 /* ========================================================
    ESTILOS GLOBAIS DE TABLAS PRIMEVUE (DARK & LIGHT MODE)
    ======================================================== */
@@ -426,4 +417,45 @@ html:not(.dark) .auth-card .p-inputtext:focus,
     border-color: #ea580c !important;
     box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.2) !important;
 }
+
+/* ========================================================
+   OVERLAYS Y SELECTORES PRIMEVUE (DARK & LIGHT MODE)
+   ======================================================== */
+html:not(.dark) .p-select-overlay,
+html:not(.dark) .p-datepicker-panel,
+html:not(.dark) .p-popover {
+    background-color: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12) !important;
+}
+
+html:not(.dark) .p-select-option {
+    color: #1e293b !important;
+}
+
+html:not(.dark) .p-select-option:not(.p-select-option-selected):hover,
+html:not(.dark) .p-select-option.p-focus {
+    background-color: #fff7ed !important;
+    color: #ea580c !important;
+}
+
+.dark .p-select-overlay,
+.dark .p-datepicker-panel,
+.dark .p-popover {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+.dark .p-select-option {
+    color: #e2e8f0 !important;
+}
+
+.dark .p-select-option:not(.p-select-option-selected):hover,
+.dark .p-select-option.p-focus {
+    background-color: #1e293b !important;
+    color: #fb923c !important;
+}
+
 

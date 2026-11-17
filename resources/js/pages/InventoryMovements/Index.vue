@@ -218,12 +218,12 @@ function formatDate(dateStr) {
           </Column>
           <Column header="Motivo / Detalle">
             <template #body="{ data }">
-              <span class="text-xs text-slate-300">{{ data.reason || 'Sin motivo especificado' }}</span>
+              <span class="text-xs text-slate-700 dark:text-slate-300">{{ data.reason || 'Sin motivo especificado' }}</span>
             </template>
           </Column>
           <Column header="Responsable">
             <template #body="{ data }">
-              <span class="text-xs text-slate-400">{{ data.user?.name || 'Sistema Automático' }}</span>
+              <span class="text-xs text-slate-500 dark:text-slate-400">{{ data.user?.name || 'Sistema Automático' }}</span>
             </template>
           </Column>
         </DataTable>
@@ -239,35 +239,35 @@ function formatDate(dateStr) {
     >
       <form @submit.prevent="submitForm" class="space-y-4 pt-2">
         <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Insumo / Ingrediente *</label>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Insumo / Ingrediente *</label>
           <Select
             v-model="form.ingredient_id"
             :options="ingredients"
             optionLabel="name"
             optionValue="id"
             placeholder="Selecciona el insumo"
-            class="w-full bg-slate-800 border-slate-700 text-slate-100"
+            class="w-full"
             required
           />
-          <div v-if="getSelectedIngredient()" class="text-xs text-slate-400 mt-1">
-            Stock actual: <strong class="text-slate-200">{{ parseFloat(getSelectedIngredient().current_stock) }} {{ getSelectedIngredient().unit_of_measure }}</strong>
+          <div v-if="getSelectedIngredient()" class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Stock actual: <strong class="text-slate-800 dark:text-slate-200">{{ parseFloat(getSelectedIngredient().current_stock) }} {{ getSelectedIngredient().unit_of_measure }}</strong>
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Tipo de Movimiento *</label>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Tipo de Movimiento *</label>
           <Select
             v-model="form.movement_type"
             :options="movementTypes"
             optionLabel="label"
             optionValue="value"
-            class="w-full bg-slate-800 border-slate-700 text-slate-100"
+            class="w-full"
             required
           />
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">
             {{ form.movement_type === 'adjustment' ? 'Nuevo Stock Real Físico *' : 'Cantidad a Registrar *' }}
           </label>
           <InputNumber
@@ -278,27 +278,27 @@ function formatDate(dateStr) {
             class="w-full"
             required
           />
-          <div v-if="getSelectedIngredient()" class="text-[11px] text-slate-400 mt-1">
+          <div v-if="getSelectedIngredient()" class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
             Unidad de medida: <strong>{{ getSelectedIngredient().unit_of_measure }}</strong>
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Motivo / Causa</label>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Motivo / Causa</label>
           <Textarea
             v-model="form.reason"
             rows="2"
-            class="w-full bg-slate-800 border-slate-700 text-slate-100 text-sm"
+            class="w-full text-sm"
             placeholder="Ej: Caducado en cámara frigorífica, Compra factura #1042..."
           />
         </div>
 
-        <div class="flex justify-end gap-2 pt-4 border-t border-slate-800">
+        <div class="flex justify-end gap-2 pt-4 border-t border-slate-200 dark:border-slate-800">
           <Button type="button" label="Cancelar" severity="secondary" text @click="modalOpen = false" />
           <Button
             type="submit"
             label="Guardar Movimiento"
-            class="bg-orange-600 border-none hover:bg-orange-500"
+            class="bg-orange-600 border-none hover:bg-orange-500 text-white"
             :loading="form.processing"
           />
         </div>

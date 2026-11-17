@@ -390,7 +390,7 @@ const totalDetectedCapacity = computed(() => {
           </div>
 
           <!-- Contenedor del Visor SVG del Plano -->
-          <div class="relative bg-slate-900 dark:bg-slate-950 border-2 border-slate-300 dark:border-slate-800 rounded-3xl overflow-hidden min-h-[520px] flex items-center justify-center shadow-lg">
+          <div class="relative bg-slate-100 dark:bg-slate-950 border-2 border-slate-300 dark:border-slate-800 rounded-3xl overflow-hidden min-h-[520px] flex items-center justify-center shadow-lg">
             <!-- Grid de Fondo tipo Blueprint -->
             <div class="absolute inset-0 bg-[radial-gradient(#475569_1px,transparent_1px)] [background-size:20px_20px] opacity-30"></div>
 
@@ -466,11 +466,11 @@ const totalDetectedCapacity = computed(() => {
 
             <!-- Estado Vacío -->
             <div v-else class="text-center p-8 space-y-3 z-10">
-              <div class="w-16 h-16 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center mx-auto text-slate-400">
+              <div class="w-16 h-16 rounded-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 flex items-center justify-center mx-auto text-slate-500 dark:text-slate-400 shadow-xs">
                 <Layers class="w-8 h-8" />
               </div>
-              <h4 class="text-base font-bold text-slate-100">Visor de Planos Desactivado</h4>
-              <p class="text-xs text-slate-300 max-w-sm mx-auto">
+              <h4 class="text-base font-bold text-slate-800 dark:text-slate-100">Visor de Planos Desactivado</h4>
+              <p class="text-xs text-slate-600 dark:text-slate-300 max-w-sm mx-auto">
                 Carga una imagen o haz clic en "Cargar Plano Modelo de Salón" para detectar automáticamente la distribución de mesas.
               </p>
             </div>

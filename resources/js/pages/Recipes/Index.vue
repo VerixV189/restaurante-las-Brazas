@@ -254,33 +254,33 @@ function confirmDelete(recipe) {
       <form @submit.prevent="submitForm" class="space-y-4 pt-2">
         <!-- Selector de Platillo -->
         <div v-if="!isEditing">
-          <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Platillo *</label>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Platillo *</label>
           <Select
             v-model="form.dish_id"
             :options="availableDishesForCreation"
             optionLabel="name"
             optionValue="id"
             placeholder="Selecciona el platillo para la receta"
-            class="w-full bg-slate-800 border-slate-700 text-slate-100"
+            class="w-full"
             required
           />
         </div>
 
         <!-- Instrucciones de Cocina -->
         <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Instrucciones / Procedimiento de Preparación</label>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Instrucciones / Procedimiento de Preparación</label>
           <Textarea
             v-model="form.instructions"
             rows="3"
-            class="w-full bg-slate-800 border-slate-700 text-slate-100 text-sm"
+            class="w-full text-sm"
             placeholder="Paso 1: Sellar corte a 250°C. Paso 2: Agregar especias..."
           />
         </div>
 
         <!-- Lista Dinámica de Ingredientes -->
-        <div class="border-t border-slate-800 pt-4">
+        <div class="border-t border-slate-200 dark:border-slate-800 pt-4">
           <div class="flex items-center justify-between mb-3">
-            <h3 class="text-sm font-bold text-slate-200 uppercase tracking-wide">
+            <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide">
               Insumos e Ingredientes por Porción
             </h3>
             <Button
@@ -288,7 +288,7 @@ function confirmDelete(recipe) {
               label="Agregar Insumo"
               icon="pi pi-plus"
               size="small"
-              class="bg-slate-800 border border-slate-700 text-slate-200 hover:bg-slate-700"
+              class="bg-slate-100 border border-slate-300 text-slate-800 hover:bg-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700"
               @click="addIngredientRow"
             />
           </div>
@@ -297,7 +297,7 @@ function confirmDelete(recipe) {
             <div
               v-for="(row, idx) in form.ingredients"
               :key="idx"
-              class="flex items-center gap-2 p-2 bg-slate-800/60 border border-slate-700/50 rounded-xl"
+              class="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/50 rounded-xl"
             >
               <div class="flex-1">
                 <Select
@@ -306,7 +306,7 @@ function confirmDelete(recipe) {
                   optionLabel="name"
                   optionValue="id"
                   placeholder="Selecciona insumo"
-                  class="w-full bg-slate-900 border-slate-700 text-xs"
+                  class="w-full text-xs"
                   @change="onIngredientChange(row)"
                   required
                 />
@@ -326,14 +326,14 @@ function confirmDelete(recipe) {
                 <InputText
                   v-model="row.unit_of_measure"
                   placeholder="Unidad (kg, g, l)"
-                  class="w-full bg-slate-900 border-slate-700 text-xs"
+                  class="w-full text-xs"
                   required
                 />
               </div>
               <Button
                 type="button"
                 icon="pi pi-trash"
-                class="p-button-text p-button-sm text-red-400 shrink-0"
+                class="p-button-text p-button-sm text-red-500 dark:text-red-400 shrink-0"
                 @click="removeIngredientRow(idx)"
                 :disabled="form.ingredients.length <= 1"
               />
@@ -341,12 +341,12 @@ function confirmDelete(recipe) {
           </div>
         </div>
 
-        <div class="flex justify-end gap-2 pt-4 border-t border-slate-800">
+        <div class="flex justify-end gap-2 pt-4 border-t border-slate-200 dark:border-slate-800">
           <Button type="button" label="Cancelar" severity="secondary" text @click="modalOpen = false" />
           <Button
             type="submit"
             :label="isEditing ? 'Actualizar Receta' : 'Guardar Receta'"
-            class="bg-orange-600 border-none hover:bg-orange-500"
+            class="bg-orange-600 border-none hover:bg-orange-500 text-white"
             :loading="form.processing"
           />
         </div>
@@ -361,25 +361,25 @@ function confirmDelete(recipe) {
       class="w-full max-w-lg"
     >
       <div v-if="selectedRecipe" class="space-y-4 pt-2">
-        <div class="p-4 bg-slate-800/50 rounded-xl border border-slate-700/50">
-          <h3 class="text-lg font-bold text-orange-400">{{ selectedRecipe.dish?.name }}</h3>
-          <p class="text-xs text-slate-400 mb-2">{{ selectedRecipe.dish?.description }}</p>
+        <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700/50">
+          <h3 class="text-lg font-bold text-orange-600 dark:text-orange-400">{{ selectedRecipe.dish?.name }}</h3>
+          <p class="text-xs text-slate-600 dark:text-slate-400 mb-2">{{ selectedRecipe.dish?.description }}</p>
           <div class="flex gap-4 text-xs font-semibold">
-            <span class="text-slate-300">Precio Venta: <strong class="text-emerald-400">${{ parseFloat(selectedRecipe.dish?.price || 0).toFixed(2) }}</strong></span>
-            <span class="text-slate-300">Costo Insumos: <strong class="text-amber-400">${{ calculateEstimatedCost(selectedRecipe).toFixed(2) }}</strong></span>
+            <span class="text-slate-700 dark:text-slate-300">Precio Venta: <strong class="text-emerald-600 dark:text-emerald-400">${{ parseFloat(selectedRecipe.dish?.price || 0).toFixed(2) }}</strong></span>
+            <span class="text-slate-700 dark:text-slate-300">Costo Insumos: <strong class="text-amber-600 dark:text-amber-400">${{ calculateEstimatedCost(selectedRecipe).toFixed(2) }}</strong></span>
           </div>
         </div>
 
         <div>
-          <h4 class="text-xs font-bold uppercase text-slate-400 mb-2">Insumos Requeridos</h4>
+          <h4 class="text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-2">Insumos Requeridos</h4>
           <div class="space-y-1.5">
             <div
               v-for="item in selectedRecipe.ingredients"
               :key="item.id"
-              class="flex items-center justify-between p-2 rounded-lg bg-slate-800/40 text-xs"
+              class="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-transparent text-xs"
             >
-              <span class="text-slate-200 font-medium">{{ item.ingredient?.name }}</span>
-              <span class="text-slate-400 font-mono">
+              <span class="text-slate-800 dark:text-slate-200 font-medium">{{ item.ingredient?.name }}</span>
+              <span class="text-slate-600 dark:text-slate-400 font-mono">
                 {{ parseFloat(item.quantity_required) }} {{ item.unit_of_measure }}
               </span>
             </div>
@@ -387,8 +387,8 @@ function confirmDelete(recipe) {
         </div>
 
         <div v-if="selectedRecipe.instructions">
-          <h4 class="text-xs font-bold uppercase text-slate-400 mb-1">Procedimiento</h4>
-          <p class="text-xs text-slate-300 bg-slate-800/30 p-3 rounded-lg border border-slate-700/40 leading-relaxed whitespace-pre-line">
+          <h4 class="text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">Procedimiento</h4>
+          <p class="text-xs text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/30 p-3 rounded-lg border border-slate-200 dark:border-slate-700/40 leading-relaxed whitespace-pre-line">
             {{ selectedRecipe.instructions }}
           </p>
         </div>

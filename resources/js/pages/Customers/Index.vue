@@ -198,39 +198,39 @@ function confirmDelete(customer) {
     >
       <form @submit.prevent="submitForm" class="space-y-4 pt-2">
         <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Nombre Completo *</label>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Nombre Completo *</label>
           <InputText
             v-model="form.name"
-            class="w-full bg-slate-800 border-slate-700 text-slate-100"
+            class="w-full"
             placeholder="Ej: Lic. Carlos Mendoza"
             required
           />
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Teléfono</label>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Teléfono</label>
             <InputText
               v-model="form.phone"
-              class="w-full bg-slate-800 border-slate-700 text-slate-100"
+              class="w-full"
               placeholder="555-9876"
             />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Correo Electrónico</label>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Correo Electrónico</label>
             <InputText
               v-model="form.email"
               type="email"
-              class="w-full bg-slate-800 border-slate-700 text-slate-100"
+              class="w-full"
               placeholder="cliente@ejemplo.com"
             />
           </div>
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Preferencias / Alergias / Notas</label>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Preferencias / Alergias / Notas</label>
           <Textarea
             v-model="form.preferences_notes"
             rows="3"
-            class="w-full bg-slate-800 border-slate-700 text-slate-100 text-sm"
+            class="w-full text-sm"
             placeholder="Ej: Alérgico a los mariscos, prefiere mesa en terraza junto a la ventana..."
           />
         </div>
@@ -239,7 +239,7 @@ function confirmDelete(customer) {
           <Button
             type="submit"
             :label="isEditing ? 'Actualizar' : 'Guardar'"
-            class="bg-orange-600 border-none hover:bg-orange-500"
+            class="bg-orange-600 border-none hover:bg-orange-500 text-white"
             :loading="form.processing"
           />
         </div>
@@ -254,30 +254,30 @@ function confirmDelete(customer) {
       class="w-full max-w-lg"
     >
       <div v-if="selectedCustomer" class="space-y-4 pt-2">
-        <div class="p-4 bg-slate-800/50 rounded-xl border border-slate-700/50">
-          <h3 class="text-lg font-bold text-slate-100">{{ selectedCustomer.name }}</h3>
-          <div class="flex gap-4 text-xs text-slate-400 mt-1">
+        <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700/50">
+          <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">{{ selectedCustomer.name }}</h3>
+          <div class="flex gap-4 text-xs text-slate-600 dark:text-slate-400 mt-1">
             <span>📞 {{ selectedCustomer.phone || 'Sin teléfono' }}</span>
             <span>✉️ {{ selectedCustomer.email || 'Sin correo' }}</span>
           </div>
-          <div v-if="selectedCustomer.preferences_notes" class="mt-3 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs">
+          <div v-if="selectedCustomer.preferences_notes" class="mt-3 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs">
             <strong>Preferencias / Alergias:</strong> {{ selectedCustomer.preferences_notes }}
           </div>
         </div>
 
         <div>
-          <h4 class="text-xs font-bold uppercase text-slate-400 mb-2">Últimas Reservas</h4>
+          <h4 class="text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-2">Últimas Reservas</h4>
           <div v-if="selectedCustomer.reservations && selectedCustomer.reservations.length > 0" class="space-y-2 max-h-56 overflow-y-auto pr-1">
             <div
               v-for="res in selectedCustomer.reservations"
               :key="res.id"
-              class="p-2.5 rounded-lg bg-slate-800/40 border border-slate-700/30 flex items-center justify-between text-xs"
+              class="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/30 flex items-center justify-between text-xs"
             >
               <div>
-                <div class="font-semibold text-slate-200">
+                <div class="font-semibold text-slate-800 dark:text-slate-200">
                   {{ res.reservation_date }} a las {{ res.reservation_time }}
                 </div>
-                <div class="text-[11px] text-slate-400">
+                <div class="text-[11px] text-slate-500 dark:text-slate-400">
                   {{ res.table ? `${res.table.table_number} (${res.table.area?.name})` : 'Sin mesa asignada' }} · {{ res.guests_count }} personas
                 </div>
               </div>

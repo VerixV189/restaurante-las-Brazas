@@ -4,23 +4,23 @@ import { ShieldX } from 'lucide-vue-next';
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-950 flex items-center justify-center p-6">
+  <div class="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-6 transition-colors duration-200">
     <div class="text-center max-w-md">
       <!-- Icon -->
       <div class="flex justify-center mb-6">
         <div class="bg-red-500/10 border border-red-500/30 rounded-full p-6">
-          <ShieldX class="w-16 h-16 text-red-400" />
+          <ShieldX class="w-16 h-16 text-red-600 dark:text-red-400" />
         </div>
       </div>
 
       <!-- Error Code -->
-      <p class="text-red-400 text-sm font-semibold uppercase tracking-widest mb-2">Error 403</p>
+      <p class="text-red-600 dark:text-red-400 text-sm font-semibold uppercase tracking-widest mb-2">Error 403</p>
 
       <!-- Title -->
-      <h1 class="text-3xl font-bold text-slate-100 mb-3">Acceso No Permitido</h1>
+      <h1 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-3">Acceso No Permitido</h1>
 
       <!-- Description -->
-      <p class="text-slate-400 text-sm mb-8">
+      <p class="text-slate-600 dark:text-slate-400 text-sm mb-8">
         No tienes los permisos necesarios para acceder a esta sección.
         Contacta al administrador si crees que esto es un error.
       </p>
@@ -35,7 +35,7 @@ import { ShieldX } from 'lucide-vue-next';
         </Link>
         <Link
           href="/"
-          class="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold rounded-xl transition-colors"
+          class="px-6 py-2.5 bg-white hover:bg-slate-100 border border-slate-300 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700 dark:text-slate-200 text-sm font-semibold rounded-xl transition-colors"
         >
           Ir al Inicio
         </Link>
