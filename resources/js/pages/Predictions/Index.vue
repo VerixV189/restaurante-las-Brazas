@@ -217,7 +217,7 @@ onMounted(() => {
           <Tab value="1" class="text-slate-600 dark:text-slate-300 font-bold text-sm">
             <div class="flex items-center gap-2">
               <TrendingUp class="w-4 h-4 text-purple-600 dark:text-purple-400" />
-              <span>Pronóstico de Demanda Mensual (ML)</span>
+              <span>Pronóstico de Demanda Mensual</span>
             </div>
           </Tab>
           <Tab value="2" class="text-slate-600 dark:text-slate-300 font-bold text-sm">
@@ -445,7 +445,7 @@ onMounted(() => {
                     <Sparkles class="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100">Modelo Predictivo Scikit-Learn</h3>
+                    <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100">Motor Predictivo de Demanda</h3>
                     <p class="text-[11px] text-slate-500 dark:text-slate-400">Estima consumo de materia prima por plato y mes.</p>
                   </div>
                 </div>
@@ -513,7 +513,7 @@ onMounted(() => {
                       <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">{{ mlInsumo }}</h3>
                     </div>
                     <Tag
-                      :value="mlResult.engine === 'scikit_learn_pkl' ? 'Modelo .pkl' : 'Modelo Estadístico'"
+                      :value="mlResult.engine === 'scikit_learn_pkl' ? 'Modelo Predictivo IA' : 'Proyección Estadística'"
                       severity="info"
                       class="text-[10px]"
                     />
@@ -557,7 +557,7 @@ onMounted(() => {
                   </div>
                   <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200">Sin pronóstico generado</h4>
                   <p class="text-xs text-slate-500 max-w-sm mx-auto">
-                    Selecciona un insumo, platillo y mes a la izquierda para proyectar la demanda mediante el modelo de Machine Learning.
+                    Selecciona un insumo, platillo y mes a la izquierda para proyectar la demanda estimada.
                   </p>
                 </div>
               </div>
@@ -596,7 +596,7 @@ onMounted(() => {
                 </div>
                 <h4 class="text-xs font-bold text-slate-800 dark:text-slate-100">Auditorías Automáticas</h4>
                 <p class="text-xs text-slate-600 dark:text-slate-400">
-                  Cada venta registrada en el POS descuenta atómicamente los insumos por receta mediante el <strong>InventoryService</strong> de Las Brazas.
+                  Cada venta registrada en el POS descuenta automáticamente los insumos por receta en tiempo real.
                 </p>
               </div>
             </div>

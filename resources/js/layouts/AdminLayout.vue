@@ -92,7 +92,7 @@ const allNavItems = [
     roles: ['Administrador', 'Recepcionista'],
   },
   {
-    name: 'Planos IA (YOLO)',
+    name: 'Planos Inteligentes',
     href: '/floor-plans',
     icon: Sparkles,
     roles: ['Administrador', 'Recepcionista'],

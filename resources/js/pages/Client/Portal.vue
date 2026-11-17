@@ -95,7 +95,7 @@ const localAddresses = ref([...props.addresses]);
 const localReservations = ref([...props.reservations]);
 const loyaltyPoints = ref(props.userProfile?.loyalty_points || 100);
 
-// Preferencias dietéticas (RF-25)
+// Preferencias dietéticas
 const dietOptions = [
   'Amante de Cortes a la Brasa',
   'Bajo en Carbohidratos / Keto',
@@ -115,7 +115,7 @@ function toggleDietPref(pref) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MARKETPLACE & MENÚ DIGITAL (RF-01, RF-02, RF-25)
+// MARKETPLACE & MENÚ DIGITAL
 // ─────────────────────────────────────────────────────────────────────────────
 const selectedCategoryId = ref(null);
 const searchQuery = ref('');
@@ -168,7 +168,7 @@ function confirmCustomAdd() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CARRITO, CUPONES & CHECKOUT (RF-03, RF-04, RF-07, RF-10, RF-24)
+// CARRITO, CUPONES & CHECKOUT
 // ─────────────────────────────────────────────────────────────────────────────
 const cartItems = ref([]);
 const orderType = ref('delivery'); // 'delivery' | 'takeaway' | 'dine_in'
@@ -392,7 +392,7 @@ async function submitCheckout() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MIS PEDIDOS & TRACKING (RF-13, RF-14)
+// MIS PEDIDOS & SEGUIMIENTO
 // ─────────────────────────────────────────────────────────────────────────────
 const trackingStepsLabels = {
   received: 'Recibido',
@@ -449,7 +449,7 @@ async function cancelPendingOrder(order) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DIRECCIONES DEL CLIENTE (RF-05)
+// DIRECCIONES DEL CLIENTE
 // ─────────────────────────────────────────────────────────────────────────────
 const newAddr = ref({
   label: 'Casa',
@@ -511,7 +511,7 @@ async function deleteAddress(id) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// RESERVAS DE MESAS (RF-12)
+// RESERVAS DE MESAS
 // ─────────────────────────────────────────────────────────────────────────────
 const tomorrowStr = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
 const resForm = ref({
@@ -571,7 +571,7 @@ async function cancelReservation(r) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// AGENTE INTELIGENTE GASTRONÓMICO (RF-27: Pedidos, Reservas, Búsqueda, Voz)
+// ASISTENTE INTELIGENTE GASTRONÓMICO (Pedidos, Reservas, Búsqueda y Voz)
 // ─────────────────────────────────────────────────────────────────────────────
 const aiMessages = ref([
   {
@@ -769,7 +769,7 @@ onUnmounted(() => {
       <!-- BARRA SUPERIOR DE EXPERIENCIA DEL CLIENTE (Entrega, Puntos, Carrito) -->
       <!-- ═══════════════════════════════════════════════════════════════════ -->
       <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex flex-wrap items-center justify-between gap-4">
-        <!-- Modalidad de Entrega (RF-04) -->
+        <!-- Modalidad de Entrega -->
         <div class="flex items-center gap-2 flex-wrap">
           <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mr-1 flex items-center gap-1">
             <Truck class="w-4 h-4 text-orange-500" /> Modalidad:
@@ -874,7 +874,7 @@ onUnmounted(() => {
       <!-- TAB 1: MARKETPLACE / MENÚ DIGITAL                                   -->
       <!-- ═══════════════════════════════════════════════════════════════════ -->
       <div v-if="activeTab === 'menu'" class="space-y-5">
-        <!-- Banner de Recomendación Personalizada (RF-25) -->
+        <!-- Banner de Recomendación Personalizada -->
         <div
           v-if="recommendedDish && !searchQuery"
           class="rounded-2xl p-5 bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 text-white shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
@@ -1102,7 +1102,7 @@ onUnmounted(() => {
             </div>
           </div>
 
-          <!-- Sugerencias para acompañar (Upsell RF-24) -->
+          <!-- Sugerencias para acompañar -->
           <div
             v-if="cartItems.length > 0 && upsellDishes.length > 0"
             class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-3"
@@ -1363,7 +1363,7 @@ onUnmounted(() => {
             </div>
           </div>
 
-          <!-- Barra de Progreso / Tracking en Vivo (RF-13) -->
+          <!-- Barra de Progreso / Seguimiento en Vivo -->
           <div v-if="order.status !== 'cancelled'" class="py-2">
             <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
               <div
@@ -1427,7 +1427,7 @@ onUnmounted(() => {
       <!-- TAB 4: PROMOS, CUPONES & PROGRAMA DE PUNTOS LAS BRAZAS              -->
       <!-- ═══════════════════════════════════════════════════════════════════ -->
       <div v-else-if="activeTab === 'promos'" class="space-y-6">
-        <!-- Tarjeta de Lealtad & Cashback (RF-23) -->
+        <!-- Tarjeta de Lealtad & Cashback -->
         <div class="rounded-2xl p-6 bg-gradient-to-r from-slate-900 via-slate-800 to-orange-950 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div class="space-y-1.5">
             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30">
@@ -1829,7 +1829,7 @@ onUnmounted(() => {
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════ -->
-    <!-- MODAL DE PERSONALIZACIÓN DE CORTE / PLATILLO (RF-02)                -->
+    <!-- MODAL DE PERSONALIZACIÓN DE CORTE / PLATILLO                      -->
     <!-- ═══════════════════════════════════════════════════════════════════ -->
     <div
       v-if="customizingDish"

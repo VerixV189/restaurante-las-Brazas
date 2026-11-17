@@ -76,7 +76,7 @@ const roleQuickActions = computed(() => {
     return [
       { label: '📅 Gestionar Reservas', href: '/reservations' },
       { label: '🗺️ Zonas y Mesas', href: '/areas' },
-      { label: '✨ Planos IA (YOLO)', href: '/floor-plans' },
+      { label: '✨ Planos Inteligentes de Salón', href: '/floor-plans' },
       { label: '👥 Directorio de Clientes', href: '/customers' },
     ];
   }

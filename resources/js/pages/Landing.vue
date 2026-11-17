@@ -68,7 +68,7 @@ const saasPlans = [
     monthlyPrice: 49,
     annualPrice: 39,
     description: 'Ideal para restaurantes y asadores de 1 sucursal que inician su digitalización operativa en la nube.',
-    infra: 'Google Cloud Run + Cloud SQL',
+    infra: 'Nube Administrada + Backups Diarios',
     popular: false,
     features: [
       'Terminal Punto de Venta (POS) Web táctil y arqueo de caja',
@@ -84,16 +84,16 @@ const saasPlans = [
     badge: 'Más Popular • Activo en Las Brazas',
     monthlyPrice: 99,
     annualPrice: 79,
-    description: 'Ecosistema omnicanal completo con App Móvil Flutter, Monitor KDS de Cocina e Inteligencia Artificial.',
-    infra: 'AWS EC2 (c7i-flex.large) + RDS + S3',
+    description: 'Ecosistema omnicanal completo con App Móvil para comensales, Monitor KDS de Cocina e Inteligencia Artificial.',
+    infra: 'Servidor Cloud Dedicado + Alta Disponibilidad',
     popular: true,
     features: [
       'Todo lo del Plan Starter + Mesas y Zonas ilimitadas',
       'Monitor de Cocina en Tiempo Real (KDS) para parrilleros',
-      'App Móvil Flutter (Play Store) con Delivery, PIN 4 dígitos y Cupones',
-      'Descuento atómico por Receta Técnica y control anti-duplicado',
+      'App Móvil (Android & iOS) con Delivery, PIN de 4 dígitos y Cupones',
+      'Descuento automático por Receta Técnica y control anti-duplicado',
       'Reservas digitales por aforo horario (±2h) y tolerancia 15 min',
-      'Agente Virtual con IA (Gemini) para comensales y gerencia',
+      'Asistente Virtual con IA (Chef Virtual) para comensales y gerencia',
     ],
   },
   {
@@ -102,14 +102,14 @@ const saasPlans = [
     badge: 'Cadenas & Franquicias',
     monthlyPrice: 189,
     annualPrice: 149,
-    description: 'Arquitectura dedicada de alta disponibilidad para cadenas gastronómicas con múltiples sucursales.',
-    infra: 'AWS / Azure Dedicado + Balanceador',
+    description: 'Infraestructura dedicada de alta disponibilidad para cadenas gastronómicas con múltiples sucursales.',
+    infra: 'Nube Dedicada + Balanceador de Carga',
     popular: false,
     features: [
       'Todo lo del Plan Pro + Múltiples sucursales y almacenes',
-      'Gestor de Planos de Salón con visión artificial (YOLO IA)',
+      'Gestor Inteligente de Planos y Distribución de Salón con IA',
       'Predicción inteligente de demanda y lotes de compra (PDF/Excel)',
-      'Auditoría completa de actividades (RBAC para 6 roles operativos)',
+      'Auditoría completa de actividades y permisos para 6 perfiles operativos',
       'Acuerdo de Nivel de Servicio (SLA 99.9%) y soporte técnico 24/7',
     ],
   },
@@ -121,7 +121,7 @@ const saasContactForm = ref({
   contact_email: '',
   contact_phone: '',
   selected_plan: 'Plan Steakhouse Pro ($99 USD/mes)',
-  cloud_provider: 'Amazon Web Services (AWS)',
+  cloud_provider: 'Nube Administrada Alta Disponibilidad',
   branches_count: 1,
   message: '',
 });
@@ -163,7 +163,7 @@ function submitSaasContact() {
     contact_email: '',
     contact_phone: '',
     selected_plan: 'Plan Steakhouse Pro ($99 USD/mes)',
-    cloud_provider: 'Amazon Web Services (AWS)',
+    cloud_provider: 'Nube Administrada Alta Disponibilidad',
     branches_count: 1,
     message: '',
   };
@@ -466,7 +466,7 @@ function submitTestimonial() {
         </div>
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white">Identidad & Filosofía Corporativa</h2>
         <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base leading-relaxed">
-          La convergencia entre la maestría culinaria de las brasas y la ingeniería de software aplicada a la excelencia operativa.
+          La fusión perfecta entre nuestra parrilla artesanal y tecnología moderna para ofrecer un servicio ágil y sin esperas.
         </p>
       </div>
 
@@ -487,11 +487,11 @@ function submitTestimonial() {
 
             <div>
               <h3 class="text-2xl font-black text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">Nuestra Misión</h3>
-              <p class="text-xs uppercase tracking-widest text-slate-500 dark:text-slate-400 font-semibold mt-1">Ecosistema Tecnológico Las Brazas</p>
+              <p class="text-xs uppercase tracking-widest text-slate-500 dark:text-slate-400 font-semibold mt-1">Hospitalidad & Gestión Gastronómica</p>
             </div>
 
             <p class="text-slate-600 dark:text-slate-300 text-sm sm:text-base leading-relaxed font-normal dark:font-light">
-              Desarrollar e implementar soluciones de software innovadoras para la gestión gastronómica integral y la atención al comensal mediante tecnologías web, móviles y de Inteligencia Artificial, proporcionando herramientas seguras, transparentes y confiables que permitan controlar, monitorear y optimizar el ciclo de vida completo de las operaciones del restaurante.
+              Brindar una experiencia gastronómica excepcional acompañada de soluciones digitales integrales (Web, App Móvil e Inteligencia Artificial) que optimizan cada etapa del restaurante con herramientas seguras, ágiles y confiables para el servicio al comensal y el control operativo.
             </p>
 
             <div class="space-y-2.5 pt-2 border-t border-slate-200 dark:border-slate-800/80">
@@ -501,7 +501,7 @@ function submitTestimonial() {
               </div>
               <div class="flex items-center gap-2.5 text-xs text-slate-600 dark:text-slate-300">
                 <CheckCircle2 class="w-4 h-4 text-orange-500 dark:text-orange-400 shrink-0" />
-                <span>Prevención de defectos y aseguramiento bajo estándar IEEE 730</span>
+                <span>Aseguramiento continuo de calidad en servicio y atención</span>
               </div>
               <div class="flex items-center gap-2.5 text-xs text-slate-600 dark:text-slate-300">
                 <CheckCircle2 class="w-4 h-4 text-orange-500 dark:text-orange-400 shrink-0" />
@@ -531,7 +531,7 @@ function submitTestimonial() {
             </div>
 
             <p class="text-slate-600 dark:text-slate-300 text-sm sm:text-base leading-relaxed font-normal dark:font-light">
-              Ser el equipo líder y referente técnico en el desarrollo de soluciones tecnológicas omnicanal (Web y Móvil) para la industria gastronómica, reconocidos por la innovación, usabilidad y máxima estabilidad de nuestros sistemas en horas de alta concurrencia, estableciendo una cultura de calidad fundamentada en estándares internacionales.
+              Consolidarnos como referentes en hospitalidad y soluciones tecnológicas omnicanal (Web y Móvil) para la industria gastronómica, reconocidos por nuestra innovación, facilidad de uso y máxima estabilidad operativa en horas de alta demanda.
             </p>
 
             <div class="space-y-2.5 pt-2 border-t border-slate-200 dark:border-slate-800/80">
@@ -541,11 +541,11 @@ function submitTestimonial() {
               </div>
               <div class="flex items-center gap-2.5 text-xs text-slate-600 dark:text-slate-300">
                 <CheckCircle2 class="w-4 h-4 text-amber-500 dark:text-amber-400 shrink-0" />
-                <span>Toma de decisiones respaldada por datos analíticos y modelos de IA</span>
+                <span>Toma de decisiones respaldada por analítica e inteligencia predictiva</span>
               </div>
               <div class="flex items-center gap-2.5 text-xs text-slate-600 dark:text-slate-300">
                 <CheckCircle2 class="w-4 h-4 text-amber-500 dark:text-amber-400 shrink-0" />
-                <span>Arquitectura limpia y código modular preparado para escalar</span>
+                <span>Operación preparada para crecer a múltiples salones y sucursales</span>
               </div>
             </div>
           </div>
@@ -560,20 +560,20 @@ function submitTestimonial() {
           </div>
           <div class="space-y-1">
             <div class="flex flex-wrap items-center gap-2">
-              <span class="text-xs font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400">Políticas de Calidad & Estándares IEEE</span>
-              <span class="text-[10px] px-2 py-0.5 rounded bg-orange-500/15 dark:bg-orange-500/20 text-orange-700 dark:text-orange-300 font-mono">IEEE 730 / 828 / 829</span>
+              <span class="text-xs font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400">Compromiso de Calidad & Seguridad</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-orange-500/15 dark:bg-orange-500/20 text-orange-700 dark:text-orange-300 font-mono">Disponibilidad 99.9% • SSL/TLS</span>
             </div>
             <h4 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Aseguramiento de Calidad en Cada Proceso</h4>
             <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-normal dark:font-light">
-              Desarrollamos con ciclos de verificación y validación continuos, revisiones técnicas de código y retroalimentación activa mediante metodologías ágiles Scrum.
+              Operamos con ciclos de mejora continua, controles preventivos de seguridad y monitoreo permanente para ofrecer una atención ágil sin interrupciones.
             </p>
           </div>
         </div>
 
         <div class="bg-white dark:bg-slate-950/80 border border-orange-200 dark:border-orange-500/30 px-6 py-4 rounded-2xl text-center md:text-right shrink-0 w-full md:w-auto shadow-sm">
-          <p class="text-[10px] tracking-widest uppercase text-amber-600 dark:text-amber-400 font-bold">Slogan Corporativo</p>
+          <p class="text-[10px] tracking-widest uppercase text-amber-600 dark:text-amber-400 font-bold">Nuestro Slogan</p>
           <p class="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white italic mt-0.5">
-            "Calidad en cada línea de código, excelencia en cada servicio."
+            "Excelencia en cada corte, precisión en cada servicio."
           </p>
         </div>
       </div>
@@ -584,11 +584,11 @@ function submitTestimonial() {
       <div class="max-w-7xl mx-auto">
         <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-600 dark:text-orange-400 text-xs font-bold uppercase tracking-widest">
-            <Cpu class="w-3.5 h-3.5" /> Arquitectura de Alto Desempeño
+            <Cpu class="w-3.5 h-3.5" /> Plataforma de Alto Desempeño
           </div>
-          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white">Fortalezas del Ecosistema Tecnológico</h2>
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white">Fortalezas del Ecosistema Digital</h2>
           <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base leading-relaxed">
-            Diseñado específicamente para mitigar cuellos de botella en momentos de alta afluencia y conectar instantáneamente la atención en sala con la cocina.
+            Diseñado específicamente para evitar cuellos de botella en momentos de alta afluencia y conectar instantáneamente la atención en sala con la cocina.
           </p>
         </div>
 
@@ -600,14 +600,14 @@ function submitTestimonial() {
                 <Layers class="w-6 h-6" />
               </div>
               <span class="text-[10px] font-mono px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold border border-slate-200 dark:border-slate-700">
-                Vue 3 + PrimeVue
+                Interfaz Táctil
               </span>
             </div>
             <h3 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors mb-2">
               Punto de Venta (POS) Táctil
             </h3>
             <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Cobros ultra veloces, arqueos y cortes de caja en vivo, división de cuentas por comensal y emisión de facturas y notas de consumo en segundos sin recargar la página.
+              Cobros ultra veloces, arqueos y cortes de caja en vivo, división de cuentas por comensal y emisión de facturas y notas de consumo en segundos.
             </p>
           </div>
 
@@ -618,14 +618,14 @@ function submitTestimonial() {
                 <Smartphone class="w-6 h-6" />
               </div>
               <span class="text-[10px] font-mono px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold border border-slate-200 dark:border-slate-700">
-                Flutter 60 FPS
+                iOS & Android
               </span>
             </div>
             <h3 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors mb-2">
-              Comandero Móvil en Salón
+              App Móvil & Comandero
             </h3>
             <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Toma de pedidos digital directamente al pie de la mesa. Selección inmediata de cortes de carne, términos de cocción y observaciones especiales sin traslados innecesarios.
+              Toma de pedidos digital al pie de mesa y pedidos a domicilio desde el teléfono, con selección de términos de cocción y seguimiento en vivo.
             </p>
           </div>
 
@@ -636,7 +636,7 @@ function submitTestimonial() {
                 <CookingPot class="w-6 h-6" />
               </div>
               <span class="text-[10px] font-mono px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold border border-slate-200 dark:border-slate-700">
-                WebSockets en Vivo
+                Tiempo Real
               </span>
             </div>
             <h3 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors mb-2">
@@ -654,14 +654,14 @@ function submitTestimonial() {
                 <ShieldCheck class="w-6 h-6" />
               </div>
               <span class="text-[10px] font-mono px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold border border-slate-200 dark:border-slate-700">
-                PostgreSQL ACID
+                Control Exacto
               </span>
             </div>
             <h3 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors mb-2">
               Control Cárnico y Mermas
             </h3>
             <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Descuento automático de inventario por porciones y gramajes según recetas técnicas, con trazabilidad rigurosa de mermas y alertas inteligentes de stock mínimo para reabastecimiento.
+              Descuento automático de inventario por porciones y gramajes según recetas, con trazabilidad rigurosa de mermas y alertas inteligentes de stock mínimo para reabastecimiento.
             </p>
           </div>
 
@@ -672,14 +672,14 @@ function submitTestimonial() {
                 <Bot class="w-6 h-6" />
               </div>
               <span class="text-[10px] font-mono px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold border border-slate-200 dark:border-slate-700">
-                Gemini AI Engine
+                Chef Virtual IA
               </span>
             </div>
             <h3 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-2">
-              Asistente Inteligente (AI)
+              Asistente Inteligente (IA)
             </h3>
             <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Soporte conversacional para clientes y administradores, recomendaciones inteligentes de maridaje y análisis predictivo de platillos con mayor rotación en el asador.
+              Soporte conversacional para clientes y administradores, recomendaciones inteligentes de maridaje y proyección de platillos con mayor rotación en el asador.
             </p>
           </div>
 
@@ -690,14 +690,14 @@ function submitTestimonial() {
                 <Cpu class="w-6 h-6" />
               </div>
               <span class="text-[10px] font-mono px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold border border-slate-200 dark:border-slate-700">
-                AWS + Laravel 12
+                Nube 24/7
               </span>
             </div>
             <h3 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors mb-2">
-              Arquitectura & Resiliencia
+              Estabilidad & Resiliencia
             </h3>
             <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Despliegue en la nube, respaldos automáticos de bases de datos, tokens de sesión seguros y tolerancia a fallas que garantizan continuidad operativa 24/7.
+              Despliegue en la nube, respaldos automáticos diarios, sesiones seguras y alta disponibilidad que garantizan continuidad operativa 24/7.
             </p>
           </div>
         </div>
@@ -1061,7 +1061,7 @@ function submitTestimonial() {
               Contacto Comercial & Cotización de Licencia SaaS
             </h3>
             <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-              ¿Deseas implementar <strong>BrazasTech POS, KDS & Mobile</strong> en tu restaurante o cadena gastronómica? Déjanos tus datos y nuestro equipo de ingeniería te configurará un entorno en la nube listo para operar.
+              ¿Deseas implementar <strong>BrazasTech POS, KDS & Mobile</strong> en tu restaurante o cadena gastronómica? Déjanos tus datos y nuestro equipo comercial te configurará un entorno en la nube listo para operar.
             </p>
 
             <div class="space-y-3 pt-2 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-300">
@@ -1075,15 +1075,15 @@ function submitTestimonial() {
               <div class="flex items-start gap-3">
                 <Cpu class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                 <div>
-                  <strong class="text-slate-900 dark:text-white">Despliegue Multi-Cloud & Open Source OSI:</strong>
-                  <p class="text-slate-500 dark:text-slate-400">Compatible con AWS (EC2/RDS/S3), Microsoft Azure y Google Cloud Run, construido sobre tecnologías con licencias OSI (MIT / BSD-3).</p>
+                  <strong class="text-slate-900 dark:text-white">Infraestructura Cloud Empresarial:</strong>
+                  <p class="text-slate-500 dark:text-slate-400">Despliegue en la nube de alta disponibilidad con copias de respaldo diarias, cifrado SSL y monitoreo permanente 24/7.</p>
                 </div>
               </div>
               <div class="flex items-start gap-3">
                 <Smartphone class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                 <div>
                   <strong class="text-slate-900 dark:text-white">Publicación Móvil Oficial:</strong>
-                  <p class="text-slate-500 dark:text-slate-400">Incluye despliegue de la App Móvil en Google Play Store verificada con Google Play Protect y protegida con Laravel Sanctum.</p>
+                  <p class="text-slate-500 dark:text-slate-400">Incluye despliegue de la App Móvil en Google Play Store y App Store con autenticación segura y seguimiento de pedidos en vivo.</p>
                 </div>
               </div>
             </div>
@@ -1126,12 +1126,12 @@ function submitTestimonial() {
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Infraestructura Cloud Preferida / Requerimientos</label>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Requerimientos de Despliegue / Sucursales</label>
                 <Textarea
                   v-model="saasContactForm.message"
                   rows="2"
                   class="w-full"
-                  placeholder="Indica cantidad de mesas, si requieres migración de datos o despliegue en AWS / Azure / Google Cloud..."
+                  placeholder="Indica cantidad de mesas, puntos de venta requeridos o integración especial de tu restaurante..."
                 />
               </div>
 
@@ -1168,7 +1168,7 @@ function submitTestimonial() {
             El restaurante de parrilla y cortes preferido para momentos inolvidables. Ecosistema gastronómico impulsado por BrazasTech S.R.L.
           </p>
           <div class="pt-2 text-xs text-amber-600 dark:text-amber-400 font-semibold italic">
-            "Calidad en cada línea de código, excelencia en cada servicio."
+            "Excelencia en cada corte, precisión en cada servicio."
           </div>
         </div>
 
@@ -1359,12 +1359,12 @@ function submitTestimonial() {
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Comentarios o Requerimientos de Despliegue</label>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Comentarios o Detalles de tu Restaurante</label>
           <Textarea
             v-model="saasContactForm.message"
             rows="2"
             class="w-full"
-            placeholder="Indica número de mesas, terminales POS requeridas o preferencia de nube (AWS / Azure / GCP)..."
+            placeholder="Indica número de mesas, terminales POS requeridas o cualquier detalle adicional..."
           />
         </div>
 

@@ -414,7 +414,7 @@ function getMarginBadge(margin) {
         </div>
       </div>
 
-      <!-- ── ASISTENTE IA CON GEMINI Y DICTADO POR VOZ ─────────────── -->
+      <!-- ── ASISTENTE IA DE REPORTES Y DICTADO POR VOZ ─────────────── -->
       <div class="relative overflow-hidden bg-gradient-to-r from-purple-50 via-indigo-50/70 to-purple-50 dark:from-purple-950/50 dark:via-slate-900 dark:to-indigo-950/50 border-2 border-purple-200 dark:border-purple-500/30 rounded-3xl p-6 shadow-md transition-colors duration-200">
         <!-- Glow effect background -->
         <div class="absolute -right-20 -top-20 w-60 h-60 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -429,7 +429,7 @@ function getMarginBadge(margin) {
               <div>
                 <div class="flex items-center gap-2">
                   <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">Asistente IA de Reportes & Dictado por Voz</h3>
-                  <Tag value="Gemini 2.5 Flash" severity="contrast" class="bg-purple-600/15 text-purple-700 dark:bg-purple-900/60 dark:text-purple-200 border border-purple-500/30 text-[10px]" />
+                  <Tag value="Análisis Inteligente" severity="contrast" class="bg-purple-600/15 text-purple-700 dark:bg-purple-900/60 dark:text-purple-200 border border-purple-500/30 text-[10px]" />
                 </div>
                 <p class="text-xs text-slate-600 dark:text-slate-400">
                   Escribe o usa el <strong>micrófono</strong> para pedir gráficas sobre ventas, platillos y periodos en lenguaje natural.
@@ -519,7 +519,7 @@ function getMarginBadge(margin) {
                   <Tag :value="`Rango: ${aiResult.result.time_range.start} → ${aiResult.result.time_range.end}`" severity="secondary" class="text-[10px]" />
                 </div>
                 <p class="text-[11px] text-slate-600 dark:text-slate-400">
-                  Motor: <strong class="text-purple-700 dark:text-purple-300">{{ aiResult.engine === 'gemini_ai' ? 'Gemini 2.5 Flash (NLP)' : 'Motor Analítico SQL' }}</strong>
+                  Procesado por: <strong class="text-purple-700 dark:text-purple-300">{{ aiResult.engine === 'gemini_ai' ? 'Asistente Analítico IA' : 'Análisis Estructurado' }}</strong>
                 </p>
               </div>
 

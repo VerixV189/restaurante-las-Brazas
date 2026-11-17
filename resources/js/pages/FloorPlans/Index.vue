@@ -100,7 +100,7 @@ function loadSampleBlueprint() {
   });
 }
 
-// 1. Detectar Layout con YOLO
+// 1. Detectar Distribución con IA
 async function runYoloDetection() {
   if (!selectedFile.value) {
     toast.add({ severity: 'warn', summary: 'Atención', detail: 'Por favor sube una imagen del plano primero.', life: 3000 });
@@ -135,7 +135,7 @@ async function runYoloDetection() {
     toast.add({
       severity: 'error',
       summary: 'Error',
-      detail: err.response?.data?.message || 'Error al procesar el plano con YOLO.',
+      detail: err.response?.data?.message || 'Error al analizar la distribución del plano.',
       life: 3500,
     });
   } finally {
@@ -222,7 +222,7 @@ const totalDetectedCapacity = computed(() => {
 
 <template>
   <AdminLayout>
-    <template #header>Gestor Inteligente de Planos & Layouts (YOLO v8)</template>
+    <template #header>Gestor Inteligente de Planos & Distribución de Salón</template>
 
     <div class="space-y-6">
       <!-- Grid Principal: Configuración (4 Cols) + Canvas/SVG Viewer (8 Cols) -->
@@ -263,7 +263,7 @@ const totalDetectedCapacity = computed(() => {
               class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
             >
               <Sparkles class="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
-              <span>Cargar Plano de Demostración</span>
+              <span>Cargar Plano Modelo de Salón</span>
             </button>
           </div>
 
@@ -311,10 +311,10 @@ const totalDetectedCapacity = computed(() => {
               </div>
             </div>
 
-            <!-- Botón Detectar con YOLO -->
+            <!-- Botón Detectar con IA -->
             <Button
               :loading="isDetecting"
-              label="Detectar Layout con YOLO"
+              label="Detectar Mesas Automáticamente"
               icon="pi pi-search"
               class="w-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 border-none text-white font-bold text-xs py-3 rounded-2xl shadow-lg shadow-orange-600/30 transition-all"
               @click="runYoloDetection"
@@ -383,7 +383,7 @@ const totalDetectedCapacity = computed(() => {
             </div>
 
             <Tag
-              :value="layoutResult.engine === 'yolo_v8' ? 'YOLO v8 (best.pt)' : 'Simulación Geométrica'"
+              :value="layoutResult.engine === 'yolo_v8' ? 'Visión IA Avanzada' : 'Análisis Geométrico'"
               :severity="layoutResult.engine === 'yolo_v8' ? 'success' : 'warn'"
               class="text-[10px]"
             />
@@ -471,7 +471,7 @@ const totalDetectedCapacity = computed(() => {
               </div>
               <h4 class="text-base font-bold text-slate-100">Visor de Planos Desactivado</h4>
               <p class="text-xs text-slate-300 max-w-sm mx-auto">
-                Carga una imagen o haz clic en "Cargar Plano de Demostración" para comenzar a detectar el layout arquitectónico con YOLO.
+                Carga una imagen o haz clic en "Cargar Plano Modelo de Salón" para detectar automáticamente la distribución de mesas.
               </p>
             </div>
           </div>
@@ -480,7 +480,7 @@ const totalDetectedCapacity = computed(() => {
           <div class="flex flex-wrap items-center justify-center gap-6 text-xs text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
             <span class="flex items-center gap-1.5 font-medium">
               <span class="w-3.5 h-3.5 rounded bg-emerald-500/30 border border-emerald-500 inline-block"></span>
-              Mesas Detectadas (YOLO)
+              Mesas Detectadas
             </span>
             <span class="flex items-center gap-1.5 font-medium">
               <span class="w-3 h-3 rounded-full bg-blue-500 border border-blue-400 inline-block"></span>

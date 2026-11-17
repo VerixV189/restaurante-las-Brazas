@@ -92,7 +92,7 @@ class AuthController extends Controller
             [
                 'name' => $user->name,
                 'phone' => $user->phone,
-                'preferences_notes' => 'Registrado vía App Móvil Flutter',
+                'preferences_notes' => 'Registrado desde la App Móvil',
             ]
         );
 

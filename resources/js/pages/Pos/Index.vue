@@ -453,7 +453,7 @@ function getOrderStatusInfo(order) {
                 <Truck class="w-10 h-10 text-slate-400 mx-auto" />
                 <p class="text-sm font-bold text-slate-700 dark:text-slate-200">No hay pedidos de envío a domicilio registrados</p>
                 <p class="text-xs text-slate-500 dark:text-slate-400">
-                  Los pedidos realizados desde la aplicación móvil Flutter aparecerán aquí automáticamente.
+                  Los pedidos realizados desde la aplicación móvil aparecerán aquí automáticamente.
                 </p>
               </div>
             </div>

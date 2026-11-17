@@ -29,7 +29,7 @@ const toast = useToast();
 const activeTab = ref(props.myOrders.length > 0 ? 'mine' : 'pending');
 const isRefreshing = ref(false);
 
-// Modal de Confirmación con PIN de 4 dígitos y Firma Digital (RF-19)
+// Modal de Confirmación con PIN de 4 dígitos y Firma Digital
 const confirmingOrder = ref(null);
 const pinInput = ref('');
 const submittingConfirm = ref(false);
@@ -376,7 +376,7 @@ async function submitConfirmDelivery() {
                 </p>
               </div>
 
-              <!-- Botones GPS Google Maps y Waze (RF-18) -->
+              <!-- Botones GPS Google Maps y Waze -->
               <div class="grid grid-cols-2 gap-2 pt-1">
                 <a
                   :href="o.google_maps_url"
@@ -439,7 +439,7 @@ async function submitConfirmDelivery() {
       </div>
     </div>
 
-    <!-- MODAL DE CONFIRMACIÓN DE ENTREGA CON PIN 4 DÍGITOS Y FIRMA DIGITAL (RF-19) -->
+    <!-- MODAL DE CONFIRMACIÓN DE ENTREGA CON PIN 4 DÍGITOS Y FIRMA DIGITAL -->
     <div
       v-if="confirmingOrder"
       class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4"

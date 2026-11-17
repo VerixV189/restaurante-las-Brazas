@@ -1095,8 +1095,8 @@ class AiChatService
     private function buildWelcomeOrFallbackReply(string $userName, string $role, bool $isStaff, string $query): string
     {
         if ($isStaff) {
-            return "👋 ¡Hola, **{$userName}** ({$role})! Soy tu **Agente IA Ejecutivo y Operativo** de Las Brazas. 🔥\n\n"
-                 . "Estoy conectado en tiempo real a PostgreSQL. Puedes consultarme o pedirme acciones:\n"
+            return "👋 ¡Hola, **{$userName}** ({$role})! Soy tu **Asistente Ejecutivo y Operativo** de Las Brazas. 🔥\n\n"
+                 . "Estoy conectado en tiempo real con la operación del restaurante. Puedes consultarme o pedirme acciones:\n"
                  . "• 📊 **Finanzas y KPIs:** *\"¿Cómo van las ventas hoy y cuáles son los platos más vendidos?\"*\n"
                  . "• 💰 **Rentabilidad y Recetas:** *\"¿Cuáles son los platillos más rentables?\"* o *\"Receta del Tomahawk\"*\n"
                  . "• ⚠️ **Inventario y Mermas:** *\"¿Qué insumos están en stock crítico y a qué proveedor llamar?\"*\n"
