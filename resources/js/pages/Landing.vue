@@ -1195,6 +1195,12 @@ function submitTestimonial() {
             <Link href="/register" class="hover:text-orange-600 dark:hover:text-orange-400 transition-colors">
               → Crear Cuenta de Comensal
             </Link>
+            <Link href="/manual" class="hover:text-orange-600 dark:hover:text-orange-400 transition-colors font-semibold text-orange-600 dark:text-orange-400">
+              → Manual de Usuario Interactivo
+            </Link>
+            <a href="/manual/pdf?download=1" download="Manual_Usuario_Completo_Las_Brazas.pdf" class="hover:text-orange-600 dark:hover:text-orange-400 transition-colors">
+              → Descargar Manual PDF
+            </a>
             <Link href="/terms" class="hover:text-orange-600 dark:hover:text-orange-400 transition-colors">
               → Términos y Condiciones
             </Link>

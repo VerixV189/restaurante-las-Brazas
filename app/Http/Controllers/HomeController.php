@@ -13,8 +13,12 @@ use Inertia\Response;
 
 class HomeController extends Controller
 {
-    public function index(): Response
+    public function index(\Illuminate\Http\Request $request): Response
     {
+        if (ManualController::isManualHost($request)) {
+            return app(ManualController::class)->index($request);
+        }
+
         $categories = Category::where('is_active', true)->get();
         $dishes = Dish::with('category')->where('is_available', true)->get();
         $tables = Table::with('area')->where('status', 'available')->get();

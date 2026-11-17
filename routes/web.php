@@ -22,6 +22,10 @@ use App\Http\Controllers\InventoryMovementController;
 // ─────────────────────────────────────────────────────────────────────────────
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::post('/reserve', [HomeController::class, 'reserve'])->name('public.reserve');
+Route::get('/manual', [\App\Http\Controllers\ManualController::class, 'index'])->name('manual.index');
+Route::get('/manual/pdf', [\App\Http\Controllers\ManualController::class, 'downloadPdf'])->name('manual.pdf');
+Route::get('/pdf', [\App\Http\Controllers\ManualController::class, 'downloadPdf'])->name('manual.pdf.short');
+Route::get('/descargar-pdf', [\App\Http\Controllers\ManualController::class, 'downloadPdf'])->name('manual.pdf.download');
 Route::get('/terms', [AuthController::class, 'showTerms'])->name('terms');
 Route::get('/terminos-y-condiciones', [AuthController::class, 'showTerms']);
 Route::get('/verify-email/{id}/{hash}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
