@@ -97,4 +97,56 @@ class ManualSubdomainTest extends TestCase
         $logoutResponse->assertHeader('Clear-Site-Data', '"cache"');
         $this->assertGuest();
     }
+
+    public function test_google_oauth_registration_creates_verified_client_and_sends_only_two_emails_without_verification_mail(): void
+    {
+        \Illuminate\Support\Facades\Mail::fake();
+        \Illuminate\Support\Facades\Http::fake([
+            'https://oauth2.googleapis.com/token' => \Illuminate\Support\Facades\Http::response([
+                'access_token' => 'fake-google-access-token-123',
+                'token_type'   => 'Bearer',
+                'expires_in'   => 3599,
+            ], 200),
+            'https://www.googleapis.com/oauth2/v3/userinfo' => \Illuminate\Support\Facades\Http::response([
+                'sub'            => '109876543210',
+                'name'           => 'Carlos Comensal Google',
+                'given_name'     => 'Carlos',
+                'email'          => 'carlos.google@example.com',
+                'email_verified' => true,
+            ], 200),
+        ]);
+
+        config([
+            'services.google.client_id'     => 'test-google-client-id.apps.googleusercontent.com',
+            'services.google.client_secret' => 'test-google-client-secret',
+            'services.google.redirect'      => 'https://lasbrazas.ramio.tech/auth/google/callback',
+        ]);
+
+        $redirectResponse = $this->get('/auth/google/redirect');
+        $redirectResponse->assertStatus(302);
+        $this->assertStringContainsString('accounts.google.com/o/oauth2/v2/auth', (string) $redirectResponse->headers->get('Location'));
+
+        $state = session('google_oauth_state');
+        $this->assertNotEmpty($state);
+
+        $callbackResponse = $this->withSession(['google_oauth_state' => $state])
+            ->get('/auth/google/callback?code=fake-auth-code-xyz&state=' . $state);
+
+        $callbackResponse->assertRedirect('/dashboard');
+        $this->assertAuthenticated();
+
+        $createdUser = \App\Models\User::where('email', 'carlos.google@example.com')->first();
+        $this->assertNotNull($createdUser);
+        $this->assertTrue((bool) $createdUser->is_active);
+        $this->assertNotNull($createdUser->email_verified_at);
+        $this->assertSame('Cliente', $createdUser->role?->name);
+
+        \Illuminate\Support\Facades\Mail::assertSent(\App\Mail\TermsMail::class, function ($mail) {
+            return $mail->hasTo('carlos.google@example.com');
+        });
+        \Illuminate\Support\Facades\Mail::assertSent(\App\Mail\ConditionsMail::class, function ($mail) {
+            return $mail->hasTo('carlos.google@example.com');
+        });
+        \Illuminate\Support\Facades\Mail::assertNotSent(\App\Mail\VerifyAccountMail::class);
+    }
 }

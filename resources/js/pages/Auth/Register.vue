@@ -96,17 +96,46 @@ function submitRegister() {
         <div class="mb-6 p-3.5 rounded-2xl bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800/40 flex items-start gap-3">
           <ShieldCheck class="w-5 h-5 text-orange-600 dark:text-orange-400 shrink-0 mt-0.5" />
           <div class="text-xs text-slate-700 dark:text-slate-300">
-            <p class="font-bold text-orange-700 dark:text-orange-300">Activación en 3 Pasos:</p>
+            <p class="font-bold text-orange-700 dark:text-orange-300">Activación Inteligente:</p>
             <p class="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed">
-              Al completar tu registro, recibirás <strong>3 correos</strong>: Términos del Servicio, Condiciones de Reserva y el Enlace de Verificación de tu Cuenta.
+              Si te registras con <strong>Google</strong>, tu cuenta queda activada al instante y recibirás los <strong>2 correos</strong> de Términos y Condiciones de Reserva. Con correo manual recibirás además el enlace de verificación.
             </p>
           </div>
         </div>
+
+        <!-- Flash Error -->
+        <Message v-if="$page.props.flash?.error" severity="error" class="mb-4 text-xs font-medium">
+          {{ $page.props.flash.error }}
+        </Message>
 
         <!-- General / Server Error Messages -->
         <Message v-if="form.errors.terms" severity="error" class="mb-4 text-xs">
           {{ form.errors.terms }}
         </Message>
+
+        <!-- Botón de Registro en 1 clic con Google OAuth 2.0 -->
+        <div class="mb-5">
+          <a
+            href="/auth/google/redirect"
+            class="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 font-semibold text-sm shadow-sm hover:shadow transition-all duration-200"
+          >
+            <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.09C3.26 21.3 7.31 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.27 14.29c-.25-.72-.38-1.49-.38-2.29s.13-1.57.38-2.29V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.98-3.09z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.98 3.09c.95-2.85 3.6-4.96 6.73-4.96z"/>
+            </svg>
+            <span>Continuar con Google</span>
+          </a>
+
+          <div class="relative flex items-center justify-center my-4">
+            <div class="border-t border-slate-200 dark:border-slate-800 w-full"></div>
+            <span class="bg-white dark:bg-slate-900 px-3 text-[11px] uppercase tracking-wider font-semibold text-slate-400 dark:text-slate-500 shrink-0">
+              o regístrate con tu correo
+            </span>
+            <div class="border-t border-slate-200 dark:border-slate-800 w-full"></div>
+          </div>
+        </div>
 
         <!-- Registration Form -->
         <form @submit.prevent="submitRegister" class="space-y-4">

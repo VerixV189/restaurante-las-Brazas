@@ -10,8 +10,10 @@ use App\Mail\VerifyAccountMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -146,6 +148,142 @@ class AuthController extends Controller
             'success',
             '¡Excelente! Tu correo electrónico ha sido verificado con éxito. Ya puedes iniciar sesión con tus credenciales.'
         );
+    }
+
+    public function redirectToGoogle(Request $request)
+    {
+        $clientId = config('services.google.client_id');
+        $clientSecret = config('services.google.client_secret');
+
+        if (empty($clientId) || empty($clientSecret)) {
+            return redirect()->route('login')->with(
+                'error',
+                'El inicio de sesión con Google está listo para activarse. Configura GOOGLE_CLIENT_ID y GOOGLE_CLIENT_SECRET en el archivo .env del servidor.'
+            );
+        }
+
+        $redirectUri = config('services.google.redirect');
+        if (!str_starts_with((string) $redirectUri, 'http')) {
+            $redirectUri = url($redirectUri ?: '/auth/google/callback');
+        }
+
+        $state = Str::random(40);
+        $request->session()->put('google_oauth_state', $state);
+
+        $query = http_build_query([
+            'client_id'     => $clientId,
+            'redirect_uri'  => $redirectUri,
+            'response_type' => 'code',
+            'scope'         => 'openid email profile',
+            'state'         => $state,
+            'prompt'        => 'select_account',
+        ]);
+
+        return redirect()->away('https://accounts.google.com/o/oauth2/v2/auth?' . $query);
+    }
+
+    public function handleGoogleCallback(Request $request)
+    {
+        if ($request->filled('error')) {
+            return redirect()->route('login')->with('error', 'Inicio de sesión con Google cancelado por el usuario.');
+        }
+
+        $expectedState = $request->session()->pull('google_oauth_state');
+        if (!$expectedState || $request->input('state') !== $expectedState || !$request->filled('code')) {
+            return redirect()->route('login')->with('error', 'La sesión de seguridad con Google expiró. Inténtalo nuevamente.');
+        }
+
+        $clientId = config('services.google.client_id');
+        $clientSecret = config('services.google.client_secret');
+        $redirectUri = config('services.google.redirect');
+        if (!str_starts_with((string) $redirectUri, 'http')) {
+            $redirectUri = url($redirectUri ?: '/auth/google/callback');
+        }
+
+        try {
+            $tokenResponse = Http::asForm()->timeout(15)->post('https://oauth2.googleapis.com/token', [
+                'code'          => $request->input('code'),
+                'client_id'     => $clientId,
+                'client_secret' => $clientSecret,
+                'redirect_uri'  => $redirectUri,
+                'grant_type'    => 'authorization_code',
+            ]);
+
+            if (!$tokenResponse->successful() || empty($tokenResponse->json('access_token'))) {
+                return redirect()->route('login')->with('error', 'No se pudo validar el token de acceso con Google.');
+            }
+
+            $userInfoResponse = Http::withToken($tokenResponse->json('access_token'))
+                ->timeout(15)
+                ->get('https://www.googleapis.com/oauth2/v3/userinfo');
+
+            if (!$userInfoResponse->successful() || empty($userInfoResponse->json('email'))) {
+                return redirect()->route('login')->with('error', 'No se pudo obtener la información de perfil desde Google.');
+            }
+
+            $googleProfile = $userInfoResponse->json();
+            $email = strtolower(trim($googleProfile['email']));
+            $name = trim($googleProfile['name'] ?? ($googleProfile['given_name'] ?? explode('@', $email)[0]));
+        } catch (\Throwable $e) {
+            \Log::warning('Error autenticando con Google OAuth: ' . $e->getMessage());
+            return redirect()->route('login')->with('error', 'Error de conexión al comunicarse con los servidores de Google.');
+        }
+
+        $user = User::where('email', $email)->first();
+
+        if (!$user) {
+            $clientRole = Role::firstOrCreate(
+                ['name' => 'Cliente'],
+                ['description' => 'Cliente externo para reservas y pedidos']
+            );
+
+            $user = User::create([
+                'name'              => $name,
+                'email'             => $email,
+                'password'          => Hash::make(Str::random(32)),
+                'role_id'           => $clientRole->id,
+                'is_active'         => true,
+                'email_verified_at' => now(),
+            ]);
+
+            try {
+                \App\Models\Customer::firstOrCreate(
+                    ['email' => $user->email],
+                    ['name' => $user->name, 'loyalty_points' => 0]
+                );
+            } catch (\Throwable $e) {
+                \Log::warning('No se pudo sincronizar ficha de cliente en registro Google: ' . $e->getMessage());
+            }
+
+            // Enviar únicamente los 2 correos informativos (Términos y Condiciones), sin correo de validación
+            try {
+                Mail::to($user->email)->send(new TermsMail($user));
+                Mail::to($user->email)->send(new ConditionsMail($user));
+            } catch (\Throwable $e) {
+                \Log::warning('Error enviando correos informativos tras registro con Google: ' . $e->getMessage());
+            }
+
+            Auth::login($user, true);
+            $request->session()->regenerate();
+
+            return redirect()->intended('/dashboard')->with(
+                'success',
+                "¡Bienvenido a Las Brazas, {$user->name}! Tu cuenta con Google ha sido creada y te enviamos a tu correo los Términos del Servicio y Condiciones de Reserva."
+            );
+        }
+
+        // Usuario ya existente (Administrador, Chef, Mesero, Recepcionista, Repartidor o Cliente)
+        if (!$user->is_active || !$user->email_verified_at) {
+            $user->forceFill([
+                'is_active'         => true,
+                'email_verified_at' => $user->email_verified_at ?? now(),
+            ])->save();
+        }
+
+        Auth::login($user, true);
+        $request->session()->regenerate();
+
+        return redirect()->intended('/dashboard');
     }
 
     public function logout(Request $request)
