@@ -5,7 +5,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <title inertia>{{ config('app.name', 'Restaurante Las Brazas') }}</title>
+        <meta name="theme-color" content="#ea580c">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <link rel="icon" type="image/jpeg" href="/images/logo-dark.jpg">
+        <link rel="apple-touch-icon" href="/images/logo-dark.jpg">
+        <link rel="manifest" href="/manifest.webmanifest">
 
         <!-- Theme Initialization Script to avoid FOUC -->
         <script>

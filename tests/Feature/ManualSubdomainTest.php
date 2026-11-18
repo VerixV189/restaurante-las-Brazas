@@ -67,4 +67,34 @@ class ManualSubdomainTest extends TestCase
             str_replace('"', '', (string) $downloadResponse->headers->get('Content-Disposition'))
         );
     }
+
+    public function test_pwa_assets_and_logout_cache_purge_headers_are_configured(): void
+    {
+        $this->assertFileExists(public_path('manifest.webmanifest'));
+        $this->assertFileExists(public_path('sw.js'));
+        $this->assertFileExists(public_path('offline.html'));
+
+        $swContent = (string) file_get_contents(public_path('sw.js'));
+        $this->assertStringContainsString('lasbrazas-static-v1', $swContent);
+        $this->assertStringContainsString('lasbrazas-session-v1', $swContent);
+        $this->assertStringContainsString('CLEAR_AUTH_CACHE', $swContent);
+
+        $role = \App\Models\Role::create([
+            'name' => 'Administrador',
+            'description' => 'Admin role',
+        ]);
+        $user = \App\Models\User::create([
+            'role_id' => $role->id,
+            'name' => 'Admin Test',
+            'email' => 'admin.pwa@lasbrazas.bo',
+            'password' => bcrypt('password123'),
+            'is_active' => true,
+            'email_verified_at' => now(),
+        ]);
+
+        $logoutResponse = $this->actingAs($user)->post('/logout');
+        $logoutResponse->assertRedirect('/');
+        $logoutResponse->assertHeader('Clear-Site-Data', '"cache"');
+        $this->assertGuest();
+    }
 }

@@ -3,12 +3,13 @@ import '../css/app.css';
 import 'primeicons/primeicons.css';
 
 import { createApp, h } from 'vue';
-import { createInertiaApp } from '@inertiajs/vue3';
+import { createInertiaApp, router } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import PrimeVue from 'primevue/config';
 import ToastService from 'primevue/toastservice';
 import ConfirmationService from 'primevue/confirmationservice';
 import Aura from '@primeuix/themes/aura';
+import { initOfflinePwaSystem, syncUserSessionSecurity } from './composables/useOfflinePwa';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Restaurante Las Brazas';
 
@@ -16,6 +17,14 @@ createInertiaApp({
     title: (title) => title ? `${title} - ${appName}` : appName,
     resolve: (name) => resolvePageComponent(`./pages/${name}.vue`, import.meta.glob('./pages/**/*.vue')),
     setup({ el, App, props, plugin }) {
+        initOfflinePwaSystem(props.initialPage);
+
+        router.on('navigate', (event) => {
+            if (event?.detail?.page) {
+                syncUserSessionSecurity(event.detail.page);
+            }
+        });
+
         return createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(PrimeVue, {

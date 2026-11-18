@@ -1,12 +1,14 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { Link, usePage } from '@inertiajs/vue3';
+import { Link, usePage, router } from '@inertiajs/vue3';
 import Toast from 'primevue/toast';
 import ConfirmDialog from 'primevue/confirmdialog';
 import Avatar from 'primevue/avatar';
 import Tag from 'primevue/tag';
 import { useTheme } from '../composables/useTheme';
+import { useOfflinePwa } from '../composables/useOfflinePwa';
 import AiChatSidebar from '../components/AiChatSidebar.vue';
+import NetworkStatusBadge from '../components/NetworkStatusBadge.vue';
 import {
   LayoutDashboard,
   UtensilsCrossed,
@@ -36,6 +38,12 @@ const page = usePage();
 const sidebarOpen = ref(true);
 const aiChatOpen = ref(false);
 const { isDark, initTheme, toggleTheme } = useTheme();
+const { isOfflineMode, simulatedOffline, toggleSimulatedOffline, purgeOfflineSessionData } = useOfflinePwa();
+
+async function handleSecureLogout() {
+  await purgeOfflineSessionData('Sesión cerrada: datos offline eliminados por seguridad');
+  router.post('/logout');
+}
 
 onMounted(() => {
   initTheme();
@@ -295,19 +303,18 @@ function isUrlActive(url) {
           </div>
         </div>
 
-        <Link
-          href="/logout"
-          method="post"
-          as="button"
+        <button
+          type="button"
+          @click="handleSecureLogout"
           :title="!sidebarOpen ? 'Cerrar Sesión' : ''"
           :class="[
-            'w-full flex items-center gap-3 rounded-xl text-red-500 hover:bg-red-500/10 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 font-medium text-xs transition-colors',
+            'w-full flex items-center gap-3 rounded-xl text-red-500 hover:bg-red-500/10 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 font-medium text-xs transition-colors cursor-pointer',
             sidebarOpen ? 'px-3 py-2' : 'p-2.5 justify-center'
           ]"
         >
           <LogOut class="w-4 h-4 shrink-0" />
           <span v-if="sidebarOpen">Cerrar Sesión</span>
-        </Link>
+        </button>
       </div>
     </aside>
 
@@ -336,6 +343,9 @@ function isUrlActive(url) {
         </div>
 
         <div class="flex items-center gap-3">
+          <!-- Indicador / Control de Modo Online y Offline (PWA) -->
+          <NetworkStatusBadge />
+
           <!-- AI Assistant Navbar Button -->
           <button
             @click="aiChatOpen = !aiChatOpen"
@@ -366,6 +376,24 @@ function isUrlActive(url) {
           <Tag value="Sistema Restaurante v1.0" severity="warn" class="hidden sm:inline-flex bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20" />
         </div>
       </header>
+
+      <!-- Banner de aviso cuando está en Modo Offline -->
+      <div
+        v-if="isOfflineMode"
+        class="bg-amber-500/15 dark:bg-amber-500/20 border-b border-amber-500/30 px-6 py-2 flex flex-wrap items-center justify-between gap-2 text-xs text-amber-800 dark:text-amber-200"
+      >
+        <span>
+          <strong>Modo Offline Activo:</strong> Estás navegando con los datos guardados en la caché segura de tu sesión actual ({{ userRole || 'Usuario' }}). Al cerrar sesión estos datos se eliminan automáticamente.
+        </span>
+        <button
+          v-if="simulatedOffline"
+          type="button"
+          @click="toggleSimulatedOffline"
+          class="px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-bold text-[11px] cursor-pointer"
+        >
+          Volver a Modo Online
+        </button>
+      </div>
 
       <!-- Page Content -->
       <main class="flex-1 p-6 overflow-y-auto">

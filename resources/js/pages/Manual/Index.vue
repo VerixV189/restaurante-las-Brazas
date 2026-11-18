@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { Head } from '@inertiajs/vue3';
 import { useTheme } from '../../composables/useTheme';
+import NetworkStatusBadge from '../../components/NetworkStatusBadge.vue';
 import {
   Flame,
   Search,
@@ -424,6 +425,8 @@ onBeforeUnmount(() => {
 
         <!-- Actions -->
         <div class="flex items-center gap-2 shrink-0">
+          <NetworkStatusBadge />
+
           <button
             type="button"
             @click="triggerPrint"

@@ -154,6 +154,9 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect('/')->withHeaders([
+            'Clear-Site-Data' => '"cache"',
+            'Cache-Control'   => 'no-store, no-cache, must-revalidate, max-age=0',
+        ]);
     }
 }

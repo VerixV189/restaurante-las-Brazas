@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useForm, Link } from '@inertiajs/vue3';
 import { useTheme } from '../composables/useTheme';
+import NetworkStatusBadge from '../components/NetworkStatusBadge.vue';
 import Toast from 'primevue/toast';
 import Button from 'primevue/button';
 import Tag from 'primevue/tag';
@@ -375,6 +376,9 @@ function submitTestimonial() {
 
         <!-- Action Buttons -->
         <div class="flex items-center gap-2 shrink-0">
+          <!-- Indicador Online / Offline PWA -->
+          <NetworkStatusBadge />
+
           <!-- Theme Switcher -->
           <button
             type="button"

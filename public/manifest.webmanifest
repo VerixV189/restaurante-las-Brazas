@@ -1,0 +1,26 @@
+{
+  "name": "Restaurante Las Brazas — Steakhouse & Parrilla",
+  "short_name": "Las Brazas",
+  "description": "Plataforma gastronómica de Restaurante Las Brazas: Menú digital, reservas, pedidos a domicilio, POS, Monitor de Cocina y Manual Interactivo con soporte Offline.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#020617",
+  "theme_color": "#ea580c",
+  "lang": "es-BO",
+  "icons": [
+    {
+      "src": "/images/logo-dark.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/logo-dark.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
