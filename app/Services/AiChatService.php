@@ -21,6 +21,13 @@ use Illuminate\Support\Facades\Log;
 
 class AiChatService
 {
+    private string $lastEngine = 'local-fallback';
+
+    public function getLastEngine(): string
+    {
+        return $this->lastEngine;
+    }
+
     /**
      * Procesa el mensaje del usuario y genera una respuesta inteligente, contextualizada y accionable.
      */
@@ -394,25 +401,41 @@ class AiChatService
     }
 
     /**
-     * Conexión directa con Google Gemini API (gemini-2.5-flash) con contexto RAG completo.
+     * Conexión directa con LLM configurado (Vertex AI Express / Google Gemini / Groq / OpenAI) con contexto RAG.
      */
     private function tryDirectGeminiApi(User $user, string $message, array $context, array $history): ?string
     {
-        $apiKey = config('services.gemini.api_key');
-        if (empty($apiKey)) {
-            return null;
-        }
-
-        $model = config('services.gemini.model', 'gemini-2.5-flash');
         $systemPrompt = $this->buildRagSystemPrompt($context);
 
-        try {
+        return $this->callConfiguredLlm($systemPrompt, $message, $history);
+    }
+
+    /**
+     * Motor unificado Multi-LLM:
+     * 1) Google Vertex AI Express (claves AQ.*) o Google AI Studio (claves AIza*) con fallback de modelos
+     * 2) Groq (llama-3.3-70b-versatile — gratuito y ultrarrápido)
+     * 3) OpenAI (gpt-4o-mini / gpt-4o)
+     */
+    private function callConfiguredLlm(string $systemPrompt, string $message, array $history = []): ?string
+    {
+        // 1. Google Gemini / Vertex AI Express
+        $geminiKey = trim((string) config('services.gemini.api_key'));
+        if ($geminiKey !== '') {
+            $configuredModel = trim((string) config('services.gemini.model', 'gemini-2.5-flash'));
+            $candidateModels = array_values(array_unique(array_filter([
+                $configuredModel,
+                'gemini-2.5-flash',
+                'gemini-2.0-flash',
+            ])));
+
+            $isVertexExpressKey = str_starts_with($geminiKey, 'AQ.');
             $contents = [];
-            foreach (array_slice($history, -6) as $h) {
-                if (!empty($h['content'])) {
+            foreach (array_slice($history, -10) as $h) {
+                $contentText = trim((string) ($h['content'] ?? ''));
+                if ($contentText !== '') {
                     $contents[] = [
                         'role'  => ($h['role'] ?? 'user') === 'assistant' ? 'model' : 'user',
-                        'parts' => [['text' => $h['content']]],
+                        'parts' => [['text' => $contentText]],
                     ];
                 }
             }
@@ -421,26 +444,156 @@ class AiChatService
                 'parts' => [['text' => $message]],
             ];
 
-            $response = Http::timeout(10)
-                ->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}", [
-                    'systemInstruction' => [
-                        'parts' => [['text' => $systemPrompt]],
-                    ],
-                    'contents' => $contents,
-                    'generationConfig' => [
-                        'temperature'     => 0.4,
-                        'maxOutputTokens' => 900,
-                    ],
+            $payload = [
+                'systemInstruction' => [
+                    'parts' => [['text' => $systemPrompt]],
+                ],
+                'contents' => $contents,
+                'generationConfig' => [
+                    'temperature'     => 0.4,
+                    'maxOutputTokens' => 2048,
+                ],
+            ];
+
+            foreach ($candidateModels as $model) {
+                $endpoints = $isVertexExpressKey
+                    ? [
+                        ['url' => "https://aiplatform.googleapis.com/v1/publishers/google/models/{$model}:generateContent", 'engine' => "vertex-{$model}"],
+                        ['url' => "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent", 'engine' => "gemini-{$model}"],
+                    ]
+                    : [
+                        ['url' => "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent", 'engine' => "gemini-{$model}"],
+                    ];
+
+                foreach ($endpoints as $ep) {
+                    try {
+                        $response = Http::timeout(18)
+                            ->withHeaders([
+                                'x-goog-api-key' => $geminiKey,
+                                'Content-Type'   => 'application/json',
+                            ])
+                            ->post($ep['url'], $payload);
+
+                        if ($response->successful()) {
+                            $parts = $response->json('candidates.0.content.parts', []);
+                            $text = '';
+                            if (is_array($parts)) {
+                                foreach ($parts as $part) {
+                                    // Ignorar bloques internos de "thought" si el modelo retorna pensamiento separado
+                                    if (!empty($part['thought'])) {
+                                        continue;
+                                    }
+                                    if (!empty($part['text'])) {
+                                        $text .= $part['text'];
+                                    }
+                                }
+                            }
+                            $text = trim($text);
+                            if ($text !== '') {
+                                $this->lastEngine = $ep['engine'];
+                                return $text;
+                            }
+                        } else {
+                            Log::warning('LLM Google API error', [
+                                'engine' => $ep['engine'],
+                                'status' => $response->status(),
+                                'body'   => mb_substr((string) $response->body(), 0, 350),
+                            ]);
+                        }
+                    } catch (\Throwable $e) {
+                        Log::warning("LLM Google exception ({$ep['engine']}): " . $e->getMessage());
+                    }
+                }
+            }
+        }
+
+        // 2. Groq API (Llama 3.3 70B — ultrarrápido y con tier gratuito)
+        $groqKey = trim((string) config('services.groq.api_key'));
+        if ($groqKey !== '') {
+            $groqModel = trim((string) config('services.groq.model', 'llama-3.3-70b-versatile'));
+            $reply = $this->callOpenAiCompatibleChat(
+                'https://api.groq.com/openai/v1/chat/completions',
+                $groqKey,
+                $groqModel,
+                $systemPrompt,
+                $message,
+                $history,
+                "groq-{$groqModel}"
+            );
+            if ($reply !== null) {
+                return $reply;
+            }
+        }
+
+        // 3. OpenAI API (GPT-4o-mini / GPT-4o)
+        $openaiKey = trim((string) config('services.openai.api_key'));
+        if ($openaiKey !== '') {
+            $openaiModel = trim((string) config('services.openai.model', 'gpt-4o-mini'));
+            $reply = $this->callOpenAiCompatibleChat(
+                'https://api.openai.com/v1/chat/completions',
+                $openaiKey,
+                $openaiModel,
+                $systemPrompt,
+                $message,
+                $history,
+                "openai-{$openaiModel}"
+            );
+            if ($reply !== null) {
+                return $reply;
+            }
+        }
+
+        $this->lastEngine = 'local-fallback';
+        return null;
+    }
+
+    private function callOpenAiCompatibleChat(
+        string $endpoint,
+        string $apiKey,
+        string $model,
+        string $systemPrompt,
+        string $message,
+        array $history,
+        string $engineLabel
+    ): ?string {
+        $messages = [
+            ['role' => 'system', 'content' => $systemPrompt],
+        ];
+        foreach (array_slice($history, -10) as $h) {
+            $contentText = trim((string) ($h['content'] ?? ''));
+            if ($contentText !== '') {
+                $messages[] = [
+                    'role'    => ($h['role'] ?? 'user') === 'assistant' ? 'assistant' : 'user',
+                    'content' => $contentText,
+                ];
+            }
+        }
+        $messages[] = ['role' => 'user', 'content' => $message];
+
+        try {
+            $response = Http::timeout(18)
+                ->withToken($apiKey)
+                ->post($endpoint, [
+                    'model'       => $model,
+                    'messages'    => $messages,
+                    'temperature' => 0.4,
+                    'max_tokens'  => 1400,
                 ]);
 
             if ($response->successful()) {
-                $text = $response->json('candidates.0.content.parts.0.text');
-                if (!empty($text)) {
-                    return trim($text);
+                $text = trim((string) $response->json('choices.0.message.content', ''));
+                if ($text !== '') {
+                    $this->lastEngine = $engineLabel;
+                    return $text;
                 }
+            } else {
+                Log::warning("LLM {$engineLabel} error", [
+                    'status' => $response->status(),
+                    'body'   => mb_substr((string) $response->body(), 0, 350),
+                ]);
             }
         } catch (\Throwable $e) {
-            Log::info('Direct Gemini API fallback: ' . $e->getMessage());
+            Log::warning("LLM {$engineLabel} exception: " . $e->getMessage());
         }
 
         return null;
@@ -1122,14 +1275,14 @@ class AiChatService
         $message = trim($message);
         $publicContext = $this->gatherPublicContext();
 
-        // 1. Intentar Google Gemini API con base de conocimiento empresarial + carta en vivo
-        $geminiReply = $this->tryDirectPublicGeminiApi($message, $publicContext, $history, $portal);
-        if ($geminiReply !== null) {
-            return $geminiReply;
+        // 1. Intentar LLM configurado (Vertex AI Express AQ.* / Google Gemini / Groq / OpenAI) con RAG completo
+        $llmReply = $this->tryDirectPublicGeminiApi($message, $publicContext, $history, $portal);
+        if ($llmReply !== null) {
+            return $llmReply;
         }
 
-        // 2. Motor inteligente de respaldo en PHP (cubre 100% de dudas sin fallar jamás)
-        return $this->smartProcessPublicQuery($message, $publicContext, $portal);
+        // 2. Motor inteligente de respaldo en PHP con memoria de conversación
+        return $this->smartProcessPublicQuery($message, $publicContext, $portal, $history);
     }
 
     /**
@@ -1209,52 +1362,9 @@ class AiChatService
 
     private function tryDirectPublicGeminiApi(string $message, array $context, array $history, string $portal): ?string
     {
-        $apiKey = config('services.gemini.api_key');
-        if (empty($apiKey)) {
-            return null;
-        }
-
-        $model = config('services.gemini.model', 'gemini-2.5-flash');
         $systemPrompt = $this->buildPublicRagSystemPrompt($context, $portal);
 
-        try {
-            $contents = [];
-            foreach (array_slice($history, -8) as $h) {
-                if (!empty($h['content'])) {
-                    $contents[] = [
-                        'role'  => ($h['role'] ?? 'user') === 'assistant' ? 'model' : 'user',
-                        'parts' => [['text' => $h['content']]],
-                    ];
-                }
-            }
-            $contents[] = [
-                'role'  => 'user',
-                'parts' => [['text' => $message]],
-            ];
-
-            $response = Http::timeout(12)
-                ->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}", [
-                    'systemInstruction' => [
-                        'parts' => [['text' => $systemPrompt]],
-                    ],
-                    'contents' => $contents,
-                    'generationConfig' => [
-                        'temperature'     => 0.35,
-                        'maxOutputTokens' => 1000,
-                    ],
-                ]);
-
-            if ($response->successful()) {
-                $text = $response->json('candidates.0.content.parts.0.text');
-                if (!empty($text)) {
-                    return trim($text);
-                }
-            }
-        } catch (\Throwable $e) {
-            Log::info('Public Gemini API fallback: ' . $e->getMessage());
-        }
-
-        return null;
+        return $this->callConfiguredLlm($systemPrompt, $message, $history);
     }
 
     private function buildPublicRagSystemPrompt(array $context, string $portal): string
@@ -1285,7 +1395,13 @@ class AiChatService
         return <<<PROMPT
 Eres el Agente Inteligente Oficial de Restaurante Las Brazas Steakhouse & BrazasTech Soluciones de Software S.R.L.
 {$rolePersona}
-Responde siempre en español con tono amable, profesional, claro y usando formato Markdown (negritas y viñetas breves). Nunca inventes datos ni reveles contraseñas internas.
+Responde siempre en español con tono amable, consultivo, estratégico y usando formato Markdown limpio (negritas y viñetas breves). Nunca inventes datos ni reveles contraseñas internas.
+REGLA CLAVE DE RAZONAMIENTO:
+- Lee siempre el historial de la conversación y responde específicamente a la situación concreta del usuario (no pegues catálogos genéricos si te pide una recomendación puntual).
+- Si un prospecto SaaS tiene 2 o más sucursales o planea expandirse, recomienda directamente el **Plan Enterprise Multi-Sede (Bs. 1,290/mes o Bs. 1,030/mes anual)** explicando por qué (gestión multi-sucursal, múltiples almacenes, predicción de compras, planos con IA y SLA 99.9%).
+- Si tiene 1 sucursal con más de 15 mesas o quiere KDS + App Móvil + Delivery + Chef IA, recomienda **Plan Steakhouse Pro (Bs. 690/mes o Bs. 550/mes anual)**.
+- Si recién empieza con 1 local pequeño (hasta 15 mesas), recomienda **Plan Parrilla Starter (Bs. 340/mes o Bs. 270/mes anual)**.
+- Termina invitándolo a dar el siguiente paso concreto (cotización, reserva, menú o aclarando si tiene alguna otra pregunta).
 
 === 1. IDENTIDAD CORPORATIVA (MISIÓN, VISIÓN, VALORES Y CALIDAD) ===
 - Empresa desarrolladora del software: BrazasTech Soluciones de Software S.R.L. (registrada ante SEPREC y SENAPI en Bolivia, facturación electrónica SIAT).
@@ -1348,9 +1464,39 @@ PROMPT;
     /**
      * Motor inteligente local de respaldo que responde cualquier duda sobre el restaurante o el SaaS.
      */
-    private function smartProcessPublicQuery(string $message, array $context, string $portal): string
+    private function smartProcessPublicQuery(string $message, array $context, string $portal, array $history = []): string
     {
         $q = mb_strtolower($message, 'UTF-8');
+        $historyText = mb_strtolower(
+            implode(' ', array_map(fn ($h) => (string) ($h['content'] ?? ''), array_slice($history, -6))),
+            'UTF-8'
+        );
+        $fullContext = trim($historyText . ' ' . $q);
+
+        // 0. Recomendación consultiva específica de Plan SaaS (multi-sucursal / expansión / situación del cliente)
+        $isAskingRecommendation = str_contains($q, 'recomiend') || str_contains($q, 'recomendado') || str_contains($q, 'idóneo') || str_contains($q, 'idoneo') || str_contains($q, 'conviene') || str_contains($q, 'situaci') || str_contains($q, 'cual me') || str_contains($q, 'cuál me') || str_contains($q, 'mejor plan');
+        $mentionsMultiBranch = (bool) preg_match('/\b(dos|2|tres|3|cuatro|4|varias|m[uú]ltiples|cadena|franquicia)\s*(sucursal|local|puesto|sede|tienda)/u', $fullContext)
+            || str_contains($fullContext, 'expandir')
+            || str_contains($fullContext, 'expansi');
+
+        if (($portal === 'corporate' || str_contains($fullContext, 'saas') || str_contains($fullContext, 'sucursal')) && ($isAskingRecommendation || $mentionsMultiBranch)) {
+            if ($mentionsMultiBranch) {
+                return "🏆 **Recomendación para tu situación: Plan Enterprise Multi-Sede**\n\n"
+                     . "Como ya cuentas con **múltiples sucursales y planeas expandirte**, el plan más idóneo para tu negocio es el **Plan Enterprise Multi-Sede — Bs. 1,290/mes** *(o **Bs. 1,030/mes** en suscripción anual, ahorrando 20%)*.\n\n"
+                     . "**¿Por qué es el ideal para ti y no Starter o Pro?**\n"
+                     . "• 🏢 **Multi-Sucursal y Multi-Almacén:** Starter y Pro están orientados a 1 sucursal; Enterprise centraliza tus 2 puestos actuales y los nuevos locales que abras desde un solo panel.\n"
+                     . "• 📈 **Predicción de Demanda & Compras (PDF/Excel):** Calcula cuánto carbón, carne e insumos comprar por sede para evitar quiebres de stock al crecer.\n"
+                     . "• 🗺️ **Planos Inteligentes con IA & Auditoría de 6 Roles:** Controla caja, cocina (KDS), meseros, delivery con PIN y auditoría por cada sucursal con **SLA 99.9% y soporte 24/7**.\n\n"
+                     . "📩 Puedes solicitar una demo personalizada indicando tus 2 sucursales en **`/empresa#cotizacion`**.";
+            }
+
+            if (str_contains($fullContext, 'pequeñ') || str_contains($fullContext, 'empez') || str_contains($fullContext, '1 sucursal') || str_contains($fullContext, 'una sucursal')) {
+                return "💡 **Recomendación para tu situación:**\n\n"
+                     . "• Si operas **1 local con hasta 15 mesas** y buscas orden en caja, inventario y facturación SIAT: elige **Plan Parrilla Starter (Bs. 340/mes o Bs. 270/mes anual)**.\n"
+                     . "• Si quieres escalar ventas con **Monitor de Cocina KDS, App Móvil propia con Delivery + PIN y Chef Virtual IA**: elige **Plan Steakhouse Pro (Bs. 690/mes o Bs. 550/mes anual)**.\n\n"
+                     . "¿Cuántas mesas manejas aproximadamente y planeas abrir otra sucursal pronto?";
+            }
+        }
 
         // 1. Misión y Visión / Identidad Corporativa
         if (str_contains($q, 'misión') || str_contains($q, 'mision') || str_contains($q, 'visión') || str_contains($q, 'vision') || str_contains($q, 'slogan') || str_contains($q, 'filosof')) {

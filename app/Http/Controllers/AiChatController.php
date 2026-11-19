@@ -68,6 +68,7 @@ class AiChatController extends Controller
             'success'           => true,
             'reply'             => $reply,
             'suggested_actions' => $actions,
+            'engine'            => $this->aiChatService->getLastEngine(),
             'timestamp'         => now()->format('H:i'),
         ]);
     }

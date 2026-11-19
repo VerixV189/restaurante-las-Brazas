@@ -429,5 +429,53 @@ class ManualSubdomainTest extends TestCase
         ]);
         $termsResp->assertOk();
         $this->assertStringContainsString('15 minutos', (string) $termsResp->json('reply'));
+
+        // Seguimiento consultivo con memoria de historial (2 sucursales -> Enterprise Multi-Sede)
+        $consultResp = $this->postJson('/ai/public-chat', [
+            'message' => '¿Cuál es el más recomendado para mi situación?',
+            'portal'  => 'corporate',
+            'history' => [
+                ['role' => 'user', 'content' => 'Tengo dos sucursales de puestos de parrillada y quiero expandirme con SaaS.'],
+            ],
+        ]);
+        $consultResp->assertOk();
+        $this->assertStringContainsString('Plan Enterprise Multi-Sede', (string) $consultResp->json('reply'));
+    }
+
+    public function test_public_ai_agent_auto_routes_vertex_express_aq_keys_to_aiplatform_endpoint(): void
+    {
+        \Illuminate\Support\Facades\Http::fake([
+            'https://aiplatform.googleapis.com/v1/publishers/google/models/gemini-2.5-flash:generateContent' => \Illuminate\Support\Facades\Http::response([
+                'candidates' => [
+                    [
+                        'content' => [
+                            'parts' => [
+                                ['text' => 'Para tus dos sucursales y planes de expansión, te recomiendo directamente el **Plan Enterprise Multi-Sede (Bs. 1,290/mes)**.'],
+                            ],
+                        ],
+                    ],
+                ],
+            ], 200),
+        ]);
+
+        config([
+            'services.gemini.api_key' => 'AQ.FakeVertexExpressKey12345',
+            'services.gemini.model'   => 'gemini-2.5-flash',
+        ]);
+
+        $resp = $this->postJson('/ai/public-chat', [
+            'message' => 'Tengo dos sucursales y quiero expandirme, ¿qué plan me conviene?',
+            'portal'  => 'corporate',
+        ]);
+
+        $resp->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('engine', 'vertex-gemini-2.5-flash');
+        $this->assertStringContainsString('Plan Enterprise Multi-Sede', (string) $resp->json('reply'));
+
+        \Illuminate\Support\Facades\Http::assertSent(function ($request) {
+            return str_contains($request->url(), 'aiplatform.googleapis.com/v1/publishers/google/models/gemini-2.5-flash:generateContent')
+                && $request->hasHeader('x-goog-api-key', 'AQ.FakeVertexExpressKey12345');
+        });
     }
 }
