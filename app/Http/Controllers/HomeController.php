@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\ContactMessageMail;
+use App\Mail\SaasQuoteMail;
 use App\Models\Category;
 use App\Models\Dish;
 use App\Models\Table;
@@ -110,5 +111,64 @@ class HomeController extends Controller
         }
 
         return redirect()->back()->with('success', '¡Mensaje enviado con éxito! Hemos recibido tu consulta en nuestro correo y te responderemos a la brevedad.');
+    }
+
+    public function corporate(): Response
+    {
+        return Inertia::render('CorporateLanding');
+    }
+
+    public function sendSaasQuote(Request $request)
+    {
+        // Honeypot anti-bots
+        if ($request->filled('website')) {
+            return redirect()->back()->with('success', '¡Solicitud de licencia SaaS recibida correctamente!');
+        }
+
+        $validated = $request->validate([
+            'restaurant_name' => ['required', 'string', 'min:2', 'max:150'],
+            'contact_name'    => ['required', 'string', 'min:2', 'max:120'],
+            'contact_phone'   => ['required', 'string', 'min:6', 'max:40'],
+            'contact_email'   => ['required', 'email', 'max:150'],
+            'selected_plan'   => ['required', 'string', 'max:150'],
+            'cloud_provider'  => ['nullable', 'string', 'max:150'],
+            'branches_count'  => ['nullable', 'integer', 'min:1', 'max:100'],
+            'message'         => ['nullable', 'string', 'max:2000'],
+        ], [
+            'restaurant_name.required' => 'Ingresa el nombre del restaurante o empresa.',
+            'contact_name.required'    => 'Ingresa el nombre de la persona de contacto.',
+            'contact_phone.required'   => 'Ingresa un número de teléfono o WhatsApp.',
+            'contact_email.required'   => 'Ingresa tu correo corporativo para enviarte la cotización.',
+            'contact_email.email'      => 'Ingresa un correo electrónico válido.',
+            'selected_plan.required'   => 'Selecciona un plan de licencia SaaS.',
+        ]);
+
+        $quoteData = [
+            'restaurant_name' => trim($validated['restaurant_name']),
+            'contact_name'    => trim($validated['contact_name']),
+            'contact_phone'   => trim($validated['contact_phone']),
+            'contact_email'   => strtolower(trim($validated['contact_email'])),
+            'selected_plan'   => trim($validated['selected_plan']),
+            'cloud_provider'  => trim((string) ($validated['cloud_provider'] ?? 'Nube Administrada Alta Disponibilidad')),
+            'branches_count'  => (int) ($validated['branches_count'] ?? 1),
+            'message'         => trim((string) ($validated['message'] ?? '')),
+            'sent_at'         => now()->format('d/m/Y H:i:s'),
+        ];
+
+        $recipient = config('mail.contact_to') ?: config('mail.from.address') ?: 'administracion@lasbrazas.bo';
+
+        try {
+            Mail::to($recipient)->send(new SaasQuoteMail($quoteData));
+        } catch (\Throwable $e) {
+            \Log::error('Error enviando correo de cotización SaaS: ' . $e->getMessage());
+            return redirect()->back()->withErrors([
+                'message' => 'No pudimos enviar tu solicitud de cotización en este momento. Intenta nuevamente en unos minutos.',
+            ]);
+        }
+
+        return redirect()->back()->with(
+            'success',
+            "¡Solicitud de cotización enviada! BrazasTech S.R.L. recibió el pedido de \"{$quoteData['restaurant_name']}\" para el {$quoteData['selected_plan']} y te contactaremos pronto."
+        );
     }
 }
