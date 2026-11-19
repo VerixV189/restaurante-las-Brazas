@@ -376,7 +376,7 @@ function getOrderStatusInfo(order) {
                     <div class="text-[11px] text-slate-500 dark:text-slate-400">
                       <div v-if="table.status === 'occupied' && table.orders && table.orders.length > 0">
                         <strong class="text-red-600 dark:text-red-400">Orden #{{ table.orders[0].id }}</strong> ·
-                        <span class="font-bold text-slate-800 dark:text-slate-200">${{ parseFloat(table.orders[0].total_amount).toFixed(2) }}</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">Bs. {{ parseFloat(table.orders[0].total_amount).toFixed(2) }}</span>
                       </div>
                       <div v-else-if="table.status === 'occupied'">
                         <strong class="text-red-600 dark:text-red-400">Ocupada</strong>
@@ -443,7 +443,7 @@ function getOrderStatusInfo(order) {
                       </span>
                     </div>
                     <span class="font-black text-sm text-emerald-600 dark:text-emerald-400">
-                      ${{ parseFloat(dOrder.total_amount).toFixed(2) }}
+                      Bs. {{ parseFloat(dOrder.total_amount).toFixed(2) }}
                     </span>
                   </div>
                 </div>
@@ -517,7 +517,7 @@ function getOrderStatusInfo(order) {
                 <div>
                   <div class="flex items-start justify-between gap-2 mb-1">
                     <h4 class="font-bold text-xs text-slate-800 dark:text-slate-200 group-hover:text-orange-600 dark:group-hover:text-orange-400 leading-tight">{{ dish.name }}</h4>
-                    <span class="font-bold text-xs text-emerald-600 dark:text-emerald-400 shrink-0">${{ parseFloat(dish.price).toFixed(2) }}</span>
+                    <span class="font-bold text-xs text-emerald-600 dark:text-emerald-400 shrink-0">Bs. {{ parseFloat(dish.price).toFixed(2) }}</span>
                   </div>
                   <p class="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-2 mb-2">{{ dish.description }}</p>
                 </div>
@@ -704,7 +704,7 @@ function getOrderStatusInfo(order) {
                     <div v-if="item.notes" class="text-[10px] text-amber-600 dark:text-amber-400 italic">"{{ item.notes }}"</div>
                   </div>
                   <div class="text-right">
-                    <div class="font-bold text-slate-700 dark:text-slate-300">${{ parseFloat(item.subtotal).toFixed(2) }}</div>
+                    <div class="font-bold text-slate-700 dark:text-slate-300">Bs. {{ parseFloat(item.subtotal).toFixed(2) }}</div>
                     <Tag
                       :value="item.status"
                       :severity="item.status === 'served' ? 'success' : item.status === 'ready' ? 'info' : 'warn'"
@@ -729,7 +729,7 @@ function getOrderStatusInfo(order) {
                 >
                   <div class="flex items-center justify-between">
                     <span class="font-bold text-slate-800 dark:text-slate-100">{{ item.name }}</span>
-                    <span class="font-bold text-emerald-600 dark:text-emerald-400">${{ (item.price * item.quantity).toFixed(2) }}</span>
+                    <span class="font-bold text-emerald-600 dark:text-emerald-400">Bs. {{ (item.price * item.quantity).toFixed(2) }}</span>
                   </div>
 
                   <div class="flex items-center justify-between gap-2">
@@ -770,16 +770,16 @@ function getOrderStatusInfo(order) {
             <div class="space-y-1 text-xs">
               <div class="flex justify-between text-slate-500 dark:text-slate-400">
                 <span>Subtotal:</span>
-                <span>${{ ((currentActiveOrder ? parseFloat(currentActiveOrder.subtotal) : 0) + cartSubtotal).toFixed(2) }}</span>
+                <span>Bs. {{ ((currentActiveOrder ? parseFloat(currentActiveOrder.subtotal) : 0) + cartSubtotal).toFixed(2) }}</span>
               </div>
               <div v-if="currentActiveOrder && parseFloat(currentActiveOrder.delivery_fee) > 0" class="flex justify-between text-slate-500 dark:text-slate-400">
                 <span>Costo de Envío:</span>
-                <span>${{ parseFloat(currentActiveOrder.delivery_fee).toFixed(2) }}</span>
+                <span>Bs. {{ parseFloat(currentActiveOrder.delivery_fee).toFixed(2) }}</span>
               </div>
               <div class="flex justify-between font-bold text-base text-slate-800 dark:text-slate-100 pt-1 border-t border-slate-200 dark:border-slate-800">
                 <span>Total a Pagar:</span>
                 <span class="text-emerald-600 dark:text-emerald-400 text-lg">
-                  ${{ ((currentActiveOrder ? parseFloat(currentActiveOrder.total_amount) : 0) + cartSubtotal).toFixed(2) }}
+                  Bs. {{ ((currentActiveOrder ? parseFloat(currentActiveOrder.total_amount) : 0) + cartSubtotal).toFixed(2) }}
                 </span>
               </div>
             </div>
@@ -870,7 +870,7 @@ function getOrderStatusInfo(order) {
       <div v-if="currentActiveOrder" class="space-y-4 pt-2">
         <div class="p-4 bg-slate-100 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 text-center">
           <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold">Total a Cobrar</p>
-          <h2 class="text-3xl font-black text-emerald-600 dark:text-emerald-400">${{ parseFloat(currentActiveOrder.total_amount).toFixed(2) }}</h2>
+          <h2 class="text-3xl font-black text-emerald-600 dark:text-emerald-400">Bs. {{ parseFloat(currentActiveOrder.total_amount).toFixed(2) }}</h2>
           <p class="text-xs text-slate-600 dark:text-slate-300 mt-1">
             {{ currentActiveOrder.table?.table_number || (currentActiveOrder.order_type === 'delivery' ? 'Envío a Domicilio' : 'Para Llevar') }}
           </p>
@@ -920,7 +920,7 @@ function getOrderStatusInfo(order) {
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Monto Recibido ($)</label>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Monto Recibido (Bs.)</label>
             <InputNumber
               v-model="paymentForm.amount_paid"
               :min="0.01"
@@ -929,7 +929,7 @@ function getOrderStatusInfo(order) {
               required
             />
             <div v-if="paymentForm.payment_method === 'cash' && paymentForm.amount_paid > parseFloat(currentActiveOrder.total_amount)" class="mt-2 text-xs p-2 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200">
-              Cambio a Entregar: <strong class="text-emerald-600 dark:text-emerald-400 font-bold">${{ (paymentForm.amount_paid - parseFloat(currentActiveOrder.total_amount)).toFixed(2) }}</strong>
+              Cambio a Entregar: <strong class="text-emerald-600 dark:text-emerald-400 font-bold">Bs. {{ (paymentForm.amount_paid - parseFloat(currentActiveOrder.total_amount)).toFixed(2) }}</strong>
             </div>
           </div>
 

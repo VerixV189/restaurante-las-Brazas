@@ -321,7 +321,7 @@ async function submitConfirmDelivery() {
 
             <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
               <span class="font-extrabold text-base text-orange-600 dark:text-orange-400">
-                Total: ${{ Number(o.total).toFixed(2) }}
+                Total: Bs. {{ Number(o.total).toFixed(2) }}
               </span>
               <button
                 type="button"
@@ -433,7 +433,7 @@ async function submitConfirmDelivery() {
             </p>
           </div>
           <span class="font-extrabold text-base text-slate-900 dark:text-white">
-            ${{ Number(o.total).toFixed(2) }}
+            Bs. {{ Number(o.total).toFixed(2) }}
           </span>
         </div>
       </div>

@@ -560,7 +560,7 @@ function submitTestimonial() {
                   {{ dish.name }}
                 </h3>
                 <span class="text-xl font-extrabold text-emerald-600 dark:text-emerald-400 shrink-0">
-                  ${{ Number(dish.price).toFixed(2) }}
+                  Bs. {{ Number(dish.price).toFixed(2) }}
                 </span>
               </div>
               <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-3">

@@ -237,12 +237,12 @@ class AiChatService
                     $sub = $item['price'] * $item['quantity'];
                     $total += $sub;
                     $noteStr = ! empty($item['notes']) ? " *({$item['notes']})*" : '';
-                    $lines[] = "• **{$item['quantity']}x {$item['name']}**{$noteStr} — $" . number_format($sub, 2);
+                    $lines[] = "• **{$item['quantity']}x {$item['name']}**{$noteStr} — Bs. " . number_format($sub, 2);
                 }
 
                 return "🛒 **¡He preparado tu orden inteligente, {$user->name}!** 🔥\n\n"
                      . implode("\n", $lines) . "\n\n"
-                     . "💰 **Subtotal Estimado:** $" . number_format($total, 2) . "\n\n"
+                     . "💰 **Subtotal Estimado:** Bs. " . number_format($total, 2) . "\n\n"
                      . "👇 *Usa los botones interactivos aquí abajo para **agregar todo a tu carrito** o **enviar el pedido directo a cocina**.*";
             }
         }
@@ -455,7 +455,7 @@ class AiChatService
         $menuLines = [];
         foreach ($context['categories'] as $cat) {
             foreach ($cat->dishes as $d) {
-                $menuLines[] = "- {$d->name} ({$cat->name}): $" . number_format($d->price, 2) . " | Prep: {$d->prep_time_minutes}m | {$d->description}";
+                $menuLines[] = "- {$d->name} ({$cat->name}): Bs. " . number_format($d->price, 2) . " | Prep: {$d->prep_time_minutes}m | {$d->description}";
             }
         }
 
@@ -467,8 +467,8 @@ class AiChatService
             $m = $context['staff_metrics'];
             $lowNames = $m['low_stock']->map(fn($i) => "{$i->name} ({$i->current_stock}/{$i->minimum_stock} {$i->unit_of_measure})")->implode(', ');
             $prompt .= "MÉTRICAS EJECUTIVAS EN TIEMPO REAL:\n"
-                    . "- Ventas Hoy: $" . number_format($m['today_sales'], 2) . " | Ventas 7 días: $" . number_format($m['week_sales'], 2) . " | Histórico: $" . number_format($m['total_sales'], 2) . "\n"
-                    . "- Ticket Promedio: $" . number_format($m['avg_ticket'], 2) . " ({$m['paid_count']} órdenes pagadas)\n"
+                    . "- Ventas Hoy: Bs. " . number_format($m['today_sales'], 2) . " | Ventas 7 días: Bs. " . number_format($m['week_sales'], 2) . " | Histórico: Bs. " . number_format($m['total_sales'], 2) . "\n"
+                    . "- Ticket Promedio: Bs. " . number_format($m['avg_ticket'], 2) . " ({$m['paid_count']} órdenes pagadas)\n"
                     . "- Comandas activas en cocina/delivery: " . $m['active_orders']->count() . "\n"
                     . "- Alertas de stock crítico: " . ($lowNames ?: 'Ninguna') . "\n";
         }
@@ -682,17 +682,17 @@ class AiChatService
     private function buildExecutiveSalesReply(array $metrics, string $userName): string
     {
         $reply = "📊 **Reporte Ejecutivo en Tiempo Real para {$userName}:**\n\n"
-               . "• **Ventas de Hoy:** $" . number_format($metrics['today_sales'], 2) . "\n"
-               . "• **Ventas Últimos 7 Días:** $" . number_format($metrics['week_sales'], 2) . "\n"
-               . "• **Ingresos Históricos Totales:** $" . number_format($metrics['total_sales'], 2) . "\n"
+               . "• **Ventas de Hoy:** Bs. " . number_format($metrics['today_sales'], 2) . "\n"
+               . "• **Ventas Últimos 7 Días:** Bs. " . number_format($metrics['week_sales'], 2) . "\n"
+               . "• **Ingresos Históricos Totales:** Bs. " . number_format($metrics['total_sales'], 2) . "\n"
                . "• **Órdenes Pagadas:** {$metrics['paid_count']} comandas\n"
-               . "• **Ticket Promedio:** $" . number_format($metrics['avg_ticket'], 2) . "\n\n";
+               . "• **Ticket Promedio:** Bs. " . number_format($metrics['avg_ticket'], 2) . "\n\n";
 
         if ($metrics['top_dishes']->isNotEmpty()) {
             $reply .= "### 🏆 Top 5 Platillos Más Vendidos\n";
             foreach ($metrics['top_dishes'] as $idx => $item) {
                 $name = $item->dish?->name ?? 'Platillo';
-                $reply .= ($idx + 1) . ". **{$name}** — {$item->total_qty} uds ($" . number_format($item->total_rev, 2) . ")\n";
+                $reply .= ($idx + 1) . ". **{$name}** — {$item->total_qty} uds (Bs. " . number_format($item->total_rev, 2) . ")\n";
             }
             $reply .= "\n";
         }
@@ -723,7 +723,7 @@ class AiChatService
                             $subCost  = $unitCost * (float) $ri->quantity_required;
                             $cost    += $subCost;
                             $ingName  = $ri->ingredient?->name ?? 'Insumo';
-                            $ingLines[] = "• **{$ingName}:** {$ri->quantity_required} {$ri->unit_of_measure}" . ($isStaff ? " ($" . number_format($subCost, 2) . ")" : "");
+                            $ingLines[] = "• **{$ingName}:** {$ri->quantity_required} {$ri->unit_of_measure}" . ($isStaff ? " (Bs. " . number_format($subCost, 2) . ")" : "");
                         }
                     }
                     $price  = (float) $dish->price;
@@ -731,12 +731,12 @@ class AiChatService
                     $margin = $price > 0 ? round(($profit / $price) * 100, 1) : 0;
 
                     $reply = "📖 **Ficha Técnica: {$dish->name}**\n\n"
-                           . "• **Precio de Venta:** $" . number_format($price, 2) . "\n"
+                           . "• **Precio de Venta:** Bs. " . number_format($price, 2) . "\n"
                            . "• **Tiempo en Parrilla:** {$dish->prep_time_minutes} min\n";
 
                     if ($isStaff) {
-                        $reply .= "• **Costo de Insumos:** $" . number_format($cost, 2) . "\n"
-                               . "• **Utilidad Neta:** $" . number_format($profit, 2) . " (**{$margin}% margen**)\n";
+                        $reply .= "• **Costo de Insumos:** Bs. " . number_format($cost, 2) . "\n"
+                               . "• **Utilidad Neta:** Bs. " . number_format($profit, 2) . " (**{$margin}% margen**)\n";
                     }
 
                     if (!empty($ingLines)) {
@@ -778,7 +778,7 @@ class AiChatService
         $reply = "💰 **Top Platillos con Mayor Utilidad y Rentabilidad:**\n\n";
         foreach (array_slice($matrix, 0, 6) as $row) {
             $reply .= "• **{$row['name']}**\n"
-                   . "  Venta: $" . number_format($row['price'], 2) . " | Costo: $" . number_format($row['cost'], 2) . " | Ganancia: **$" . number_format($row['profit'], 2) . "** ({$row['margin']}%)\n";
+                   . "  Venta: Bs. " . number_format($row['price'], 2) . " | Costo: Bs. " . number_format($row['cost'], 2) . " | Ganancia: **Bs. " . number_format($row['profit'], 2) . "** ({$row['margin']}%)\n";
         }
         $reply .= "\n💡 *Pregúntame por la receta de cualquier platillo (ej. \"¿Cuál es la receta del Tomahawk?\") para ver su desglose exacto.*";
         return $reply;
@@ -818,7 +818,7 @@ class AiChatService
         }
 
         if ($wasteMovements->isNotEmpty()) {
-            $reply .= "### 🗑️ Últimas Mermas Registradas (Impacto: $" . number_format($totalWasteCost, 2) . ")\n";
+            $reply .= "### 🗑️ Últimas Mermas Registradas (Impacto: Bs. " . number_format($totalWasteCost, 2) . ")\n";
             foreach ($wasteMovements as $wm) {
                 $ingName = $wm->ingredient?->name ?? 'Insumo';
                 $unit    = $wm->ingredient?->unit_of_measure ?? '';
@@ -848,7 +848,7 @@ class AiChatService
             foreach ($salonOrders as $o) {
                 $tbl = $o->table?->table_number ?? 'Mesa';
                 $st  = $o->status === 'ready' ? '✅ Lista para servir' : '🔥 En Fuego / Cocina';
-                $reply .= "• **Orden #{$o->id} ({$tbl})** — {$st} — Total: $" . number_format($o->total_amount, 2) . "\n";
+                $reply .= "• **Orden #{$o->id} ({$tbl})** — {$st} — Total: Bs. " . number_format($o->total_amount, 2) . "\n";
             }
             $reply .= "\n";
         }
@@ -865,7 +865,7 @@ class AiChatService
                     'ready'      => '✅ Listo para Despacho',
                     default      => $o->status,
                 };
-                $reply .= "• **#{$o->id} {$type}** ({$cust}) — {$st}{$pin} — $" . number_format($o->total_amount, 2) . "\n";
+                $reply .= "• **#{$o->id} {$type}** ({$cust}) — {$st}{$pin} — Bs. " . number_format($o->total_amount, 2) . "\n";
                 if ($o->delivery_address) {
                     $reply .= "  📍 *{$o->delivery_address}*\n";
                 }
@@ -916,11 +916,11 @@ class AiChatService
         foreach ($coupons as $c) {
             $benefit = match ($c->type) {
                 'percent'       => "{$c->value}% de descuento",
-                'fixed'         => "$" . number_format($c->value, 2) . " de descuento directo",
+                'fixed'         => "Bs. " . number_format($c->value, 2) . " de descuento directo",
                 'free_shipping' => "Envío a domicilio GRATIS",
                 default         => $c->type,
             };
-            $reply .= "• Código **`{$c->code}`** — {$benefit} *(Compra mínima: $" . number_format($c->min_order, 2) . ")*\n";
+            $reply .= "• Código **`{$c->code}`** — {$benefit} *(Compra mínima: Bs. " . number_format($c->min_order, 2) . ")*\n";
         }
         return $reply;
     }
@@ -958,12 +958,12 @@ class AiChatService
 
             $reply .= "**Pedido #{$order->id}** — {$date}{$typeInfo}\n";
             $reply .= "• **Estado:** {$statusLabel}\n";
-            $reply .= "• **Total:** $" . number_format($order->total_amount, 2) . "\n";
+            $reply .= "• **Total:** Bs. " . number_format($order->total_amount, 2) . "\n";
 
             if ($order->items->isNotEmpty()) {
                 foreach ($order->items as $item) {
                     $dishName = $item->dish?->name ?? 'Platillo';
-                    $reply .= "  - {$item->quantity}x {$dishName} ($" . number_format($item->subtotal, 2) . ")\n";
+                    $reply .= "  - {$item->quantity}x {$dishName} (Bs. " . number_format($item->subtotal, 2) . ")\n";
                 }
             }
             $reply .= "\n---\n";
@@ -1022,19 +1022,19 @@ class AiChatService
     {
         $allDishes = $categories->flatMap(fn($c) => $c->dishes->map(fn($d) => ['dish' => $d, 'cat' => $c->name]));
 
-        // 1. Si el usuario menciona un presupuesto (ej. "tengo 200", "menos de 300")
-        if (preg_match('/(?:menos de|con|presupuesto de|hasta)\s*\$?\s*(\d+)/u', $query, $budgetMatch)) {
+        // 1. Si el usuario menciona un presupuesto (ej. "tengo 200", "menos de Bs. 300")
+        if (preg_match('/(?:menos de|con|presupuesto de|hasta)\s*(?:bs\.?|bob|\$)?\s*(\d+)/iu', $query, $budgetMatch)) {
             $budget = (float) $budgetMatch[1];
             $affordable = $allDishes->filter(fn($item) => (float) $item['dish']->price <= $budget)->sortByDesc(fn($i) => $i['dish']->price);
 
             if ($affordable->isEmpty()) {
-                return "💡 Con un presupuesto de **$" . number_format($budget, 2) . "** puedes ordenar nuestras bebidas refrescantes ($45) o guarniciones como la Yuca Frita Crocante ($75).";
+                return "💡 Con un presupuesto de **Bs. " . number_format($budget, 2) . "** puedes ordenar nuestras bebidas refrescantes (Bs. 45) o guarniciones como la Yuca Frita Crocante (Bs. 75).";
             }
 
-            $reply = "🎯 **Opciones Recomendadas dentro de tu presupuesto ($" . number_format($budget, 2) . "):**\n\n";
+            $reply = "🎯 **Opciones Recomendadas dentro de tu presupuesto (Bs. " . number_format($budget, 2) . "):**\n\n";
             foreach ($affordable->take(7) as $item) {
                 $d = $item['dish'];
-                $reply .= "• **{$d->name}** ({$item['cat']}) — **$" . number_format($d->price, 2) . "**\n";
+                $reply .= "• **{$d->name}** ({$item['cat']}) — **Bs. " . number_format($d->price, 2) . "**\n";
             }
             return $reply;
         }
@@ -1048,7 +1048,7 @@ class AiChatService
                 if (str_contains($query, $kw)) {
                     return "🥩 **{$dish->name}**\n\n"
                          . "• **Categoría:** {$item['cat']}\n"
-                         . "• **Precio:** $" . number_format($dish->price, 2) . "\n"
+                         . "• **Precio:** Bs. " . number_format($dish->price, 2) . "\n"
                          . "• **Descripción:** {$dish->description}\n"
                          . "• **Tiempo en Parrilla:** {$dish->prep_time_minutes} minutos a las brasas\n\n"
                          . "🍷 *¿Deseas conocer su receta técnica o reservar una mesa para degustarlo?*";
@@ -1063,10 +1063,10 @@ class AiChatService
 
             $reply = "🔥 **Recomendaciones del Maestro Parrillero para ti, {$userName}:**\n\n";
             foreach ($topCortes as $idx => $d) {
-                $reply .= ($idx + 1) . ". **{$d->name}** ($" . number_format($d->price, 2) . ")\n"
+                $reply .= ($idx + 1) . ". **{$d->name}** (Bs. " . number_format($d->price, 2) . ")\n"
                         . "   *{$d->description}*\n\n";
             }
-            $reply .= "🍷 **Maridaje Sugerido:** Acompaña nuestros cortes Dry-Aged con una **Botella de Vino Malbec Reserva Mendoza ($480.00)** o una **Cerveza Artesanal IPA ($95.00)**.";
+            $reply .= "🍷 **Maridaje Sugerido:** Acompaña nuestros cortes Dry-Aged con una **Botella de Vino Malbec Reserva Mendoza (Bs. 480.00)** o una **Cerveza Artesanal IPA (Bs. 95.00)**.";
             return $reply;
         }
 
@@ -1076,7 +1076,7 @@ class AiChatService
             if ($cat->dishes->isNotEmpty()) {
                 $reply .= "### 🔥 {$cat->name}\n";
                 foreach ($cat->dishes->take(4) as $d) {
-                    $reply .= "• **{$d->name}** — $" . number_format($d->price, 2) . "\n";
+                    $reply .= "• **{$d->name}** — Bs. " . number_format($d->price, 2) . "\n";
                 }
                 if ($cat->dishes->count() > 4) {
                     $reply .= "  *(+" . ($cat->dishes->count() - 4) . " platillos más en esta categoría)*\n";
@@ -1085,7 +1085,7 @@ class AiChatService
             }
         }
 
-        $reply .= "💡 *Pregúntame por cualquier platillo, pide opciones según tu presupuesto (ej. \"¿Qué como con $350?\") o solicita su ficha de receta.*";
+        $reply .= "💡 *Pregúntame por cualquier platillo, pide opciones según tu presupuesto (ej. \"¿Qué como con Bs. 350?\") o solicita su ficha de receta.*";
         return $reply;
     }
 
@@ -1107,7 +1107,7 @@ class AiChatService
         return "¡Hola, **{$userName}**! 👋 Soy tu **Chef Virtual y Sommelier IA** en Restaurante Las Brazas. 🔥🥩\n\n"
              . "Puedo ayudarte en tiempo real con:\n"
              . "• 🥩 **Carta y Recomendaciones:** Precios, cortes, tiempos de cocción y maridajes.\n"
-             . "• 🎯 **Búsqueda por Presupuesto:** Dime *\"¿Qué me recomiendas con $350?\"*\n"
+             . "• 🎯 **Búsqueda por Presupuesto:** Dime *\"¿Qué me recomiendas con Bs. 350?\"*\n"
              . "• 📅 **Reservar por Chat:** Escribe *\"Reserva una mesa para 4 personas mañana a las 20:00\"* y la agendo al instante.\n"
              . "• 📦 **Tus Pedidos y Cupones:** Estado de tus órdenes y códigos de descuento activos.";
     }
@@ -1262,7 +1262,7 @@ class AiChatService
         $menuLines = [];
         foreach ($context['categories'] as $cat) {
             foreach ($cat->dishes as $d) {
-                $menuLines[] = "- {$d->name} ({$cat->name}): $" . number_format((float) $d->price, 2) . " | Prep: {$d->prep_time_minutes} min | {$d->description}";
+                $menuLines[] = "- {$d->name} ({$cat->name}): Bs. " . number_format((float) $d->price, 2) . " | Prep: {$d->prep_time_minutes} min | {$d->description}";
             }
         }
 
@@ -1274,8 +1274,8 @@ class AiChatService
 
         $couponLines = [];
         foreach ($context['coupons'] as $c) {
-            $desc = $c->type === 'percent' ? "{$c->value}% de descuento" : ($c->type === 'free_shipping' ? 'Envío gratis' : '$' . number_format((float) $c->value, 2) . ' de descuento');
-            $couponLines[] = "- Código {$c->code}: {$desc} (pedido mínimo $" . number_format((float) $c->min_order, 2) . ")";
+            $desc = $c->type === 'percent' ? "{$c->value}% de descuento" : ($c->type === 'free_shipping' ? 'Envío gratis' : 'Bs. ' . number_format((float) $c->value, 2) . ' de descuento');
+            $couponLines[] = "- Código {$c->code}: {$desc} (pedido mínimo Bs. " . number_format((float) $c->min_order, 2) . ")";
         }
 
         $rolePersona = $portal === 'corporate'
@@ -1305,15 +1305,15 @@ Responde siempre en español con tono amable, profesional, claro y usando format
 - Formulario Contáctenos (/#contacto) y Cotización SaaS (/empresa#cotizacion): envían directamente al correo oficial Gmail del equipo con respuesta directa.
 
 === 3. MODELO SAAS Y PLANES COMERCIALES (/empresa) ===
-- Plan Parrilla Starter: $49 USD/mes (Mensual) o $39 USD/mes (Anual, -20%). Incluye 1 sucursal, hasta 15 mesas, POS Web táctil y arqueo de caja, catálogo digital, control de inventario y stock mínimo, tickets PDF y facturación SIAT, Nube Administrada + backups diarios.
-- Plan Steakhouse Pro (Más Popular • Activo en Las Brazas): $99 USD/mes (Mensual) o $79 USD/mes (Anual, -20%). Todo lo del Starter + mesas y zonas ilimitadas, Monitor de Cocina en Tiempo Real (KDS), App Móvil Android & iOS con Delivery, PIN de 4 dígitos y Cupones, descuento automático por Receta Técnica, reservas digitales por aforo horario (±2h) y tolerancia de 15 min, Chef Virtual IA, Servidor Cloud Dedicado.
-- Plan Enterprise Multi-Sede: $189 USD/mes (Mensual) o $149 USD/mes (Anual, -20%). Todo lo del Pro + múltiples sucursales y almacenes, Gestor Inteligente de Planos de Salón con IA, predicción de demanda y lotes de compra (PDF/Excel), auditoría completa y permisos para 6 perfiles operativos, SLA 99.9% y soporte 24/7.
+- Plan Parrilla Starter: Bs. 340/mes (Mensual) o Bs. 270/mes (Anual, -20%). Incluye 1 sucursal, hasta 15 mesas, POS Web táctil y arqueo de caja, catálogo digital, control de inventario y stock mínimo, tickets PDF y facturación SIAT, Nube Administrada + backups diarios.
+- Plan Steakhouse Pro (Más Popular • Activo en Las Brazas): Bs. 690/mes (Mensual) o Bs. 550/mes (Anual, -20%). Todo lo del Starter + mesas y zonas ilimitadas, Monitor de Cocina en Tiempo Real (KDS), App Móvil Android & iOS con Delivery, PIN de 4 dígitos y Cupones, descuento automático por Receta Técnica, reservas digitales por aforo horario (±2h) y tolerancia de 15 min, Chef Virtual IA, Servidor Cloud Dedicado.
+- Plan Enterprise Multi-Sede: Bs. 1,290/mes (Mensual) o Bs. 1,030/mes (Anual, -20%). Todo lo del Pro + múltiples sucursales y almacenes, Gestor Inteligente de Planos de Salón con IA, predicción de demanda y lotes de compra (PDF/Excel), auditoría completa y permisos para 6 perfiles operativos, SLA 99.9% y soporte 24/7.
 
 === 4. TÉRMINOS Y CONDICIONES (/terms) ===
 - Registro manual: requiere aceptar 2 casillas independientes obligatorias (Términos y Condiciones + Política de Privacidad) y envía 4 correos (Términos, Condiciones, Política de Privacidad y Verificación de cuenta).
 - Registro en 1 clic con Google OAuth 2.0: activa y verifica la cuenta automáticamente al instante y envía los 3 correos informativos (Términos, Condiciones y Política de Privacidad), sin correo de validación.
 - Reservas de mesas: tolerancia estricta de 15 minutos antes de liberar la mesa; control de aforo en ventanas de ±2 horas; cancelaciones permitidas con al menos 2 horas de anticipación.
-- Pedidos y Delivery: entregas a domicilio validadas con PIN secreto de 4 dígitos y firma manuscrita; envío estándar $3.00 o envío GRATIS en pedidos desde $50.00 o con cupón de envío gratis.
+- Pedidos y Delivery: entregas a domicilio validadas con PIN secreto de 4 dígitos y firma manuscrita; envío estándar Bs. 3.00 o envío GRATIS en pedidos desde Bs. 50.00 o con cupón de envío gratis.
 - Código de convivencia: ambiente familiar, derecho de admisión ante conductas irrespetuosas.
 
 === 5. POLÍTICA DE PRIVACIDAD Y SEGURIDAD (/privacy) ===
@@ -1394,9 +1394,9 @@ PROMPT;
         if (str_contains($q, 'saas') || str_contains($q, 'plan') || str_contains($q, 'licencia') || str_contains($q, 'cotiz') || str_contains($q, 'brazastech') || str_contains($q, 'pos') || str_contains($q, 'kds') || str_contains($q, 'ecosistema') || str_contains($q, 'software')) {
             return "🚀 **BrazasTech Cloud SaaS — Planes para Restaurantes & Parrillas**\n\n"
                  . "Desarrollado por **BrazasTech Soluciones de Software S.R.L.** (registrado ante SEPREC y SENAPI, con facturación SIAT):\n\n"
-                 . "• **Plan Parrilla Starter — $49 USD/mes** *(o $39/mes anual, -20%)*: 1 sucursal, hasta 15 mesas, POS Web táctil, inventario con stock mínimo, tickets PDF/SIAT y backups diarios.\n"
-                 . "• **Plan Steakhouse Pro — $99 USD/mes** *(o $79/mes anual, -20% • Más Popular)*: Mesas y zonas ilimitadas, Monitor de Cocina **KDS** en vivo, **App Móvil (Android/iOS)** con Delivery + PIN 4 dígitos + Cupones, descuento automático por Receta Técnica y **Chef Virtual IA**.\n"
-                 . "• **Plan Enterprise Multi-Sede — $189 USD/mes** *(o $149/mes anual, -20%)*: Múltiples sucursales, Gestor Inteligente de Planos con IA, predicción de demanda y compras (PDF/Excel), auditoría de 6 roles y SLA 99.9%.\n\n"
+                 . "• **Plan Parrilla Starter — Bs. 340/mes** *(o Bs. 270/mes anual, -20%)*: 1 sucursal, hasta 15 mesas, POS Web táctil, inventario con stock mínimo, tickets PDF/SIAT y backups diarios.\n"
+                 . "• **Plan Steakhouse Pro — Bs. 690/mes** *(o Bs. 550/mes anual, -20% • Más Popular)*: Mesas y zonas ilimitadas, Monitor de Cocina **KDS** en vivo, **App Móvil (Android/iOS)** con Delivery + PIN 4 dígitos + Cupones, descuento automático por Receta Técnica y **Chef Virtual IA**.\n"
+                 . "• **Plan Enterprise Multi-Sede — Bs. 1,290/mes** *(o Bs. 1,030/mes anual, -20%)*: Múltiples sucursales, Gestor Inteligente de Planos con IA, predicción de demanda y compras (PDF/Excel), auditoría de 6 roles y SLA 99.9%.\n\n"
                  . "📩 Puedes solicitar una demo y cotización directa a nuestro correo en **`/empresa#cotizacion`**.";
         }
 
@@ -1431,14 +1431,14 @@ PROMPT;
             if ($context['coupons']->isNotEmpty()) {
                 $couponBlock = "\n\n🎟️ **Cupones Activos Hoy:**\n";
                 foreach ($context['coupons']->take(4) as $c) {
-                    $benefit = $c->type === 'percent' ? "{$c->value}% OFF" : ($c->type === 'free_shipping' ? 'Envío Gratis' : '$' . number_format((float) $c->value, 2) . ' OFF');
-                    $couponBlock .= "• **`{$c->code}`** — {$benefit} (mínimo $" . number_format((float) $c->min_order, 2) . ")\n";
+                    $benefit = $c->type === 'percent' ? "{$c->value}% OFF" : ($c->type === 'free_shipping' ? 'Envío Gratis' : 'Bs. ' . number_format((float) $c->value, 2) . ' OFF');
+                    $couponBlock .= "• **`{$c->code}`** — {$benefit} (mínimo Bs. " . number_format((float) $c->min_order, 2) . ")\n";
                 }
             }
 
             return "🛵 **Pedidos Online, Delivery Seguro & Promociones**\n\n"
                  . "• **Modalidades:** Delivery a domicilio, Para Recoger (Takeaway) y Pedidos en Mesa.\n"
-                 . "• **Tarifa de envío:** $3.00 estándar y **Envío GRATIS** en pedidos desde $50.00 (o usando cupón).\n"
+                 . "• **Tarifa de envío:** Bs. 3.00 estándar y **Envío GRATIS** en pedidos desde Bs. 50.00 (o usando cupón).\n"
                  . "• **Doble Seguridad:** Al pedir delivery recibes un **PIN secreto de 4 dígitos** que entregas al repartidor junto a tu firma en pantalla.\n"
                  . "• **Puntos & Cashback:** Acumulas puntos automáticamente con cada pedido desde tu cuenta de comensal." . $couponBlock;
         }
@@ -1459,7 +1459,7 @@ PROMPT;
                 $lines = [];
                 foreach ($allDishes->take(8) as $entry) {
                     $d = $entry['dish'];
-                    $lines[] = "• **{$d->name}** *({$entry['cat']})* — **$" . number_format((float) $d->price, 2) . "** *(~{$d->prep_time_minutes} min)*";
+                    $lines[] = "• **{$d->name}** *({$entry['cat']})* — **Bs. " . number_format((float) $d->price, 2) . "** *(~{$d->prep_time_minutes} min)*";
                 }
                 return "🥩 **Recomendaciones de Nuestra Carta en Vivo:**\n\n"
                      . implode("\n", $lines) . "\n\n"
@@ -1472,7 +1472,7 @@ PROMPT;
             return "👋 ¡Hola! Soy el **Agente Inteligente de BrazasTech Cloud SaaS**. 🚀\n\n"
                  . "Puedes ponerme a prueba preguntándome cualquier detalle:\n"
                  . "• 🎯 **Identidad Corporativa:** Misión, Visión, Slogan y Políticas de Calidad.\n"
-                 . "• 💼 **Planes y Precios SaaS:** Comparativa de Starter ($49), Pro ($99) y Enterprise ($189).\n"
+                 . "• 💼 **Planes y Precios SaaS:** Comparativa de Starter (Bs. 340), Pro (Bs. 690) y Enterprise (Bs. 1,290).\n"
                  . "• ⚙️ **Ecosistema Tecnológico:** POS táctil, Monitor KDS, App Móvil, Planos con IA e Inventarios.\n"
                  . "• 🛡️ **Legal y Seguridad:** Términos y Condiciones, Política de Privacidad, Google OAuth y PWA Offline.\n"
                  . "• 🔐 **Accesos:** Portal de Personal (`/staff/login`) y Manual Interactivo (`/manual`).";

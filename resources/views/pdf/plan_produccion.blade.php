@@ -150,9 +150,9 @@
                     <td><strong>{{ $dish['name'] }}</strong></td>
                     <td>{{ $dish['category'] }}</td>
                     <td class="text-center"><strong>{{ $dish['portions'] }} porciones</strong></td>
-                    <td class="text-right">${{ number_format($dish['price'], 2) }}</td>
+                    <td class="text-right">Bs. {{ number_format($dish['price'], 2) }}</td>
                     <td class="text-right" style="color: #16a34a; font-weight: bold;">
-                        ${{ number_format($dish['portions'] * $dish['price'], 2) }}
+                        Bs. {{ number_format($dish['portions'] * $dish['price'], 2) }}
                     </td>
                 </tr>
             @endforeach
@@ -170,7 +170,7 @@
                 <th class="text-right">Stock Actual</th>
                 <th class="text-right">Faltante a Comprar</th>
                 <th class="text-right">Costo Unitario</th>
-                <th class="text-right">Costo Faltante ($)</th>
+                <th class="text-right">Costo Faltante (Bs.)</th>
                 <th class="text-center">Estado</th>
             </tr>
         </thead>
@@ -184,9 +184,9 @@
                     <td class="text-right font-bold {{ $ing['deficit'] > 0 ? 'text-danger' : 'text-success' }}">
                         {{ number_format($ing['deficit'], 2) }}
                     </td>
-                    <td class="text-right">${{ number_format($ing['cost_per_unit'], 2) }}</td>
+                    <td class="text-right">Bs. {{ number_format($ing['cost_per_unit'], 2) }}</td>
                     <td class="text-right font-bold {{ $ing['deficit'] > 0 ? 'text-danger' : 'text-muted' }}">
-                        ${{ number_format($ing['cost_to_buy'], 2) }}
+                        Bs. {{ number_format($ing['cost_to_buy'], 2) }}
                     </td>
                     <td class="text-center">
                         @if($ing['deficit'] > 0)
@@ -212,13 +212,13 @@
             <td style="width: 32%;" class="kpi-box">
                 <div style="font-size: 9px; color: #64748b; font-weight: bold;">COSTO TOTAL PRODUCCIÓN LOTE</div>
                 <div style="font-size: 14px; font-weight: bold; color: #ea580c; margin-top: 3px;">
-                    ${{ number_format($totalProductionCost, 2) }}
+                    Bs. {{ number_format($totalProductionCost, 2) }}
                 </div>
             </td>
             <td style="width: 32%;" class="kpi-box">
                 <div style="font-size: 9px; color: #64748b; font-weight: bold;">INVERSIÓN NECESARIA EN COMPRAS</div>
                 <div style="font-size: 14px; font-weight: bold; color: #dc2626; margin-top: 3px;">
-                    ${{ number_format($totalCostToBuy, 2) }}
+                    Bs. {{ number_format($totalCostToBuy, 2) }}
                 </div>
             </td>
         </tr>

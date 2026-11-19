@@ -266,7 +266,7 @@ onMounted(() => {
                       </h4>
                       <div class="flex items-center gap-2 mt-1">
                         <span class="text-[10px] text-slate-500 dark:text-slate-400">{{ dish.category?.name || 'General' }}</span>
-                        <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">${{ parseFloat(dish.price).toFixed(2) }}</span>
+                        <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">Bs. {{ parseFloat(dish.price).toFixed(2) }}</span>
                         <Tag
                           :value="dish.recipe ? 'Con Receta' : 'Sin Receta'"
                           :severity="dish.recipe ? 'success' : 'warn'"
@@ -305,7 +305,7 @@ onMounted(() => {
                     >
                       <div>
                         <span class="font-bold text-slate-800 dark:text-slate-100">{{ item.dish_name }}</span>
-                        <p class="text-[10px] text-slate-500 dark:text-slate-400">${{ (item.dish_price * item.portions).toFixed(2) }} estimado</p>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400">Bs. {{ (item.dish_price * item.portions).toFixed(2) }} estimado</p>
                       </div>
 
                       <div class="flex items-center gap-2">
@@ -339,14 +339,14 @@ onMounted(() => {
                   <div class="p-3.5 bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 rounded-2xl text-center">
                     <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Costo Total Producción</span>
                     <h3 class="text-lg font-bold text-orange-600 dark:text-orange-400 mt-0.5">
-                      ${{ (batchCalculation?.totalProductionCost || 0).toFixed(2) }}
+                      Bs. {{ (batchCalculation?.totalProductionCost || 0).toFixed(2) }}
                     </h3>
                   </div>
 
                   <div class="p-3.5 bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 rounded-2xl text-center">
                     <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Inversión en Faltantes</span>
                     <h3 class="text-lg font-bold text-red-600 dark:text-red-400 mt-0.5">
-                      ${{ (batchCalculation?.totalCostToBuy || 0).toFixed(2) }}
+                      Bs. {{ (batchCalculation?.totalCostToBuy || 0).toFixed(2) }}
                     </h3>
                   </div>
 
@@ -412,7 +412,7 @@ onMounted(() => {
                           class="font-bold"
                           :class="data.deficit > 0 ? 'text-red-600 dark:text-red-400' : 'text-slate-500'"
                         >
-                          ${{ data.cost_to_buy.toFixed(2) }}
+                          Bs. {{ data.cost_to_buy.toFixed(2) }}
                         </span>
                       </template>
                     </Column>

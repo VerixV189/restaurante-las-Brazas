@@ -239,7 +239,7 @@ class ManualSubdomainTest extends TestCase
             'contact_name'    => 'Ing. Roberto Céspedes',
             'contact_phone'   => '+591 700-55555',
             'contact_email'   => 'gerencia@elgaucho.bo',
-            'selected_plan'   => 'Plan Steakhouse Pro ($99 USD/mes - Mensual)',
+            'selected_plan'   => 'Plan Steakhouse Pro (Bs. 690 / mes - Mensual)',
             'cloud_provider'  => 'Servidor Cloud Dedicado + Alta Disponibilidad',
             'branches_count'  => 2,
             'message'         => 'Necesitamos 2 sucursales con KDS y App móvil.',
@@ -412,9 +412,9 @@ class ManualSubdomainTest extends TestCase
             'portal'  => 'corporate',
         ]);
         $saasResp->assertOk();
-        $this->assertStringContainsString('$49', (string) $saasResp->json('reply'));
-        $this->assertStringContainsString('$99', (string) $saasResp->json('reply'));
-        $this->assertStringContainsString('$189', (string) $saasResp->json('reply'));
+        $this->assertStringContainsString('Bs. 340', (string) $saasResp->json('reply'));
+        $this->assertStringContainsString('Bs. 690', (string) $saasResp->json('reply'));
+        $this->assertStringContainsString('Bs. 1,290', (string) $saasResp->json('reply'));
 
         $privacyResp = $this->postJson('/ai/public-chat', [
             'message' => 'Explícame la política de privacidad y el uso de Google',

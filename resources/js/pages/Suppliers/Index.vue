@@ -275,7 +275,7 @@ function confirmDelete(supplier) {
                 <span class="text-slate-800 dark:text-slate-200 font-medium">{{ ing.name }}</span>
                 <span class="text-[10px] text-slate-500 dark:text-slate-400 ml-2">Stock: {{ parseFloat(ing.current_stock) }} {{ ing.unit_of_measure }}</span>
               </div>
-              <span class="font-semibold text-emerald-600 dark:text-emerald-400">${{ parseFloat(ing.cost_per_unit).toFixed(2) }} / {{ ing.unit_of_measure }}</span>
+              <span class="font-semibold text-emerald-600 dark:text-emerald-400">Bs. {{ parseFloat(ing.cost_per_unit).toFixed(2) }} / {{ ing.unit_of_measure }}</span>
             </div>
           </div>
           <div v-else class="text-xs text-slate-500 italic py-2">

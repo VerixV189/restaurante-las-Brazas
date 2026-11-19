@@ -119,7 +119,7 @@ function confirmDelete(dish) {
         </Column>
         <Column field="price" header="Precio" sortable>
           <template #body="{ data }">
-            <span class="font-bold text-emerald-600 dark:text-emerald-400">${{ Number(data.price).toFixed(2) }}</span>
+            <span class="font-bold text-emerald-600 dark:text-emerald-400">Bs. {{ Number(data.price).toFixed(2) }}</span>
           </template>
         </Column>
         <Column field="prep_time_minutes" header="Tiempo Prep.">
@@ -172,10 +172,10 @@ function confirmDelete(dish) {
           <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Categoría</label>
           <Select v-model="form.category_id" :options="categories" optionLabel="name" optionValue="id" class="w-full bg-slate-50 border-slate-300 dark:bg-slate-800 dark:border-slate-700" required />
         </div>
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Precio ($)</label>
-            <InputNumber v-model="form.price" mode="currency" currency="USD" locale="en-US" class="w-full bg-slate-50 border-slate-300 dark:bg-slate-800 dark:border-slate-700" required />
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Precio (Bs.)</label>
+            <InputNumber v-model="form.price" prefix="Bs. " :minFractionDigits="2" :maxFractionDigits="2" :min="0" class="w-full bg-slate-50 border-slate-300 dark:bg-slate-800 dark:border-slate-700" required />
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Tiempo (min)</label>

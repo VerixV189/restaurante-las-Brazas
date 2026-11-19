@@ -178,14 +178,14 @@ function confirmDelete(recipe) {
         <Column header="Costo Estimado">
           <template #body="{ data }">
             <span class="font-semibold text-amber-600 dark:text-amber-400">
-              ${{ calculateEstimatedCost(data).toFixed(2) }}
+              Bs. {{ calculateEstimatedCost(data).toFixed(2) }}
             </span>
           </template>
         </Column>
         <Column header="Precio de Venta">
           <template #body="{ data }">
             <span class="font-semibold text-emerald-600 dark:text-emerald-400">
-              ${{ parseFloat(data.dish?.price || 0).toFixed(2) }}
+              Bs. {{ parseFloat(data.dish?.price || 0).toFixed(2) }}
             </span>
           </template>
         </Column>
@@ -365,8 +365,8 @@ function confirmDelete(recipe) {
           <h3 class="text-lg font-bold text-orange-600 dark:text-orange-400">{{ selectedRecipe.dish?.name }}</h3>
           <p class="text-xs text-slate-600 dark:text-slate-400 mb-2">{{ selectedRecipe.dish?.description }}</p>
           <div class="flex gap-4 text-xs font-semibold">
-            <span class="text-slate-700 dark:text-slate-300">Precio Venta: <strong class="text-emerald-600 dark:text-emerald-400">${{ parseFloat(selectedRecipe.dish?.price || 0).toFixed(2) }}</strong></span>
-            <span class="text-slate-700 dark:text-slate-300">Costo Insumos: <strong class="text-amber-600 dark:text-amber-400">${{ calculateEstimatedCost(selectedRecipe).toFixed(2) }}</strong></span>
+            <span class="text-slate-700 dark:text-slate-300">Precio Venta: <strong class="text-emerald-600 dark:text-emerald-400">Bs. {{ parseFloat(selectedRecipe.dish?.price || 0).toFixed(2) }}</strong></span>
+            <span class="text-slate-700 dark:text-slate-300">Costo Insumos: <strong class="text-amber-600 dark:text-amber-400">Bs. {{ calculateEstimatedCost(selectedRecipe).toFixed(2) }}</strong></span>
           </div>
         </div>
 

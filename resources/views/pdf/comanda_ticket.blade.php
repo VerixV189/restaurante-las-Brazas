@@ -127,8 +127,8 @@
                             <div class="item-notes">* {{ $item->notes }}</div>
                         @endif
                     </td>
-                    <td class="text-right">${{ number_format($item->unit_price, 2) }}</td>
-                    <td class="text-right bold">${{ number_format($item->subtotal, 2) }}</td>
+                    <td class="text-right">Bs. {{ number_format($item->unit_price, 2) }}</td>
+                    <td class="text-right bold">Bs. {{ number_format($item->subtotal, 2) }}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -140,17 +140,17 @@
     <table class="totals-table">
         <tr>
             <td>Subtotal:</td>
-            <td class="text-right">${{ number_format($order->subtotal, 2) }}</td>
+            <td class="text-right">Bs. {{ number_format($order->subtotal, 2) }}</td>
         </tr>
         @if($order->tax > 0)
         <tr>
             <td>Impuestos (IVA):</td>
-            <td class="text-right">${{ number_format($order->tax, 2) }}</td>
+            <td class="text-right">Bs. {{ number_format($order->tax, 2) }}</td>
         </tr>
         @endif
         <tr style="font-size: 13px;">
             <td class="bold">TOTAL A PAGAR:</td>
-            <td class="text-right bold">${{ number_format($order->total_amount, 2) }}</td>
+            <td class="text-right bold">Bs. {{ number_format($order->total_amount, 2) }}</td>
         </tr>
     </table>
 
@@ -160,7 +160,7 @@
             @foreach($order->payments as $payment)
                 <tr>
                     <td><strong>Método:</strong> {{ strtoupper($payment->payment_method) }}</td>
-                    <td class="text-right"><strong>Pagado:</strong> ${{ number_format($payment->amount, 2) }}</td>
+                    <td class="text-right"><strong>Pagado:</strong> Bs. {{ number_format($payment->amount, 2) }}</td>
                 </tr>
                 @if($payment->transaction_ref)
                 <tr>

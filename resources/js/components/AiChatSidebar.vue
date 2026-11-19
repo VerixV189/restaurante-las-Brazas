@@ -134,7 +134,7 @@ const quickSuggestions = computed(() => {
   return [
     { label: '🛒 Pedir Arrachera + Cerveza', prompt: 'Pídeme una Arrachera término medio y una Cerveza Artesanal' },
     { label: '🥩 Mejores cortes', prompt: '¿Cuáles son los cortes de carne más recomendados?' },
-    { label: '🎯 Presupuesto $350', prompt: '¿Qué me recomiendas pedir con un presupuesto de $350?' },
+    { label: '🎯 Presupuesto Bs. 350', prompt: '¿Qué me recomiendas pedir con un presupuesto de Bs. 350?' },
     { label: '➕ Reservar para 4p', prompt: 'Reserva una mesa para 4 personas mañana a las 20:00' },
     { label: '📦 Mis pedidos', prompt: '¿Cuál es el estado de mis pedidos recientes?' },
     { label: '🎟️ Cupones', prompt: '¿Qué cupones de descuento tienen activos?' },
@@ -399,7 +399,7 @@ function renderMarkdown(text) {
                       {{ item.quantity }}x {{ item.name }}
                     </p>
                     <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">
-                      ${{ Number(item.price).toFixed(2) }} c/u {{ item.notes ? `• ${item.notes}` : '' }}
+                      Bs. {{ Number(item.price).toFixed(2) }} c/u {{ item.notes ? `• ${item.notes}` : '' }}
                     </p>
                   </div>
                   <button

@@ -582,7 +582,7 @@ const aiMessages = ref([
       `Puedo ejecutar acciones reales por ti en lenguaje natural o por voz:\n` +
       `• 🛒 **Hacer Pedidos:** *"Pídeme una Arrachera término medio y una Cerveza Artesanal"*\n` +
       `• 📅 **Crear Reservas:** *"Reserva una mesa para 4 personas mañana a las 20:00"*\n` +
-      `• 🎯 **Buscar por Presupuesto o Corte:** *"¿Qué me recomiendas pedir con $350?"*\n` +
+      `• 🎯 **Buscar por Presupuesto o Corte:** *"¿Qué me recomiendas pedir con Bs. 350?"*\n` +
       `• 🎟️ **Cupones y Estado de Envíos:** *"¿Qué cupones tienen activos?"* o *"Estado de mi pedido"*`,
     suggestedItems: [],
     suggestedCoupons: [],
@@ -597,7 +597,7 @@ let speechRec = null;
 const aiPrompts = [
   '🛒 Pídeme una Arrachera término medio y una Cerveza Artesanal',
   '🥩 ¿Cuáles son los cortes de carne más recomendados?',
-  '🎯 ¿Qué me recomiendas pedir con un presupuesto de $350?',
+  '🎯 ¿Qué me recomiendas pedir con un presupuesto de Bs. 350?',
   '📅 Reserva una mesa para 4 personas mañana a las 20:00',
   '🎟️ ¿Qué cupones de descuento tienen activos?',
   '📦 ¿Cuál es el estado de mis pedidos recientes?',
@@ -820,7 +820,7 @@ onUnmounted(() => {
             class="px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-extrabold flex items-center gap-1.5 cursor-pointer hover:bg-amber-500/20 transition-colors"
           >
             <Star class="w-4 h-4 text-amber-500 fill-amber-500" />
-            {{ loyaltyPoints }} pts (${{ (loyaltyPoints * 0.05).toFixed(2) }} Cashback)
+            {{ loyaltyPoints }} pts (Bs. {{ (loyaltyPoints * 0.05).toFixed(2) }} Cashback)
           </button>
 
           <button
@@ -831,7 +831,7 @@ onUnmounted(() => {
             <ShoppingCart class="w-4 h-4" />
             <span>Carrito ({{ totalItemsCount }})</span>
             <span v-if="cartTotal > 0" class="px-1.5 py-0.5 rounded bg-black/20 text-[11px]">
-              ${{ cartTotal.toFixed(2) }}
+              Bs. {{ cartTotal.toFixed(2) }}
             </span>
           </button>
         </div>
@@ -884,7 +884,7 @@ onUnmounted(() => {
               <Flame class="w-3.5 h-3.5" /> Recomendación del Maestro Parrillero
             </span>
             <h3 class="text-lg sm:text-xl font-extrabold">
-              {{ recommendedDish.name }} • ${{ Number(recommendedDish.price).toFixed(2) }}
+              {{ recommendedDish.name }} • Bs. {{ Number(recommendedDish.price).toFixed(2) }}
             </h3>
             <p class="text-xs text-white/90 max-w-2xl">
               {{ recommendedDish.description }}
@@ -978,7 +978,7 @@ onUnmounted(() => {
                 <div>
                   <span class="text-[10px] uppercase font-bold text-slate-400 block">Precio</span>
                   <span class="text-base font-extrabold text-orange-600 dark:text-orange-400">
-                    ${{ Number(dish.price).toFixed(2) }}
+                    Bs. {{ Number(dish.price).toFixed(2) }}
                   </span>
                 </div>
 
@@ -1062,7 +1062,7 @@ onUnmounted(() => {
                       {{ item.notes }}
                     </p>
                     <p class="text-xs text-slate-500">
-                      ${{ Number(item.dish.price).toFixed(2) }} c/u
+                      Bs. {{ Number(item.dish.price).toFixed(2) }} c/u
                     </p>
                   </div>
                 </div>
@@ -1087,7 +1087,7 @@ onUnmounted(() => {
                   </div>
 
                   <span class="font-extrabold text-sm text-slate-900 dark:text-white w-20 text-right">
-                    ${{ (Number(item.dish.price) * item.quantity).toFixed(2) }}
+                    Bs. {{ (Number(item.dish.price) * item.quantity).toFixed(2) }}
                   </span>
 
                   <button
@@ -1118,7 +1118,7 @@ onUnmounted(() => {
               >
                 <div class="min-w-0">
                   <p class="font-bold text-xs text-slate-900 dark:text-white truncate">{{ u.name }}</p>
-                  <p class="text-xs text-orange-600 dark:text-orange-400 font-bold">${{ Number(u.price).toFixed(2) }}</p>
+                  <p class="text-xs text-orange-600 dark:text-orange-400 font-bold">Bs. {{ Number(u.price).toFixed(2) }}</p>
                 </div>
                 <button
                   type="button"
@@ -1288,19 +1288,19 @@ onUnmounted(() => {
             <div class="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-1.5 text-xs">
               <div class="flex justify-between text-slate-500">
                 <span>Subtotal ({{ totalItemsCount }} ítems)</span>
-                <span>${{ cartSubtotal.toFixed(2) }}</span>
+                <span>Bs. {{ cartSubtotal.toFixed(2) }}</span>
               </div>
               <div v-if="cartDiscount > 0" class="flex justify-between text-emerald-600 font-bold">
                 <span>Descuento Cupón</span>
-                <span>-${{ cartDiscount.toFixed(2) }}</span>
+                <span>-Bs. {{ cartDiscount.toFixed(2) }}</span>
               </div>
               <div v-if="orderType === 'delivery'" class="flex justify-between text-slate-500">
-                <span>Costo de Envío (Gratis desde $50)</span>
-                <span>{{ deliveryFee === 0 ? 'GRATIS' : `$${deliveryFee.toFixed(2)}` }}</span>
+                <span>Costo de Envío (Gratis desde Bs. 50)</span>
+                <span>{{ deliveryFee === 0 ? 'GRATIS' : `Bs. ${deliveryFee.toFixed(2)}` }}</span>
               </div>
               <div class="flex justify-between text-base font-extrabold text-slate-900 dark:text-white pt-2 border-t border-slate-200 dark:border-slate-800">
                 <span>Total a Pagar</span>
-                <span class="text-orange-600 dark:text-orange-400">${{ cartTotal.toFixed(2) }}</span>
+                <span class="text-orange-600 dark:text-orange-400">Bs. {{ cartTotal.toFixed(2) }}</span>
               </div>
             </div>
 
@@ -1310,7 +1310,7 @@ onUnmounted(() => {
               @click="submitCheckout"
               class="w-full py-3 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-extrabold text-sm shadow-lg shadow-orange-600/25 disabled:opacity-40 cursor-pointer transition-transform active:scale-98"
             >
-              {{ submittingOrder ? 'Procesando pedido...' : `🔥 Confirmar y Pagar $${cartTotal.toFixed(2)}` }}
+              {{ submittingOrder ? 'Procesando pedido...' : `🔥 Confirmar y Pagar Bs. ${cartTotal.toFixed(2)}` }}
             </button>
           </div>
         </div>
@@ -1355,7 +1355,7 @@ onUnmounted(() => {
 
             <div class="text-right">
               <span class="text-lg font-extrabold text-orange-600 dark:text-orange-400">
-                ${{ Number(order.total).toFixed(2) }}
+                Bs. {{ Number(order.total).toFixed(2) }}
               </span>
               <span class="block text-[10px] uppercase font-bold text-slate-400">
                 {{ order.items_count }} ítem(s)
@@ -1391,7 +1391,7 @@ onUnmounted(() => {
                 <strong>{{ it.quantity }}x</strong> {{ it.name }}
                 <em v-if="it.notes" class="text-slate-400"> ({{ it.notes }})</em>
               </span>
-              <span class="font-bold">${{ Number(it.subtotal).toFixed(2) }}</span>
+              <span class="font-bold">Bs. {{ Number(it.subtotal).toFixed(2) }}</span>
             </div>
           </div>
 
@@ -1437,7 +1437,7 @@ onUnmounted(() => {
               Tienes {{ loyaltyPoints }} Puntos Acumulados
             </h3>
             <p class="text-xs text-slate-300">
-              Acumulas 1 punto por cada $1 consumido. Equivalente en Cashback: <strong>${{ (loyaltyPoints * 0.05).toFixed(2) }} USD</strong>.
+              Acumulas 1 punto por cada Bs. 1 consumido. Equivalente en Cashback: <strong>Bs. {{ (loyaltyPoints * 0.05).toFixed(2) }} Bs.</strong>.
             </p>
           </div>
           <button
@@ -1464,10 +1464,10 @@ onUnmounted(() => {
                 <span class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">● Activo</span>
               </div>
               <h4 class="font-extrabold text-base text-slate-900 dark:text-white">
-                {{ c.type === 'percent' ? `${c.value}% de Descuento` : c.type === 'fixed' ? `$${c.value} de Descuento Directo` : 'Envío a Domicilio GRATIS' }}
+                {{ c.type === 'percent' ? `${c.value}% de Descuento` : c.type === 'fixed' ? `Bs. ${c.value} de Descuento Directo` : 'Envío a Domicilio GRATIS' }}
               </h4>
               <p class="text-xs text-slate-500">
-                Compra mínima requerida: <strong>${{ Number(c.min_order).toFixed(2) }}</strong>
+                Compra mínima requerida: <strong>Bs. {{ Number(c.min_order).toFixed(2) }}</strong>
               </p>
             </div>
 
@@ -1666,7 +1666,7 @@ onUnmounted(() => {
                         {{ item.quantity }}x {{ item.name }}
                       </p>
                       <p class="text-[11px] text-orange-600 dark:text-orange-400 font-bold">
-                        ${{ Number(item.price).toFixed(2) }} c/u {{ item.notes ? `• ${item.notes}` : '' }}
+                        Bs. {{ Number(item.price).toFixed(2) }} c/u {{ item.notes ? `• ${item.notes}` : '' }}
                       </p>
                     </div>
                   </div>
@@ -1843,7 +1843,7 @@ onUnmounted(() => {
               {{ customizingDish.name }}
             </h3>
             <p class="text-xs text-orange-600 dark:text-orange-400 font-bold">
-              ${{ Number(customizingDish.price).toFixed(2) }} • {{ customizingDish.prep_time_minutes }} min en parrilla
+              Bs. {{ Number(customizingDish.price).toFixed(2) }} • {{ customizingDish.prep_time_minutes }} min en parrilla
             </p>
           </div>
         </div>
@@ -1906,7 +1906,7 @@ onUnmounted(() => {
               @click="confirmCustomAdd"
               class="px-5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-xs cursor-pointer"
             >
-              Agregar (${{ (Number(customizingDish.price) * customQuantity).toFixed(2) }})
+              Agregar (Bs. {{ (Number(customizingDish.price) * customQuantity).toFixed(2) }})
             </button>
           </div>
         </div>

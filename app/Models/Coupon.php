@@ -16,7 +16,7 @@ class Coupon extends Model
         if (! $this->is_active) return 'El cupón no está activo.';
         if ($this->expires_at && $this->expires_at->isPast()) return 'El cupón ha expirado.';
         if ($this->max_uses !== null && $this->used_count >= $this->max_uses) return 'El cupón alcanzó su límite de usos.';
-        if ($subtotal < (float) $this->min_order) return "Pedido mínimo para este cupón: {$this->min_order}.";
+        if ($subtotal < (float) $this->min_order) return "Pedido mínimo para este cupón: Bs. " . number_format((float) $this->min_order, 2) . ".";
         return null;
     }
 

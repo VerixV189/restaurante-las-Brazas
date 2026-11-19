@@ -171,15 +171,15 @@
         <tr>
             <td class="kpi-card" style="width: 33%;">
                 <div class="kpi-title">Ventas Totales Históricas</div>
-                <div class="kpi-value green">${{ number_format($summary['total_revenue'], 2) }}</div>
+                <div class="kpi-value green">Bs. {{ number_format($summary['total_revenue'], 2) }}</div>
             </td>
             <td class="kpi-card" style="width: 33%;">
                 <div class="kpi-title">Ventas de Hoy</div>
-                <div class="kpi-value highlight">${{ number_format($summary['today_revenue'], 2) }}</div>
+                <div class="kpi-value highlight">Bs. {{ number_format($summary['today_revenue'], 2) }}</div>
             </td>
             <td class="kpi-card" style="width: 33%;">
                 <div class="kpi-title">Ventas Este Mes</div>
-                <div class="kpi-value">${{ number_format($summary['month_revenue'], 2) }}</div>
+                <div class="kpi-value">Bs. {{ number_format($summary['month_revenue'], 2) }}</div>
             </td>
         </tr>
         <tr>
@@ -189,11 +189,11 @@
             </td>
             <td class="kpi-card">
                 <div class="kpi-title">Ticket Promedio</div>
-                <div class="kpi-value">${{ number_format($summary['average_ticket'], 2) }}</div>
+                <div class="kpi-value">Bs. {{ number_format($summary['average_ticket'], 2) }}</div>
             </td>
             <td class="kpi-card">
                 <div class="kpi-title">Costo por Mermas</div>
-                <div class="kpi-value red">${{ number_format($summary['total_waste_loss'], 2) }}</div>
+                <div class="kpi-value red">Bs. {{ number_format($summary['total_waste_loss'], 2) }}</div>
             </td>
         </tr>
     </table>
@@ -204,7 +204,7 @@
         <thead>
             <tr>
                 <th>Fecha / Día</th>
-                <th class="text-right">Monto Total Recaudado ($)</th>
+                <th class="text-right">Monto Total Recaudado (Bs.)</th>
                 <th class="text-center">Estado</th>
             </tr>
         </thead>
@@ -212,7 +212,7 @@
             @foreach($dailySales as $day)
                 <tr>
                     <td><strong>{{ $day['date'] }}</strong></td>
-                    <td class="text-right font-mono">${{ number_format($day['amount'], 2) }}</td>
+                    <td class="text-right font-mono">Bs. {{ number_format($day['amount'], 2) }}</td>
                     <td class="text-center">
                         @if($day['amount'] > 0)
                             <span class="badge badge-success">Con Movimiento</span>
@@ -244,10 +244,10 @@
                     <td class="text-center"><strong>{{ $index + 1 }}</strong></td>
                     <td><strong>{{ $dish->name }}</strong></td>
                     <td>{{ $dish->category->name ?? 'General' }}</td>
-                    <td class="text-right">${{ number_format($dish->price, 2) }}</td>
+                    <td class="text-right">Bs. {{ number_format($dish->price, 2) }}</td>
                     <td class="text-center">{{ $dish->total_units_sold ?? 0 }}</td>
                     <td class="text-right" style="font-weight: bold; color: #16a34a;">
-                        ${{ number_format($dish->total_revenue_generated ?? 0, 2) }}
+                        Bs. {{ number_format($dish->total_revenue_generated ?? 0, 2) }}
                     </td>
                 </tr>
             @empty
@@ -283,9 +283,9 @@
                         @endif
                     </td>
                     <td>{{ $item['category'] }}</td>
-                    <td class="text-right">${{ number_format($item['selling_price'], 2) }}</td>
-                    <td class="text-right" style="color: #b45309;">${{ number_format($item['recipe_cost'], 2) }}</td>
-                    <td class="text-right" style="font-weight: bold; color: #16a34a;">${{ number_format($item['gross_profit'], 2) }}</td>
+                    <td class="text-right">Bs. {{ number_format($item['selling_price'], 2) }}</td>
+                    <td class="text-right" style="color: #b45309;">Bs. {{ number_format($item['recipe_cost'], 2) }}</td>
+                    <td class="text-right" style="font-weight: bold; color: #16a34a;">Bs. {{ number_format($item['gross_profit'], 2) }}</td>
                     <td class="text-center">
                         @if($item['margin_percent'] >= 65)
                             <span class="badge badge-success">{{ $item['margin_percent'] }}% (Alto)</span>

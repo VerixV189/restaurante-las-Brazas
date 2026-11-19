@@ -48,8 +48,8 @@ const saasPlans = [
     id: 'starter',
     name: 'Plan Parrilla Starter',
     badge: 'Arranque Cloud',
-    monthlyPrice: 49,
-    annualPrice: 39,
+    monthlyPrice: 340,
+    annualPrice: 270,
     description: 'Ideal para restaurantes y asadores de 1 sucursal que inician su digitalización operativa en la nube.',
     infra: 'Nube Administrada + Backups Diarios',
     popular: false,
@@ -65,8 +65,8 @@ const saasPlans = [
     id: 'pro',
     name: 'Plan Steakhouse Pro',
     badge: 'Más Popular • Activo en Las Brazas',
-    monthlyPrice: 99,
-    annualPrice: 79,
+    monthlyPrice: 690,
+    annualPrice: 550,
     description: 'Ecosistema omnicanal completo con App Móvil para comensales, Monitor KDS de Cocina e Inteligencia Artificial.',
     infra: 'Servidor Cloud Dedicado + Alta Disponibilidad',
     popular: true,
@@ -83,8 +83,8 @@ const saasPlans = [
     id: 'enterprise',
     name: 'Plan Enterprise Multi-Sede',
     badge: 'Cadenas & Franquicias',
-    monthlyPrice: 189,
-    annualPrice: 149,
+    monthlyPrice: 1290,
+    annualPrice: 1030,
     description: 'Infraestructura dedicada de alta disponibilidad para cadenas gastronómicas con múltiples sucursales.',
     infra: 'Nube Dedicada + Balanceador de Carga',
     popular: false,
@@ -103,7 +103,7 @@ const quoteForm = useForm({
   contact_name: '',
   contact_email: '',
   contact_phone: '',
-  selected_plan: 'Plan Steakhouse Pro ($99 USD/mes - Mensual)',
+  selected_plan: 'Plan Steakhouse Pro (Bs. 690 / mes - Mensual)',
   cloud_provider: 'Servidor Cloud Dedicado + Alta Disponibilidad',
   branches_count: 1,
   message: '',
@@ -113,7 +113,7 @@ const quoteForm = useForm({
 function openSaasModal(plan = null) {
   if (plan) {
     const price = billingCycle.value === 'monthly' ? plan.monthlyPrice : plan.annualPrice;
-    quoteForm.selected_plan = `${plan.name} ($${price} USD/mes - ${billingCycle.value === 'monthly' ? 'Mensual' : 'Anual'})`;
+    quoteForm.selected_plan = `${plan.name} (Bs. ${price} / mes - ${billingCycle.value === 'monthly' ? 'Mensual' : 'Anual'})`;
     quoteForm.cloud_provider = plan.infra;
   }
   saasModalOpen.value = true;
@@ -525,9 +525,9 @@ function submitSaasQuote() {
             <div class="py-4 border-y border-slate-200 dark:border-slate-800">
               <div class="flex items-baseline gap-1.5">
                 <span class="text-4xl font-black text-slate-900 dark:text-white">
-                  ${{ billingCycle === 'monthly' ? plan.monthlyPrice : plan.annualPrice }}
+                  Bs. {{ billingCycle === 'monthly' ? plan.monthlyPrice : plan.annualPrice }}
                 </span>
-                <span class="text-xs font-bold text-slate-500 dark:text-slate-400">USD / mes</span>
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400">BOB / mes</span>
               </div>
               <p class="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-1">
                 Infraestructura incluida: {{ plan.infra }}

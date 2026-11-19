@@ -169,29 +169,29 @@ class ReportController extends Controller
         $html .= '<h2>1. Resumen de Indicadores Clave (KPIs)</h2><table><thead><tr>
             <th>Indicador</th><th>Valor</th>
         </tr></thead><tbody>
-            <tr><td>Ventas Totales Históricas</td><td class="num">$' . number_format($summary['total_revenue'], 2) . '</td></tr>
-            <tr><td>Ventas de Hoy</td><td class="num">$' . number_format($summary['today_revenue'], 2) . '</td></tr>
-            <tr><td>Ventas del Mes Actual</td><td class="num">$' . number_format($summary['month_revenue'], 2) . '</td></tr>
+            <tr><td>Ventas Totales Históricas</td><td class="num">Bs. ' . number_format($summary['total_revenue'], 2) . '</td></tr>
+            <tr><td>Ventas de Hoy</td><td class="num">Bs. ' . number_format($summary['today_revenue'], 2) . '</td></tr>
+            <tr><td>Ventas del Mes Actual</td><td class="num">Bs. ' . number_format($summary['month_revenue'], 2) . '</td></tr>
             <tr><td>Comandas Pagadas</td><td class="num">' . $summary['completed_orders_count'] . '</td></tr>
-            <tr><td>Ticket Promedio</td><td class="num">$' . number_format($summary['average_ticket'], 2) . '</td></tr>
-            <tr><td>Costo por Mermas</td><td class="num">$' . number_format($summary['total_waste_loss'], 2) . '</td></tr>
+            <tr><td>Ticket Promedio</td><td class="num">Bs. ' . number_format($summary['average_ticket'], 2) . '</td></tr>
+            <tr><td>Costo por Mermas</td><td class="num">Bs. ' . number_format($summary['total_waste_loss'], 2) . '</td></tr>
         </tbody></table>';
 
         // 2. Ventas Últimos 7 Días
         $html .= '<h2>2. Evolución de Ventas (Últimos 7 Días)</h2><table><thead><tr>
-            <th>Fecha</th><th>Ventas ($)</th>
+            <th>Fecha</th><th>Ventas (Bs.)</th>
         </tr></thead><tbody>';
         foreach ($data['dailySales'] as $day) {
-            $html .= '<tr><td>' . e($day['date']) . '</td><td class="num">$' . number_format($day['amount'], 2) . '</td></tr>';
+            $html .= '<tr><td>' . e($day['date']) . '</td><td class="num">Bs. ' . number_format($day['amount'], 2) . '</td></tr>';
         }
         $html .= '</tbody></table>';
 
         // 3. Ventas por Categoría
         $html .= '<h2>3. Ventas por Categoría</h2><table><thead><tr>
-            <th>Categoría</th><th>Total Ventas ($)</th>
+            <th>Categoría</th><th>Total Ventas (Bs.)</th>
         </tr></thead><tbody>';
         foreach ($data['categoriesSales'] as $cat) {
-            $html .= '<tr><td>' . e($cat['category_name']) . '</td><td class="num">$' . number_format($cat['total_sales'], 2) . '</td></tr>';
+            $html .= '<tr><td>' . e($cat['category_name']) . '</td><td class="num">Bs. ' . number_format($cat['total_sales'], 2) . '</td></tr>';
         }
         $html .= '</tbody></table>';
 
@@ -204,9 +204,9 @@ class ReportController extends Controller
                 <td>' . ($idx + 1) . '</td>
                 <td>' . e($dish->name) . '</td>
                 <td>' . e($dish->category->name ?? 'General') . '</td>
-                <td class="num">$' . number_format((float) $dish->price, 2) . '</td>
+                <td class="num">Bs. ' . number_format((float) $dish->price, 2) . '</td>
                 <td class="num">' . (int) ($dish->total_units_sold ?? 0) . '</td>
-                <td class="num">$' . number_format((float) ($dish->total_revenue_generated ?? 0), 2) . '</td>
+                <td class="num">Bs. ' . number_format((float) ($dish->total_revenue_generated ?? 0), 2) . '</td>
             </tr>';
         }
         $html .= '</tbody></table>';
@@ -219,9 +219,9 @@ class ReportController extends Controller
             $html .= '<tr>
                 <td>' . e($item['name']) . '</td>
                 <td>' . e($item['category']) . '</td>
-                <td class="num">$' . number_format($item['selling_price'], 2) . '</td>
-                <td class="num">$' . number_format($item['recipe_cost'], 2) . '</td>
-                <td class="num">$' . number_format($item['gross_profit'], 2) . '</td>
+                <td class="num">Bs. ' . number_format($item['selling_price'], 2) . '</td>
+                <td class="num">Bs. ' . number_format($item['recipe_cost'], 2) . '</td>
+                <td class="num">Bs. ' . number_format($item['gross_profit'], 2) . '</td>
                 <td class="num">' . $item['margin_percent'] . '%</td>
             </tr>';
         }
@@ -256,17 +256,17 @@ class ReportController extends Controller
             // Sección 1: KPIs
             fputcsv($out, ['=== 1. RESUMEN DE INDICADORES CLAVE (KPIS) ===']);
             fputcsv($out, ['Indicador', 'Valor']);
-            fputcsv($out, ['Ventas Totales Históricas ($)', number_format($summary['total_revenue'], 2, '.', '')]);
-            fputcsv($out, ['Ventas de Hoy ($)', number_format($summary['today_revenue'], 2, '.', '')]);
-            fputcsv($out, ['Ventas Este Mes ($)', number_format($summary['month_revenue'], 2, '.', '')]);
+            fputcsv($out, ['Ventas Totales Históricas (Bs.)', number_format($summary['total_revenue'], 2, '.', '')]);
+            fputcsv($out, ['Ventas de Hoy (Bs.)', number_format($summary['today_revenue'], 2, '.', '')]);
+            fputcsv($out, ['Ventas Este Mes (Bs.)', number_format($summary['month_revenue'], 2, '.', '')]);
             fputcsv($out, ['Comandas Cobradas', $summary['completed_orders_count']]);
-            fputcsv($out, ['Ticket Promedio ($)', number_format($summary['average_ticket'], 2, '.', '')]);
-            fputcsv($out, ['Costo por Mermas ($)', number_format($summary['total_waste_loss'], 2, '.', '')]);
+            fputcsv($out, ['Ticket Promedio (Bs.)', number_format($summary['average_ticket'], 2, '.', '')]);
+            fputcsv($out, ['Costo por Mermas (Bs.)', number_format($summary['total_waste_loss'], 2, '.', '')]);
             fputcsv($out, []);
 
             // Sección 2: Ventas Diarias
             fputcsv($out, ['=== 2. EVOLUCIÓN DE VENTAS (ÚLTIMOS 7 DÍAS) ===']);
-            fputcsv($out, ['Fecha', 'Monto ($)']);
+            fputcsv($out, ['Fecha', 'Monto (Bs.)']);
             foreach ($data['dailySales'] as $day) {
                 fputcsv($out, [$day['date'], number_format($day['amount'], 2, '.', '')]);
             }
@@ -274,7 +274,7 @@ class ReportController extends Controller
 
             // Sección 3: Ventas por Categoría
             fputcsv($out, ['=== 3. VENTAS POR CATEGORÍA ===']);
-            fputcsv($out, ['Categoría', 'Total Ventas ($)']);
+            fputcsv($out, ['Categoría', 'Total Ventas (Bs.)']);
             foreach ($data['categoriesSales'] as $cat) {
                 fputcsv($out, [$cat['category_name'], number_format($cat['total_sales'], 2, '.', '')]);
             }
@@ -282,7 +282,7 @@ class ReportController extends Controller
 
             // Sección 4: Top Platillos
             fputcsv($out, ['=== 4. TOP PLATILLOS MÁS VENDIDOS ===']);
-            fputcsv($out, ['Ranking', 'Platillo', 'Categoría', 'Precio Unitario ($)', 'Unidades Vendidas', 'Ingresos Generados ($)']);
+            fputcsv($out, ['Ranking', 'Platillo', 'Categoría', 'Precio Unitario (Bs.)', 'Unidades Vendidas', 'Ingresos Generados (Bs.)']);
             foreach ($data['topDishes'] as $idx => $dish) {
                 fputcsv($out, [
                     $idx + 1,
@@ -297,7 +297,7 @@ class ReportController extends Controller
 
             // Sección 5: Rentabilidad
             fputcsv($out, ['=== 5. MATRIZ DE COSTO VS PRECIO (RENTABILIDAD) ===']);
-            fputcsv($out, ['Platillo', 'Categoría', 'Precio Venta ($)', 'Costo Insumos ($)', 'Ganancia Bruta ($)', 'Margen (%)']);
+            fputcsv($out, ['Platillo', 'Categoría', 'Precio Venta (Bs.)', 'Costo Insumos (Bs.)', 'Ganancia Bruta (Bs.)', 'Margen (%)']);
             foreach ($data['profitability'] as $item) {
                 fputcsv($out, [
                     $item['name'],

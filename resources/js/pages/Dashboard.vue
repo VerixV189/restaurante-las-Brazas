@@ -121,7 +121,7 @@ const dailyChartData = computed(() => ({
   labels: props.dailySales.map(d => d.date),
   datasets: [
     {
-      label: 'Ingresos ($)',
+      label: 'Ingresos (Bs.)',
       backgroundColor: 'rgba(234, 88, 12, 0.75)',
       borderColor: '#ea580c',
       borderWidth: 2,
@@ -151,7 +151,7 @@ const channelChartData = computed(() => ({
 }));
 
 const paymentChartData = computed(() => ({
-  labels: ['Efectivo ($)', 'Tarjeta ($)', 'Transferencia / QR ($)'],
+  labels: ['Efectivo (Bs.)', 'Tarjeta (Bs.)', 'Transferencia / QR (Bs.)'],
   datasets: [
     {
       data: [
@@ -174,7 +174,7 @@ const barChartOptions = {
   scales: {
     x: { ticks: { color: '#64748b' }, grid: { color: 'rgba(148, 163, 184, 0.15)' } },
     y: {
-      ticks: { color: '#64748b', callback: (v) => `$${v}` },
+      ticks: { color: '#64748b', callback: (v) => `Bs. ${v}` },
       grid: { color: 'rgba(148, 163, 184, 0.15)' },
     },
   },
@@ -290,7 +290,7 @@ function getOrderBadge(order) {
                 Ingresos ({{ periodOptions.find(p => p.key === selectedPeriod)?.label }})
               </p>
               <h3 class="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
-                ${{ Number(currentMetrics.revenue || 0).toFixed(2) }}
+                Bs. {{ Number(currentMetrics.revenue || 0).toFixed(2) }}
               </h3>
             </div>
             <div class="p-3 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl border border-emerald-500/20">
@@ -311,7 +311,7 @@ function getOrderBadge(order) {
             <div>
               <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Ticket Promedio</p>
               <h3 class="text-2xl font-black text-slate-800 dark:text-slate-100 mt-1">
-                ${{ Number(currentMetrics.avg_ticket || 0).toFixed(2) }}
+                Bs. {{ Number(currentMetrics.avg_ticket || 0).toFixed(2) }}
               </h3>
             </div>
             <div class="p-3 bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-xl border border-purple-500/20">
@@ -400,10 +400,10 @@ function getOrderBadge(order) {
           <div>
             <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Valor en Almacén</p>
             <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100 mt-0.5">
-              ${{ Number(stats.inventory_value || 0).toFixed(2) }}
+              Bs. {{ Number(stats.inventory_value || 0).toFixed(2) }}
             </h3>
             <p class="text-[11px] text-red-500 dark:text-red-400 font-medium">
-              Mermas: ${{ Number(stats.waste_loss || 0).toFixed(2) }}
+              Mermas: Bs. {{ Number(stats.waste_loss || 0).toFixed(2) }}
             </p>
           </div>
           <div class="p-3 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 rounded-xl border border-cyan-500/20">
@@ -535,7 +535,7 @@ function getOrderBadge(order) {
                     {{ dish.name }}
                   </span>
                   <span class="font-bold text-emerald-600 dark:text-emerald-400">
-                    {{ dish.units_sold || 0 }} uds · ${{ Number(dish.revenue || 0).toFixed(2) }}
+                    {{ dish.units_sold || 0 }} uds · Bs. {{ Number(dish.revenue || 0).toFixed(2) }}
                   </span>
                 </div>
                 <div class="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
@@ -617,7 +617,7 @@ function getOrderBadge(order) {
           </Column>
           <Column header="Total">
             <template #body="{ data }">
-              <span class="font-bold text-emerald-600 dark:text-emerald-400">${{ parseFloat(data.total_amount).toFixed(2) }}</span>
+              <span class="font-bold text-emerald-600 dark:text-emerald-400">Bs. {{ parseFloat(data.total_amount).toFixed(2) }}</span>
             </template>
           </Column>
           <Column header="Estado">

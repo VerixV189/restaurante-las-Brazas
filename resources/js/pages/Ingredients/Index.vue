@@ -128,7 +128,7 @@ function confirmDelete(ingredient) {
         </Column>
         <Column field="cost_per_unit" header="Costo Unitario">
           <template #body="{ data }">
-            <span class="text-slate-600 dark:text-slate-300">${{ Number(data.cost_per_unit).toFixed(2) }} / {{ data.unit_of_measure }}</span>
+            <span class="text-slate-600 dark:text-slate-300">Bs. {{ Number(data.cost_per_unit).toFixed(2) }} / {{ data.unit_of_measure }}</span>
           </template>
         </Column>
         <Column header="Estado Stock">
@@ -195,8 +195,8 @@ function confirmDelete(ingredient) {
             <Select v-model="form.unit_of_measure" :options="unitOptions" class="w-full bg-slate-50 border-slate-300 dark:bg-slate-800 dark:border-slate-700" required />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Costo Unitario ($)</label>
-            <InputNumber v-model="form.cost_per_unit" mode="currency" currency="USD" locale="en-US" class="w-full bg-slate-50 border-slate-300 dark:bg-slate-800 dark:border-slate-700" required />
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Costo Unitario (Bs.)</label>
+            <InputNumber v-model="form.cost_per_unit" prefix="Bs. " :minFractionDigits="2" :maxFractionDigits="2" :min="0" class="w-full bg-slate-50 border-slate-300 dark:bg-slate-800 dark:border-slate-700" required />
           </div>
         </div>
         <div class="flex justify-end gap-2 pt-4">

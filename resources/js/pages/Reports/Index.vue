@@ -199,7 +199,7 @@ function exportAiResultCsv() {
   csv += `Consulta IA,"${(aiResult.value.prompt_original || '').replace(/"/g, '""')}"\n`;
   csv += `Platillo / Serie,"${res.dish_name}"\n`;
   csv += `Rango,"${res.time_range.start} - ${res.time_range.end}"\n\n`;
-  csv += 'Periodo,Unidades Vendidas,Ventas ($)\n';
+  csv += 'Periodo,Unidades Vendidas,Ventas (Bs.)\n';
 
   labels.forEach((lbl, idx) => {
     csv += `"${lbl}",${quantities[idx] || 0},${(sales[idx] || 0).toFixed(2)}\n`;
@@ -237,7 +237,7 @@ const aiChartData = computed(() => {
     labels: labels,
     datasets: [
       {
-        label: `Ventas ($) - ${res.dish_name}`,
+        label: `Ventas (Bs.) - ${res.dish_name}`,
         backgroundColor: aiActiveChartType.value === 'line' ? 'rgba(139, 92, 246, 0.2)' : 'rgba(139, 92, 246, 0.75)',
         borderColor: '#8b5cf6',
         borderWidth: 2,
@@ -262,7 +262,7 @@ const aiChartOptions = {
     },
     tooltip: {
       callbacks: {
-        label: (context) => ` Ventas: $${Number(context.raw || 0).toFixed(2)}`,
+        label: (context) => ` Ventas: Bs. ${Number(context.raw || 0).toFixed(2)}`,
       },
     },
   },
@@ -274,7 +274,7 @@ const aiChartOptions = {
     y: {
       ticks: {
         color: '#64748b',
-        callback: (value) => `$${value}`,
+        callback: (value) => `Bs. ${value}`,
       },
       grid: { color: 'rgba(148, 163, 184, 0.2)' },
     },
@@ -287,7 +287,7 @@ const dailySalesChartData = computed(() => {
     labels: props.dailySales.map(d => d.date),
     datasets: [
       {
-        label: 'Ventas ($)',
+        label: 'Ventas (Bs.)',
         backgroundColor: 'rgba(234, 88, 12, 0.75)',
         borderColor: '#ea580c',
         borderWidth: 2,
@@ -310,7 +310,7 @@ const dailySalesChartOptions = {
     },
     tooltip: {
       callbacks: {
-        label: (context) => ` Ventas: $${Number(context.raw || 0).toFixed(2)}`,
+        label: (context) => ` Ventas: Bs. ${Number(context.raw || 0).toFixed(2)}`,
       },
     },
   },
@@ -322,7 +322,7 @@ const dailySalesChartOptions = {
     y: {
       ticks: {
         color: '#64748b',
-        callback: (value) => `$${value}`,
+        callback: (value) => `Bs. ${value}`,
       },
       grid: { color: 'rgba(148, 163, 184, 0.2)' },
     },
@@ -356,7 +356,7 @@ const categoryChartOptions = {
     },
     tooltip: {
       callbacks: {
-        label: (context) => ` ${context.label}: $${Number(context.raw || 0).toFixed(2)}`,
+        label: (context) => ` ${context.label}: Bs. ${Number(context.raw || 0).toFixed(2)}`,
       },
     },
   },
@@ -560,7 +560,7 @@ function getMarginBadge(margin) {
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div class="p-3 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-center">
                 <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Total Recaudado</span>
-                <h4 class="text-lg font-bold text-emerald-600 dark:text-emerald-400">${{ aiResult.result.statistics.total_sales.toFixed(2) }}</h4>
+                <h4 class="text-lg font-bold text-emerald-600 dark:text-emerald-400">Bs. {{ aiResult.result.statistics.total_sales.toFixed(2) }}</h4>
               </div>
               <div class="p-3 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-center">
                 <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Porciones Vendidas</span>
@@ -568,7 +568,7 @@ function getMarginBadge(margin) {
               </div>
               <div class="p-3 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-center">
                 <span class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Promedio / Periodo</span>
-                <h4 class="text-lg font-bold text-cyan-600 dark:text-cyan-400">${{ aiResult.result.statistics.average_per_period.toFixed(2) }}</h4>
+                <h4 class="text-lg font-bold text-cyan-600 dark:text-cyan-400">Bs. {{ aiResult.result.statistics.average_per_period.toFixed(2) }}</h4>
               </div>
             </div>
 
@@ -594,7 +594,7 @@ function getMarginBadge(margin) {
             <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Total Histórico</span>
             <DollarSign class="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
           </div>
-          <h3 class="text-xl font-bold text-emerald-600 dark:text-emerald-400">${{ summary.total_revenue.toFixed(2) }}</h3>
+          <h3 class="text-xl font-bold text-emerald-600 dark:text-emerald-400">Bs. {{ summary.total_revenue.toFixed(2) }}</h3>
         </div>
 
         <!-- Ventas Hoy -->
@@ -603,7 +603,7 @@ function getMarginBadge(margin) {
             <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Ventas Hoy</span>
             <TrendingUp class="w-4 h-4 text-orange-500 dark:text-orange-400" />
           </div>
-          <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100">${{ summary.today_revenue.toFixed(2) }}</h3>
+          <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100">Bs. {{ summary.today_revenue.toFixed(2) }}</h3>
         </div>
 
         <!-- Ventas Mes -->
@@ -612,7 +612,7 @@ function getMarginBadge(margin) {
             <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Este Mes</span>
             <Calendar class="w-4 h-4 text-blue-500 dark:text-blue-400" />
           </div>
-          <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100">${{ summary.month_revenue.toFixed(2) }}</h3>
+          <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100">Bs. {{ summary.month_revenue.toFixed(2) }}</h3>
         </div>
 
         <!-- Comandas Cobradas -->
@@ -630,7 +630,7 @@ function getMarginBadge(margin) {
             <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Ticket Promedio</span>
             <Percent class="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
           </div>
-          <h3 class="text-xl font-bold text-cyan-600 dark:text-cyan-400">${{ summary.average_ticket.toFixed(2) }}</h3>
+          <h3 class="text-xl font-bold text-cyan-600 dark:text-cyan-400">Bs. {{ summary.average_ticket.toFixed(2) }}</h3>
         </div>
 
         <!-- Pérdida por Mermas -->
@@ -639,7 +639,7 @@ function getMarginBadge(margin) {
             <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Costo Mermas</span>
             <AlertTriangle class="w-4 h-4 text-red-500 dark:text-red-400" />
           </div>
-          <h3 class="text-xl font-bold text-red-600 dark:text-red-400">${{ summary.total_waste_loss.toFixed(2) }}</h3>
+          <h3 class="text-xl font-bold text-red-600 dark:text-red-400">Bs. {{ summary.total_waste_loss.toFixed(2) }}</h3>
         </div>
       </div>
 
@@ -728,7 +728,7 @@ function getMarginBadge(margin) {
               <Column field="category.name" header="Categoría"></Column>
               <Column header="Precio Unitario">
                 <template #body="{ data }">
-                  <span class="font-semibold text-slate-700 dark:text-slate-200">${{ parseFloat(data.price).toFixed(2) }}</span>
+                  <span class="font-semibold text-slate-700 dark:text-slate-200">Bs. {{ parseFloat(data.price).toFixed(2) }}</span>
                 </template>
               </Column>
               <Column header="Unidades Vendidas" sortable>
@@ -739,7 +739,7 @@ function getMarginBadge(margin) {
               <Column header="Ingresos Generados" sortable>
                 <template #body="{ data }">
                   <span class="font-bold text-emerald-600 dark:text-emerald-400">
-                    ${{ parseFloat(data.total_revenue_generated || 0).toFixed(2) }}
+                    Bs. {{ parseFloat(data.total_revenue_generated || 0).toFixed(2) }}
                   </span>
                 </template>
               </Column>
@@ -760,17 +760,17 @@ function getMarginBadge(margin) {
               <Column field="category" header="Categoría"></Column>
               <Column header="Precio de Venta" sortable>
                 <template #body="{ data }">
-                  <span class="font-semibold text-slate-700 dark:text-slate-200">${{ data.selling_price.toFixed(2) }}</span>
+                  <span class="font-semibold text-slate-700 dark:text-slate-200">Bs. {{ data.selling_price.toFixed(2) }}</span>
                 </template>
               </Column>
               <Column header="Costo de Insumos (Receta)" sortable>
                 <template #body="{ data }">
-                  <span class="font-semibold text-amber-600 dark:text-amber-400">${{ data.recipe_cost.toFixed(2) }}</span>
+                  <span class="font-semibold text-amber-600 dark:text-amber-400">Bs. {{ data.recipe_cost.toFixed(2) }}</span>
                 </template>
               </Column>
-              <Column header="Ganancia Bruta ($)" sortable>
+              <Column header="Ganancia Bruta (Bs.)" sortable>
                 <template #body="{ data }">
-                  <span class="font-bold text-emerald-600 dark:text-emerald-400">${{ data.gross_profit.toFixed(2) }}</span>
+                  <span class="font-bold text-emerald-600 dark:text-emerald-400">Bs. {{ data.gross_profit.toFixed(2) }}</span>
                 </template>
               </Column>
               <Column header="Margen %" sortable>
