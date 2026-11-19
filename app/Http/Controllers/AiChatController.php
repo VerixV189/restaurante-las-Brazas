@@ -19,11 +19,13 @@ class AiChatController extends Controller
     public function sendMessage(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'message' => 'required|string|min:1|max:1000',
-            'history' => 'nullable|array',
+            'message'           => 'required|string|min:1|max:1000',
+            'history'           => 'nullable|array|max:10',
+            'history.*.role'    => 'nullable|in:user,assistant',
+            'history.*.content' => 'nullable|string|max:1500',
         ], [
             'message.required' => 'El mensaje no puede estar vacío.',
-            'message.max' => 'El mensaje no puede exceder los 1000 caracteres.',
+            'message.max'      => 'El mensaje no puede exceder los 1000 caracteres.',
         ]);
 
         $user = $request->user();
@@ -49,12 +51,14 @@ class AiChatController extends Controller
     public function sendPublicMessage(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'message' => 'required|string|min:1|max:1000',
-            'portal'  => 'nullable|in:restaurant,corporate',
-            'history' => 'nullable|array',
+            'message'           => 'required|string|min:1|max:800',
+            'portal'            => 'nullable|in:restaurant,corporate',
+            'history'           => 'nullable|array|max:10',
+            'history.*.role'    => 'nullable|in:user,assistant',
+            'history.*.content' => 'nullable|string|max:1500',
         ], [
             'message.required' => 'Por favor escribe tu consulta.',
-            'message.max'      => 'El mensaje no puede exceder los 1000 caracteres.',
+            'message.max'      => 'El mensaje no puede exceder los 800 caracteres.',
         ]);
 
         $portal  = $validated['portal'] ?? 'restaurant';

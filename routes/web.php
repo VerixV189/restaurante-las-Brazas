@@ -25,7 +25,7 @@ Route::get('/empresa', [HomeController::class, 'corporate'])->name('corporate.la
 Route::post('/empresa/cotizacion', [HomeController::class, 'sendSaasQuote'])->middleware('throttle:10,1')->name('corporate.quote');
 Route::post('/reserve', [HomeController::class, 'reserve'])->name('public.reserve');
 Route::post('/contact', [HomeController::class, 'sendContact'])->middleware('throttle:10,1')->name('public.contact');
-Route::post('/ai/public-chat', [\App\Http\Controllers\AiChatController::class, 'sendPublicMessage'])->middleware('throttle:30,1')->name('ai.public.chat');
+Route::post('/ai/public-chat', [\App\Http\Controllers\AiChatController::class, 'sendPublicMessage'])->middleware('throttle:20,1')->name('ai.public.chat');
 Route::post('/ai/public-transcribe', [\App\Http\Controllers\AiChatController::class, 'transcribeAudio'])->middleware('throttle:20,1')->name('ai.public.transcribe');
 Route::get('/manual', [\App\Http\Controllers\ManualController::class, 'index'])->name('manual.index');
 Route::get('/manual/pdf', [\App\Http\Controllers\ManualController::class, 'downloadPdf'])->name('manual.pdf');
