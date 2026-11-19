@@ -445,7 +445,7 @@ class ManualSubdomainTest extends TestCase
     public function test_public_ai_agent_auto_routes_vertex_express_aq_keys_to_aiplatform_endpoint(): void
     {
         \Illuminate\Support\Facades\Http::fake([
-            'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent' => \Illuminate\Support\Facades\Http::response([
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent' => \Illuminate\Support\Facades\Http::response([
                 'candidates' => [
                     [
                         'content' => [
@@ -460,7 +460,7 @@ class ManualSubdomainTest extends TestCase
 
         config([
             'services.gemini.api_key' => 'AQ.FakeAiStudioKey12345',
-            'services.gemini.model'   => 'gemini-2.5-flash',
+            'services.gemini.model'   => 'gemini-3.8-flash',
         ]);
 
         $resp = $this->postJson('/ai/public-chat', [
@@ -470,11 +470,11 @@ class ManualSubdomainTest extends TestCase
 
         $resp->assertOk()
             ->assertJsonPath('success', true)
-            ->assertJsonPath('engine', 'gemini-gemini-2.5-flash');
+            ->assertJsonPath('engine', 'gemini-gemini-3.8-flash');
         $this->assertStringContainsString('Plan Enterprise Multi-Sede', (string) $resp->json('reply'));
 
         \Illuminate\Support\Facades\Http::assertSent(function ($request) {
-            return str_contains($request->url(), 'generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent')
+            return str_contains($request->url(), 'generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent')
                 && $request->hasHeader('x-goog-api-key', 'AQ.FakeAiStudioKey12345');
         });
     }

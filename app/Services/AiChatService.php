@@ -418,17 +418,17 @@ class AiChatService
      */
     private function callConfiguredLlm(string $systemPrompt, string $message, array $history = []): ?string
     {
-        // 1. Google Gemini / Vertex AI Express
+        // 1. Google Gemini (Google AI Studio con header x-goog-api-key + fallback automático de modelos actuales)
         $geminiKey = trim((string) config('services.gemini.api_key'));
         if ($geminiKey !== '') {
-            $configuredModel = trim((string) config('services.gemini.model', 'gemini-2.5-flash'));
+            $configuredModel = trim((string) config('services.gemini.model', 'gemini-3.8-flash'));
             $candidateModels = array_values(array_unique(array_filter([
                 $configuredModel,
-                'gemini-2.5-flash',
-                'gemini-2.0-flash',
+                'gemini-3.8-flash',
+                'gemini-3.6-flash',
+                'gemini-3.5-flash-lite',
             ])));
 
-            $isVertexExpressKey = str_starts_with($geminiKey, 'AQ.');
             $contents = [];
             foreach (array_slice($history, -10) as $h) {
                 $contentText = trim((string) ($h['content'] ?? ''));
@@ -456,53 +456,45 @@ class AiChatService
             ];
 
             foreach ($candidateModels as $model) {
-                $endpoints = $isVertexExpressKey
-                    ? [
-                        ['url' => "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent", 'engine' => "gemini-{$model}"],
-                        ['url' => "https://aiplatform.googleapis.com/v1/publishers/google/models/{$model}:generateContent", 'engine' => "vertex-{$model}"],
-                    ]
-                    : [
-                        ['url' => "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent", 'engine' => "gemini-{$model}"],
-                    ];
+                $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent";
+                $engine = "gemini-{$model}";
 
-                foreach ($endpoints as $ep) {
-                    try {
-                        $response = Http::timeout(18)
-                            ->withHeaders([
-                                'x-goog-api-key' => $geminiKey,
-                                'Content-Type'   => 'application/json',
-                            ])
-                            ->post($ep['url'], $payload);
+                try {
+                    $response = Http::timeout(20)
+                        ->withHeaders([
+                            'x-goog-api-key' => $geminiKey,
+                            'Content-Type'   => 'application/json',
+                        ])
+                        ->post($url, $payload);
 
-                        if ($response->successful()) {
-                            $parts = $response->json('candidates.0.content.parts', []);
-                            $text = '';
-                            if (is_array($parts)) {
-                                foreach ($parts as $part) {
-                                    // Ignorar bloques internos de "thought" si el modelo retorna pensamiento separado
-                                    if (!empty($part['thought'])) {
-                                        continue;
-                                    }
-                                    if (!empty($part['text'])) {
-                                        $text .= $part['text'];
-                                    }
+                    if ($response->successful()) {
+                        $parts = $response->json('candidates.0.content.parts', []);
+                        $text = '';
+                        if (is_array($parts)) {
+                            foreach ($parts as $part) {
+                                // Ignorar bloques internos de "thought" si el modelo retorna pensamiento separado
+                                if (!empty($part['thought'])) {
+                                    continue;
+                                }
+                                if (!empty($part['text'])) {
+                                    $text .= $part['text'];
                                 }
                             }
-                            $text = trim($text);
-                            if ($text !== '') {
-                                $this->lastEngine = $ep['engine'];
-                                return $text;
-                            }
-                        } else {
-                            Log::warning('LLM Google API error', [
-                                'engine' => $ep['engine'],
-                                'status' => $response->status(),
-                                'body'   => mb_substr((string) $response->body(), 0, 350),
-                            ]);
                         }
-                    } catch (\Throwable $e) {
-                        Log::warning("LLM Google exception ({$ep['engine']}): " . $e->getMessage());
+                        $text = trim($text);
+                        if ($text !== '') {
+                            $this->lastEngine = $engine;
+                            return $text;
+                        }
+                    } else {
+                        Log::warning('LLM Google API error', [
+                            'engine' => $engine,
+                            'status' => $response->status(),
+                            'body'   => mb_substr((string) $response->body(), 0, 350),
+                        ]);
                     }
+                } catch (\Throwable $e) {
+                    Log::warning("LLM Google exception ({$engine}): " . $e->getMessage());
                 }
             }
         }
