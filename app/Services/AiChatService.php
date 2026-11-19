@@ -1111,4 +1111,379 @@ class AiChatService
              . "• 📅 **Reservar por Chat:** Escribe *\"Reserva una mesa para 4 personas mañana a las 20:00\"* y la agendo al instante.\n"
              . "• 📦 **Tus Pedidos y Cupones:** Estado de tus órdenes y códigos de descuento activos.";
     }
+
+    /**
+     * =========================================================================
+     * AGENTE IA PÚBLICO PARA LANDINGS (RESTAURANTE `/` Y EMPRESARIAL `/empresa`)
+     * =========================================================================
+     */
+    public function generatePublicReply(string $message, array $history = [], string $portal = 'restaurant'): string
+    {
+        $message = trim($message);
+        $publicContext = $this->gatherPublicContext();
+
+        // 1. Intentar Google Gemini API con base de conocimiento empresarial + carta en vivo
+        $geminiReply = $this->tryDirectPublicGeminiApi($message, $publicContext, $history, $portal);
+        if ($geminiReply !== null) {
+            return $geminiReply;
+        }
+
+        // 2. Motor inteligente de respaldo en PHP (cubre 100% de dudas sin fallar jamás)
+        return $this->smartProcessPublicQuery($message, $publicContext, $portal);
+    }
+
+    /**
+     * Extrae accesos directos interactivos recomendados según el tema de la conversación.
+     */
+    public function extractPublicActions(string $message, string $reply, string $portal = 'restaurant'): array
+    {
+        $combined = mb_strtolower($message . ' ' . $reply, 'UTF-8');
+        $actions = [];
+
+        if (str_contains($combined, 'privacidad') || str_contains($combined, 'datos personales') || str_contains($combined, 'arco')) {
+            $actions[] = ['label' => 'Ver Política de Privacidad', 'href' => '/privacy', 'kind' => 'emerald'];
+        }
+        if (str_contains($combined, 'término') || str_contains($combined, 'termino') || str_contains($combined, 'condicion') || str_contains($combined, 'tolerancia')) {
+            $actions[] = ['label' => 'Leer Términos y Condiciones', 'href' => '/terms', 'kind' => 'orange'];
+        }
+        if (str_contains($combined, 'saas') || str_contains($combined, 'plan') || str_contains($combined, 'cotiz') || str_contains($combined, 'licencia') || str_contains($combined, 'brazastech') || str_contains($combined, 'misión') || str_contains($combined, 'visión')) {
+            $actions[] = [
+                'label' => $portal === 'corporate' ? 'Ir a Cotización SaaS' : 'Explorar Sitio Empresarial',
+                'href'  => $portal === 'corporate' ? '/empresa#cotizacion' : '/empresa',
+                'kind'  => 'blue',
+            ];
+        }
+        if (str_contains($combined, 'menú') || str_contains($combined, 'menu') || str_contains($combined, 'corte') || str_contains($combined, 'platillo') || str_contains($combined, 'precio')) {
+            $actions[] = ['label' => 'Ver Menú Digital', 'href' => '/#menu', 'kind' => 'orange'];
+        }
+        if (str_contains($combined, 'registrar') || str_contains($combined, 'cuenta') || str_contains($combined, 'google')) {
+            $actions[] = ['label' => 'Crear Cuenta Cliente', 'href' => '/register', 'kind' => 'orange'];
+        }
+        if (str_contains($combined, 'personal') || str_contains($combined, 'empleado') || str_contains($combined, 'staff') || str_contains($combined, 'administrador')) {
+            $actions[] = ['label' => 'Acceso Personal', 'href' => '/staff/login', 'kind' => 'slate'];
+        }
+        if (str_contains($combined, 'manual') || str_contains($combined, 'pdf') || str_contains($combined, 'guía')) {
+            $actions[] = ['label' => 'Abrir Manual Interactivo', 'href' => '/manual', 'kind' => 'orange'];
+        }
+        if (str_contains($combined, 'contact') || str_contains($combined, 'ubicación') || str_contains($combined, 'ubicacion') || str_contains($combined, 'horario') || str_contains($combined, 'teléfono')) {
+            $actions[] = ['label' => 'Ir a Contáctenos', 'href' => '/#contacto', 'kind' => 'orange'];
+        }
+
+        // Eliminar duplicados por href y limitar a 3 acciones limpias
+        $unique = [];
+        foreach ($actions as $act) {
+            $unique[$act['href']] = $act;
+        }
+
+        return array_slice(array_values($unique), 0, 3);
+    }
+
+    private function gatherPublicContext(): array
+    {
+        try {
+            $categories = Category::where('is_active', true)
+                ->with(['dishes' => fn ($q) => $q->where('is_available', true)->orderBy('name')])
+                ->get();
+        } catch (\Throwable $e) {
+            $categories = collect();
+        }
+
+        try {
+            $areas = Area::with('tables')->get();
+        } catch (\Throwable $e) {
+            $areas = collect();
+        }
+
+        try {
+            $coupons = Coupon::where('is_active', true)->get();
+        } catch (\Throwable $e) {
+            $coupons = collect();
+        }
+
+        return [
+            'categories' => $categories,
+            'areas'      => $areas,
+            'coupons'    => $coupons,
+        ];
+    }
+
+    private function tryDirectPublicGeminiApi(string $message, array $context, array $history, string $portal): ?string
+    {
+        $apiKey = config('services.gemini.api_key');
+        if (empty($apiKey)) {
+            return null;
+        }
+
+        $model = config('services.gemini.model', 'gemini-2.5-flash');
+        $systemPrompt = $this->buildPublicRagSystemPrompt($context, $portal);
+
+        try {
+            $contents = [];
+            foreach (array_slice($history, -8) as $h) {
+                if (!empty($h['content'])) {
+                    $contents[] = [
+                        'role'  => ($h['role'] ?? 'user') === 'assistant' ? 'model' : 'user',
+                        'parts' => [['text' => $h['content']]],
+                    ];
+                }
+            }
+            $contents[] = [
+                'role'  => 'user',
+                'parts' => [['text' => $message]],
+            ];
+
+            $response = Http::timeout(12)
+                ->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}", [
+                    'systemInstruction' => [
+                        'parts' => [['text' => $systemPrompt]],
+                    ],
+                    'contents' => $contents,
+                    'generationConfig' => [
+                        'temperature'     => 0.35,
+                        'maxOutputTokens' => 1000,
+                    ],
+                ]);
+
+            if ($response->successful()) {
+                $text = $response->json('candidates.0.content.parts.0.text');
+                if (!empty($text)) {
+                    return trim($text);
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::info('Public Gemini API fallback: ' . $e->getMessage());
+        }
+
+        return null;
+    }
+
+    private function buildPublicRagSystemPrompt(array $context, string $portal): string
+    {
+        $menuLines = [];
+        foreach ($context['categories'] as $cat) {
+            foreach ($cat->dishes as $d) {
+                $menuLines[] = "- {$d->name} ({$cat->name}): $" . number_format((float) $d->price, 2) . " | Prep: {$d->prep_time_minutes} min | {$d->description}";
+            }
+        }
+
+        $areaLines = [];
+        foreach ($context['areas'] as $area) {
+            $cap = $area->tables->sum('capacity');
+            $areaLines[] = "- {$area->name}: {$area->tables->count()} mesas (capacidad total {$cap} personas)";
+        }
+
+        $couponLines = [];
+        foreach ($context['coupons'] as $c) {
+            $desc = $c->type === 'percent' ? "{$c->value}% de descuento" : ($c->type === 'free_shipping' ? 'Envío gratis' : '$' . number_format((float) $c->value, 2) . ' de descuento');
+            $couponLines[] = "- Código {$c->code}: {$desc} (pedido mínimo $" . number_format((float) $c->min_order, 2) . ")";
+        }
+
+        $rolePersona = $portal === 'corporate'
+            ? "Actúas como Consultor Especialista Cloud SaaS de BrazasTech Soluciones de Software S.R.L. y conoces también todos los detalles de su restaurante insignia 'Restaurante Las Brazas Steakhouse'."
+            : "Actúas como Anfitrión Virtual y Sommelier IA de 'Restaurante Las Brazas Steakhouse', y además conoces por completo la información empresarial y SaaS de BrazasTech S.R.L. por si un visitante o cliente B2B pregunta por el software.";
+
+        return <<<PROMPT
+Eres el Agente Inteligente Oficial de Restaurante Las Brazas Steakhouse & BrazasTech Soluciones de Software S.R.L.
+{$rolePersona}
+Responde siempre en español con tono amable, profesional, claro y usando formato Markdown (negritas y viñetas breves). Nunca inventes datos ni reveles contraseñas internas.
+
+=== 1. IDENTIDAD CORPORATIVA (MISIÓN, VISIÓN, VALORES Y CALIDAD) ===
+- Empresa desarrolladora del software: BrazasTech Soluciones de Software S.R.L. (registrada ante SEPREC y SENAPI en Bolivia, facturación electrónica SIAT).
+- Restaurante insignia: Restaurante Las Brazas Steakhouse & Grill (+12 años de tradición parrillera, +45,000 comensales atendidos, calificación 4.9/5, cocción 100% con carbón vegetal y leña de mezquite seleccionada).
+- Misión: Brindar una experiencia gastronómica excepcional acompañada de soluciones digitales integrales (Web, App Móvil e Inteligencia Artificial) que optimizan cada etapa del restaurante con herramientas seguras, ágiles y confiables para el servicio al comensal y el control operativo.
+- Visión: Consolidarnos como referentes en hospitalidad y soluciones tecnológicas omnicanal (Web y Móvil) para la industria gastronómica en Latinoamérica, reconocidos por nuestra innovación, facilidad de uso y máxima estabilidad operativa en horas pico.
+- Slogan: "Excelencia en cada corte, precisión en cada servicio."
+- Compromiso de Calidad: Disponibilidad 99.9%, cifrado SSL/TLS, copias de respaldo diarias, auditoría de procesos y trazabilidad total de inventario cárnico.
+
+=== 2. UBICACIÓN, HORARIOS Y CONTACTO ===
+- Dirección: Av. Las Brazas #120, Zona Equipetrol Norte, Santa Cruz de la Sierra, Bolivia.
+- Teléfono fijo: +591 (3) 345-6789 | WhatsApp de atención: +591 700-45678.
+- Horarios de atención:
+  • Lunes a Jueves: 1:00 PM – 10:00 PM
+  • Viernes y Sábado: 1:00 PM – 11:30 PM
+  • Domingo Familiar: 1:00 PM – 9:00 PM
+- Formulario Contáctenos (/#contacto) y Cotización SaaS (/empresa#cotizacion): envían directamente al correo oficial Gmail del equipo con respuesta directa.
+
+=== 3. MODELO SAAS Y PLANES COMERCIALES (/empresa) ===
+- Plan Parrilla Starter: $49 USD/mes (Mensual) o $39 USD/mes (Anual, -20%). Incluye 1 sucursal, hasta 15 mesas, POS Web táctil y arqueo de caja, catálogo digital, control de inventario y stock mínimo, tickets PDF y facturación SIAT, Nube Administrada + backups diarios.
+- Plan Steakhouse Pro (Más Popular • Activo en Las Brazas): $99 USD/mes (Mensual) o $79 USD/mes (Anual, -20%). Todo lo del Starter + mesas y zonas ilimitadas, Monitor de Cocina en Tiempo Real (KDS), App Móvil Android & iOS con Delivery, PIN de 4 dígitos y Cupones, descuento automático por Receta Técnica, reservas digitales por aforo horario (±2h) y tolerancia de 15 min, Chef Virtual IA, Servidor Cloud Dedicado.
+- Plan Enterprise Multi-Sede: $189 USD/mes (Mensual) o $149 USD/mes (Anual, -20%). Todo lo del Pro + múltiples sucursales y almacenes, Gestor Inteligente de Planos de Salón con IA, predicción de demanda y lotes de compra (PDF/Excel), auditoría completa y permisos para 6 perfiles operativos, SLA 99.9% y soporte 24/7.
+
+=== 4. TÉRMINOS Y CONDICIONES (/terms) ===
+- Registro manual: requiere aceptar 2 casillas independientes obligatorias (Términos y Condiciones + Política de Privacidad) y envía 4 correos (Términos, Condiciones, Política de Privacidad y Verificación de cuenta).
+- Registro en 1 clic con Google OAuth 2.0: activa y verifica la cuenta automáticamente al instante y envía los 3 correos informativos (Términos, Condiciones y Política de Privacidad), sin correo de validación.
+- Reservas de mesas: tolerancia estricta de 15 minutos antes de liberar la mesa; control de aforo en ventanas de ±2 horas; cancelaciones permitidas con al menos 2 horas de anticipación.
+- Pedidos y Delivery: entregas a domicilio validadas con PIN secreto de 4 dígitos y firma manuscrita; envío estándar $3.00 o envío GRATIS en pedidos desde $50.00 o con cupón de envío gratis.
+- Código de convivencia: ambiente familiar, derecho de admisión ante conductas irrespetuosas.
+
+=== 5. POLÍTICA DE PRIVACIDAD Y SEGURIDAD (/privacy) ===
+- Nunca vendemos ni compartimos datos personales con terceros publicitarios.
+- Acceso con Google OAuth 2.0: solo solicitamos alcances básicos (openid, email, profile). Jamás accedemos a contraseñas, correos de Gmail, Drive ni contactos.
+- Seguridad técnica: HTTPS/SSL, hash seguro de contraseñas, separación estricta de accesos (Clientes solo entran en /login; Personal autorizado solo entra en /staff/login), y Modo Offline PWA con purga automática de caché privada al cerrar sesión (Clear-Site-Data).
+- Derechos del titular (ARCO): acceso, rectificación, actualización y eliminación de cuenta/datos vía /#contacto.
+
+=== 6. PORTALES Y ACCESOS ===
+- Web del Restaurante (Clientes): / | Login Clientes: /login | Registro Clientes: /register
+- Sitio Web Empresarial SaaS: /empresa | Cotización SaaS: /empresa#cotizacion
+- Acceso Exclusivo Personal (Administrador, Chef, Mesero, Recepcionista, Repartidor): /staff/login
+- Manual de Usuario Interactivo y PDF: /manual (también disponible en manual.lasbrazas.ramio.tech)
+
+=== 7. DATOS EN VIVO DE LA BASE DE DATOS ===
+CARTA DISPONIBLE HOY:
+{$this->joinLinesOrFallback($menuLines, 'Consulta nuestra carta actualizada en la sección Menú Digital.')}
+
+AMBIENTES / ZONAS:
+{$this->joinLinesOrFallback($areaLines, 'Salón Principal, Terraza Jardín y Área VIP.')}
+
+CUPONES ACTIVOS:
+{$this->joinLinesOrFallback($couponLines, 'Consulta las promociones vigentes al ingresar a tu Portal del Comensal.')}
+PROMPT;
+    }
+
+    private function joinLinesOrFallback(array $lines, string $fallback): string
+    {
+        return empty($lines) ? $fallback : implode("\n", array_slice($lines, 0, 40));
+    }
+
+    /**
+     * Motor inteligente local de respaldo que responde cualquier duda sobre el restaurante o el SaaS.
+     */
+    private function smartProcessPublicQuery(string $message, array $context, string $portal): string
+    {
+        $q = mb_strtolower($message, 'UTF-8');
+
+        // 1. Misión y Visión / Identidad Corporativa
+        if (str_contains($q, 'misión') || str_contains($q, 'mision') || str_contains($q, 'visión') || str_contains($q, 'vision') || str_contains($q, 'slogan') || str_contains($q, 'filosof')) {
+            return "🎯 **Identidad Corporativa — BrazasTech & Restaurante Las Brazas**\n\n"
+                 . "• **Nuestra Misión:** Brindar una experiencia gastronómica excepcional acompañada de soluciones digitales integrales (Web, App Móvil e Inteligencia Artificial) que optimizan cada etapa del restaurante con herramientas seguras, ágiles y confiables.\n"
+                 . "• **Nuestra Visión:** Consolidarnos como referentes en hospitalidad y soluciones tecnológicas omnicanal para la industria gastronómica en Latinoamérica, reconocidos por nuestra innovación, facilidad de uso y estabilidad operativa 99.9%.\n"
+                 . "• **Nuestro Slogan:** *\"Excelencia en cada corte, precisión en cada servicio.\"*\n"
+                 . "• **Compromiso de Calidad:** Respaldo diario en nube, cifrado SSL/TLS y trazabilidad total de inventario cárnico.";
+        }
+
+        // 2. Sobre Nosotros / Historia
+        if (str_contains($q, 'sobre nosotros') || str_contains($q, 'historia') || str_contains($q, 'quienes son') || str_contains($q, 'quiénes son') || str_contains($q, 'tradición') || str_contains($q, 'tradicion')) {
+            return "🔥 **Sobre Nosotros — Restaurante Las Brazas Steakhouse**\n\n"
+                 . "Somos una casa de parrilla y cortes madurados con **más de 12 años de tradición** en Santa Cruz de la Sierra, cocinando 100% a la leña de mezquite y carbón vegetal seleccionado.\n\n"
+                 . "• ⭐ **4.9 / 5** de calificación con **+45,000 comensales atendidos**.\n"
+                 . "• 🪑 **3 Ambientes Exclusivos:** Salón Principal, Terraza Jardín y Área VIP Corporativa.\n"
+                 . "• 💻 Tecnología operada con el ecosistema **BrazasTech Cloud SaaS** para ofrecer reservas sin filas y entregas seguras.";
+        }
+
+        // 3. Política de Privacidad y Protección de Datos
+        if (str_contains($q, 'privacidad') || str_contains($q, 'datos personales') || str_contains($q, 'protección de datos') || str_contains($q, 'cookies') || str_contains($q, 'arco')) {
+            return "🛡️ **Política de Privacidad — Restaurante Las Brazas**\n\n"
+                 . "• **Uso responsable:** Nunca vendemos ni compartimos tus datos personales con terceros con fines publicitarios.\n"
+                 . "• **Google OAuth 2.0:** Al iniciar sesión con Google solo solicitamos tu nombre y correo verificado (`openid`, `email`, `profile`). Jamás accedemos a tu contraseña, correos ni archivos.\n"
+                 . "• **Seguridad técnica y PWA:** Conexiones cifradas HTTPS/SSL, contraseñas con hash irreversible y **borrado automático de caché offline** al cerrar sesión (`Clear-Site-Data`).\n"
+                 . "• **Derechos ARCO:** Puedes solicitar acceso, actualización o eliminación de tu cuenta desde **Contáctenos**.\n\n"
+                 . "📄 Puedes leer el documento completo en **`/privacy`** (o **`/politica-de-privacidad`**).";
+        }
+
+        // 4. Términos y Condiciones
+        if (str_contains($q, 'término') || str_contains($q, 'termino') || str_contains($q, 'condicion') || str_contains($q, 'legal') || str_contains($q, 'regla')) {
+            return "📜 **Términos y Condiciones del Servicio — Las Brazas**\n\n"
+                 . "• **Registro de cuenta:** Con correo manual debes aceptar **2 casillas independientes** (Términos y Política de Privacidad) y recibirás 4 correos (Términos, Condiciones, Privacidad y Verificación). Con **Google** quedas activo al instante y recibes los 3 correos informativos (sin validación).\n"
+                 . "• **Reservas de mesa:** Margen de tolerancia estricto de **15 minutos** antes de liberar la mesa y cancelación permitida hasta **2 horas antes**.\n"
+                 . "• **Delivery seguro:** Cada pedido a domicilio incluye un **PIN de 4 dígitos** y firma manuscrita al momento de la entrega.\n"
+                 . "• **Convivencia:** Ambiente cálido y familiar con respeto hacia clientes y personal.\n\n"
+                 . "📄 Consulta el documento completo en **`/terms`**.";
+        }
+
+        // 5. Planes SaaS, Precios, Módulos B2B, Cotización
+        if (str_contains($q, 'saas') || str_contains($q, 'plan') || str_contains($q, 'licencia') || str_contains($q, 'cotiz') || str_contains($q, 'brazastech') || str_contains($q, 'pos') || str_contains($q, 'kds') || str_contains($q, 'ecosistema') || str_contains($q, 'software')) {
+            return "🚀 **BrazasTech Cloud SaaS — Planes para Restaurantes & Parrillas**\n\n"
+                 . "Desarrollado por **BrazasTech Soluciones de Software S.R.L.** (registrado ante SEPREC y SENAPI, con facturación SIAT):\n\n"
+                 . "• **Plan Parrilla Starter — $49 USD/mes** *(o $39/mes anual, -20%)*: 1 sucursal, hasta 15 mesas, POS Web táctil, inventario con stock mínimo, tickets PDF/SIAT y backups diarios.\n"
+                 . "• **Plan Steakhouse Pro — $99 USD/mes** *(o $79/mes anual, -20% • Más Popular)*: Mesas y zonas ilimitadas, Monitor de Cocina **KDS** en vivo, **App Móvil (Android/iOS)** con Delivery + PIN 4 dígitos + Cupones, descuento automático por Receta Técnica y **Chef Virtual IA**.\n"
+                 . "• **Plan Enterprise Multi-Sede — $189 USD/mes** *(o $149/mes anual, -20%)*: Múltiples sucursales, Gestor Inteligente de Planos con IA, predicción de demanda y compras (PDF/Excel), auditoría de 6 roles y SLA 99.9%.\n\n"
+                 . "📩 Puedes solicitar una demo y cotización directa a nuestro correo en **`/empresa#cotizacion`**.";
+        }
+
+        // 6. Ubicación, Dirección, Horarios y Contacto
+        if (str_contains($q, 'ubicaci') || str_contains($q, 'direcci') || str_contains($q, 'donde') || str_contains($q, 'dónde') || str_contains($q, 'horario') || str_contains($q, 'hora') || str_contains($q, 'teléfono') || str_contains($q, 'telefono') || str_contains($q, 'whatsapp') || str_contains($q, 'contact')) {
+            return "📍 **Ubicación, Horarios y Contacto — Restaurante Las Brazas**\n\n"
+                 . "• **Dirección:** Av. Las Brazas #120, Zona Equipetrol Norte, Santa Cruz de la Sierra, Bolivia.\n"
+                 . "• **Teléfono Fijo:** +591 (3) 345-6789\n"
+                 . "• **WhatsApp Atención:** +591 700-45678\n"
+                 . "• **Horarios de Atención:**\n"
+                 . "  - Lunes a Jueves: **1:00 PM – 10:00 PM**\n"
+                 . "  - Viernes y Sábado: **1:00 PM – 11:30 PM**\n"
+                 . "  - Domingo Familiar: **1:00 PM – 9:00 PM**\n\n"
+                 . "✉️ También puedes escribirnos desde el formulario **Contáctenos (`/#contacto`)** y tu mensaje llega directamente a nuestra bandeja oficial de Gmail.";
+        }
+
+        // 7. Reservas y Ambientes
+        if (str_contains($q, 'reserv') || str_contains($q, 'mesa') || str_contains($q, 'terraza') || str_contains($q, 'vip') || str_contains($q, 'tolerancia')) {
+            $zones = $context['areas']->map(fn ($a) => "**{$a->name}** ({$a->tables->count()} mesas)")->implode(', ');
+            $zonesText = $zones ?: '**Salón Principal**, **Terraza Jardín** y **Área VIP**';
+
+            return "📅 **Reservas de Mesas en Las Brazas**\n\n"
+                 . "• **Zonas disponibles:** {$zonesText}.\n"
+                 . "• **Cómo reservar:** Pulsa el botón **Reservar** en la página principal o ingresa a tu **Portal del Comensal (`/login`)** para elegir fecha, horario, número de adultos/niños y zona favorita.\n"
+                 . "• **Tolerancia:** Contamos con **15 minutos de tolerancia** desde la hora reservada y gestión de disponibilidad en franjas de ±2 horas.\n"
+                 . "• **Cancelación:** Puedes cancelar anticipadamente hasta **2 horas antes** de tu reserva.";
+        }
+
+        // 8. Delivery, Cupones y Pagos
+        if (str_contains($q, 'delivery') || str_contains($q, 'domicilio') || str_contains($q, 'envío') || str_contains($q, 'envio') || str_contains($q, 'cupon') || str_contains($q, 'cupón') || str_contains($q, 'descuento') || str_contains($q, 'promo') || str_contains($q, 'pin')) {
+            $couponBlock = '';
+            if ($context['coupons']->isNotEmpty()) {
+                $couponBlock = "\n\n🎟️ **Cupones Activos Hoy:**\n";
+                foreach ($context['coupons']->take(4) as $c) {
+                    $benefit = $c->type === 'percent' ? "{$c->value}% OFF" : ($c->type === 'free_shipping' ? 'Envío Gratis' : '$' . number_format((float) $c->value, 2) . ' OFF');
+                    $couponBlock .= "• **`{$c->code}`** — {$benefit} (mínimo $" . number_format((float) $c->min_order, 2) . ")\n";
+                }
+            }
+
+            return "🛵 **Pedidos Online, Delivery Seguro & Promociones**\n\n"
+                 . "• **Modalidades:** Delivery a domicilio, Para Recoger (Takeaway) y Pedidos en Mesa.\n"
+                 . "• **Tarifa de envío:** $3.00 estándar y **Envío GRATIS** en pedidos desde $50.00 (o usando cupón).\n"
+                 . "• **Doble Seguridad:** Al pedir delivery recibes un **PIN secreto de 4 dígitos** que entregas al repartidor junto a tu firma en pantalla.\n"
+                 . "• **Puntos & Cashback:** Acumulas puntos automáticamente con cada pedido desde tu cuenta de comensal." . $couponBlock;
+        }
+
+        // 9. Acceso Personal, Roles, Login Google, Manual o PWA Offline
+        if (str_contains($q, 'google') || str_contains($q, 'iniciar') || str_contains($q, 'login') || str_contains($q, 'registr') || str_contains($q, 'personal') || str_contains($q, 'staff') || str_contains($q, 'empleado') || str_contains($q, 'manual') || str_contains($q, 'offline') || str_contains($q, 'pwa')) {
+            return "🔐 **Accesos, Seguridad y Centro de Ayuda**\n\n"
+                 . "• **Clientes / Comensales:** Ingresan por **`/login`** o se registran en **`/register`** (incluye acceso rápido en 1 clic con **Google OAuth 2.0**).\n"
+                 . "• **Personal y Administración:** Acceso estricto y exclusivo en **`/staff/login`** para los 5 roles internos (`Administrador`, `Chef`, `Mesero`, `Recepcionista`, `Repartidor`). Los accesos de clientes y empleados están estrictamente separados.\n"
+                 . "• **Modo Offline (PWA):** El sistema funciona como app instalable con indicador **En Línea / Sin Conexión** y elimina automáticamente la caché privada al cerrar sesión.\n"
+                 . "• **Manual Oficial:** Disponible en línea y en PDF descargable en **`/manual`**.";
+        }
+
+        // 10. Menú, Platillos, Cortes, Precios, Presupuesto
+        if (str_contains($q, 'menú') || str_contains($q, 'menu') || str_contains($q, 'carta') || str_contains($q, 'corte') || str_contains($q, 'carne') || str_contains($q, 'platillo') || str_contains($q, 'plato') || str_contains($q, 'precio') || str_contains($q, 'comer') || str_contains($q, 'recomiend') || str_contains($q, 'presupuesto')) {
+            $allDishes = $context['categories']->flatMap(fn ($c) => $c->dishes->map(fn ($d) => ['dish' => $d, 'cat' => $c->name]));
+            if ($allDishes->isNotEmpty()) {
+                $lines = [];
+                foreach ($allDishes->take(8) as $entry) {
+                    $d = $entry['dish'];
+                    $lines[] = "• **{$d->name}** *({$entry['cat']})* — **$" . number_format((float) $d->price, 2) . "** *(~{$d->prep_time_minutes} min)*";
+                }
+                return "🥩 **Recomendaciones de Nuestra Carta en Vivo:**\n\n"
+                     . implode("\n", $lines) . "\n\n"
+                     . "🔥 *Todos nuestros cortes se preparan a la leña en el término que prefieras (Sellado, Término Medio, Tres Cuartos o Bien Cocido). Puedes explorar la carta completa en **`/#menu`**.*";
+            }
+        }
+
+        // 11. Bienvenida / Respuesta general según portal
+        if ($portal === 'corporate') {
+            return "👋 ¡Hola! Soy el **Agente Inteligente de BrazasTech Cloud SaaS**. 🚀\n\n"
+                 . "Puedes ponerme a prueba preguntándome cualquier detalle:\n"
+                 . "• 🎯 **Identidad Corporativa:** Misión, Visión, Slogan y Políticas de Calidad.\n"
+                 . "• 💼 **Planes y Precios SaaS:** Comparativa de Starter ($49), Pro ($99) y Enterprise ($189).\n"
+                 . "• ⚙️ **Ecosistema Tecnológico:** POS táctil, Monitor KDS, App Móvil, Planos con IA e Inventarios.\n"
+                 . "• 🛡️ **Legal y Seguridad:** Términos y Condiciones, Política de Privacidad, Google OAuth y PWA Offline.\n"
+                 . "• 🔐 **Accesos:** Portal de Personal (`/staff/login`) y Manual Interactivo (`/manual`).";
+        }
+
+        return "👋 ¡Hola! Soy el **Asistente Inteligente Oficial de Restaurante Las Brazas**. 🔥🥩\n\n"
+             . "Estoy aquí para responder cualquier consulta al instante:\n"
+             . "• 🥩 **Menú y Recomendaciones:** Cortes a la leña, precios y tiempos de preparación.\n"
+             . "• 📍 **Ubicación y Horarios:** Cómo llegar, teléfonos y horarios de atención.\n"
+             . "• 📅 **Reservas y Delivery:** Zonas disponibles, tolerancia de 15 min, cupones y PIN de entrega.\n"
+             . "• 📜 **Legal y Privacidad:** Términos y Condiciones, Política de Privacidad y registro con Google.\n"
+             . "• 🚀 **Sitio Empresarial SaaS:** Misión, Visión y Planes BrazasTech para restaurantes.";
+    }
 }

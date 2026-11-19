@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useForm, Link } from '@inertiajs/vue3';
 import { useTheme } from '../composables/useTheme';
 import NetworkStatusBadge from '../components/NetworkStatusBadge.vue';
+import PublicAiChatWidget from '../components/PublicAiChatWidget.vue';
 import Toast from 'primevue/toast';
 import Button from 'primevue/button';
 import Tag from 'primevue/tag';
@@ -1044,5 +1045,8 @@ function submitTestimonial() {
         </div>
       </form>
     </Dialog>
+
+    <!-- Agente Inteligente Flotante (Restaurante + Info General) -->
+    <PublicAiChatWidget portal="restaurant" />
   </div>
 </template>

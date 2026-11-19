@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import { useForm, Link } from '@inertiajs/vue3';
 import { useTheme } from '../composables/useTheme';
 import NetworkStatusBadge from '../components/NetworkStatusBadge.vue';
+import PublicAiChatWidget from '../components/PublicAiChatWidget.vue';
 import Toast from 'primevue/toast';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
@@ -761,5 +762,8 @@ function submitSaasQuote() {
         </div>
       </form>
     </Dialog>
+
+    <!-- Agente Inteligente Flotante (Consultor Empresarial & SaaS) -->
+    <PublicAiChatWidget portal="corporate" />
   </div>
 </template>

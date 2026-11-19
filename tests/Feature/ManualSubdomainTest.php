@@ -385,4 +385,49 @@ class ManualSubdomainTest extends TestCase
         // Si el cliente ya logueado entra a /login, redirige limpiamente sin 500
         $this->actingAs($client)->get('/login')->assertStatus(302);
     }
+
+    public function test_public_ai_agent_answers_mission_location_terms_privacy_and_saas_plans(): void
+    {
+        // Forzar motor de conocimiento local para verificar precisión determinística sin depender de red
+        config(['services.gemini.api_key' => null]);
+
+        $missionResp = $this->postJson('/ai/public-chat', [
+            'message' => '¿Cuál es la misión y visión de la empresa?',
+            'portal'  => 'corporate',
+        ]);
+        $missionResp->assertOk()
+            ->assertJsonPath('success', true);
+        $this->assertStringContainsString('Misión', (string) $missionResp->json('reply'));
+        $this->assertStringContainsString('Visión', (string) $missionResp->json('reply'));
+
+        $locationResp = $this->postJson('/ai/public-chat', [
+            'message' => '¿Dónde están ubicados y qué horarios tienen?',
+            'portal'  => 'restaurant',
+        ]);
+        $locationResp->assertOk();
+        $this->assertStringContainsString('Av. Las Brazas #120', (string) $locationResp->json('reply'));
+
+        $saasResp = $this->postJson('/ai/public-chat', [
+            'message' => '¿Qué planes SaaS tienen y cuánto cuestan?',
+            'portal'  => 'corporate',
+        ]);
+        $saasResp->assertOk();
+        $this->assertStringContainsString('$49', (string) $saasResp->json('reply'));
+        $this->assertStringContainsString('$99', (string) $saasResp->json('reply'));
+        $this->assertStringContainsString('$189', (string) $saasResp->json('reply'));
+
+        $privacyResp = $this->postJson('/ai/public-chat', [
+            'message' => 'Explícame la política de privacidad y el uso de Google',
+            'portal'  => 'restaurant',
+        ]);
+        $privacyResp->assertOk();
+        $this->assertStringContainsString('/privacy', (string) $privacyResp->json('reply'));
+
+        $termsResp = $this->postJson('/ai/public-chat', [
+            'message' => '¿Cuáles son los términos y condiciones de reserva?',
+            'portal'  => 'restaurant',
+        ]);
+        $termsResp->assertOk();
+        $this->assertStringContainsString('15 minutos', (string) $termsResp->json('reply'));
+    }
 }

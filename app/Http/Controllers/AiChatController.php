@@ -42,4 +42,33 @@ class AiChatController extends Controller
             'timestamp' => now()->format('H:i'),
         ]);
     }
+
+    /**
+     * Endpoint público para el Agente Inteligente en los Landings (/ y /empresa).
+     */
+    public function sendPublicMessage(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'message' => 'required|string|min:1|max:1000',
+            'portal'  => 'nullable|in:restaurant,corporate',
+            'history' => 'nullable|array',
+        ], [
+            'message.required' => 'Por favor escribe tu consulta.',
+            'message.max'      => 'El mensaje no puede exceder los 1000 caracteres.',
+        ]);
+
+        $portal  = $validated['portal'] ?? 'restaurant';
+        $message = $validated['message'];
+        $history = $validated['history'] ?? [];
+
+        $reply   = $this->aiChatService->generatePublicReply($message, $history, $portal);
+        $actions = $this->aiChatService->extractPublicActions($message, $reply, $portal);
+
+        return response()->json([
+            'success'           => true,
+            'reply'             => $reply,
+            'suggested_actions' => $actions,
+            'timestamp'         => now()->format('H:i'),
+        ]);
+    }
 }
