@@ -21,6 +21,8 @@ use App\Http\Controllers\InventoryMovementController;
 // Rutas Públicas (sin autenticación)
 // ─────────────────────────────────────────────────────────────────────────────
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/empresa', [HomeController::class, 'corporate'])->name('corporate.landing');
+Route::post('/empresa/cotizacion', [HomeController::class, 'sendSaasQuote'])->middleware('throttle:10,1')->name('corporate.quote');
 Route::post('/reserve', [HomeController::class, 'reserve'])->name('public.reserve');
 Route::post('/contact', [HomeController::class, 'sendContact'])->middleware('throttle:10,1')->name('public.contact');
 Route::get('/manual', [\App\Http\Controllers\ManualController::class, 'index'])->name('manual.index');
@@ -39,6 +41,8 @@ Route::get('/verify-email/{id}/{hash}', [AuthController::class, 'verifyEmail'])-
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
+    Route::get('/staff/login', [AuthController::class, 'showStaffLogin'])->name('staff.login');
+    Route::post('/staff/login', [AuthController::class, 'staffLogin'])->name('staff.login.submit');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
     Route::get('/auth/google/redirect', [AuthController::class, 'redirectToGoogle'])->name('auth.google.redirect');

@@ -224,4 +224,116 @@ class ManualSubdomainTest extends TestCase
                 && ($mail->contactData['subject'] ?? null) === 'Reserva Grupal o Evento Corporativo';
         });
     }
+
+    public function test_corporate_landing_and_saas_quote_email_to_gmail(): void
+    {
+        \Illuminate\Support\Facades\Mail::fake();
+        config(['mail.contact_to' => 'erikaguilar189@gmail.com']);
+
+        $pageResponse = $this->get('/empresa');
+        $pageResponse->assertOk();
+        $pageResponse->assertInertia(fn ($page) => $page->component('CorporateLanding'));
+
+        $quoteResponse = $this->from('/empresa')->post('/empresa/cotizacion', [
+            'restaurant_name' => 'Parrilla El Gaucho S.R.L.',
+            'contact_name'    => 'Ing. Roberto Céspedes',
+            'contact_phone'   => '+591 700-55555',
+            'contact_email'   => 'gerencia@elgaucho.bo',
+            'selected_plan'   => 'Plan Steakhouse Pro ($99 USD/mes - Mensual)',
+            'cloud_provider'  => 'Servidor Cloud Dedicado + Alta Disponibilidad',
+            'branches_count'  => 2,
+            'message'         => 'Necesitamos 2 sucursales con KDS y App móvil.',
+            'website'         => '',
+        ]);
+
+        $quoteResponse->assertRedirect('/empresa');
+        $quoteResponse->assertSessionHas('success');
+
+        \Illuminate\Support\Facades\Mail::assertSent(\App\Mail\SaasQuoteMail::class, function ($mail) {
+            return $mail->hasTo('erikaguilar189@gmail.com')
+                && ($mail->quoteData['restaurant_name'] ?? null) === 'Parrilla El Gaucho S.R.L.'
+                && ($mail->quoteData['contact_email'] ?? null) === 'gerencia@elgaucho.bo';
+        });
+    }
+
+    public function test_strict_dual_login_separates_clients_and_staff_completely(): void
+    {
+        $adminRole = \App\Models\Role::firstOrCreate(['name' => 'Administrador'], ['description' => 'Admin']);
+        $clientRole = \App\Models\Role::firstOrCreate(['name' => 'Cliente'], ['description' => 'Cliente']);
+
+        $admin = \App\Models\User::create([
+            'role_id'           => $adminRole->id,
+            'name'              => 'Admin Staff',
+            'email'             => 'staff.admin@lasbrazas.com',
+            'password'          => bcrypt('password123'),
+            'is_active'         => true,
+            'email_verified_at' => now(),
+        ]);
+
+        $client = \App\Models\User::create([
+            'role_id'           => $clientRole->id,
+            'name'              => 'Cliente Portal',
+            'email'             => 'cliente.portal@gmail.com',
+            'password'          => bcrypt('password123'),
+            'is_active'         => true,
+            'email_verified_at' => now(),
+        ]);
+
+        // 1. Vista /staff/login carga correctamente
+        $this->get('/staff/login')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->component('Auth/StaffLogin'));
+
+        // 2. Administrador bloqueado en /login (Portal de Comensales)
+        $this->from('/login')->post('/login', [
+            'email'    => $admin->email,
+            'password' => 'password123',
+        ])->assertRedirect('/login')->assertSessionHasErrors(['email']);
+        $this->assertGuest();
+
+        // 3. Cliente bloqueado en /staff/login (Portal de Personal)
+        $this->from('/staff/login')->post('/staff/login', [
+            'email'    => $client->email,
+            'password' => 'password123',
+        ])->assertRedirect('/staff/login')->assertSessionHasErrors(['email']);
+        $this->assertGuest();
+
+        // 4. Cliente entra correctamente por /login
+        $this->post('/login', [
+            'email'    => $client->email,
+            'password' => 'password123',
+        ])->assertRedirect('/dashboard');
+        $this->assertAuthenticatedAs($client);
+        $this->post('/logout');
+
+        // 5. Administrador entra correctamente por /staff/login
+        $this->post('/staff/login', [
+            'email'    => $admin->email,
+            'password' => 'password123',
+        ])->assertRedirect('/dashboard');
+        $this->assertAuthenticatedAs($admin);
+        $this->post('/logout');
+
+        // 6. Administrador bloqueado también al intentar Google OAuth en portal clientes
+        \Illuminate\Support\Facades\Http::fake([
+            'https://oauth2.googleapis.com/token' => \Illuminate\Support\Facades\Http::response([
+                'access_token' => 'fake-admin-token',
+            ], 200),
+            'https://www.googleapis.com/oauth2/v3/userinfo' => \Illuminate\Support\Facades\Http::response([
+                'email' => $admin->email,
+                'name'  => $admin->name,
+            ], 200),
+        ]);
+        config([
+            'services.google.client_id'     => 'test-id',
+            'services.google.client_secret' => 'test-secret',
+            'services.google.redirect'      => 'https://lasbrazas.ramio.tech/auth/google/callback',
+        ]);
+
+        $this->withSession(['google_oauth_state' => 'state-admin-check'])
+            ->get('/auth/google/callback?code=abc&state=state-admin-check')
+            ->assertRedirect('/staff/login')
+            ->assertSessionHas('error');
+        $this->assertGuest();
+    }
 }

@@ -20,6 +20,13 @@ use Inertia\Response;
 
 class AuthController extends Controller
 {
+    protected function isClientUser(User $user): bool
+    {
+        $user->loadMissing('role');
+
+        return strtolower((string) ($user->role?->name ?? '')) === 'cliente';
+    }
+
     public function showLogin(): Response
     {
         return Inertia::render('Auth/Login');
@@ -33,9 +40,25 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            /** @var User $user */
             $user = Auth::user();
+
+            // Bloqueo estricto: el Portal de Clientes (/login) solo admite cuentas con rol Cliente
+            if (! $this->isClientUser($user)) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return back()->withErrors([
+                    'email' => 'Esta cuenta pertenece al personal operativo. Por seguridad, el equipo debe iniciar sesión exclusivamente desde el Portal de Personal (/staff/login).',
+                ]);
+            }
+
             if (! $user->is_active && ! $user->hasVerifiedEmail()) {
                 Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
                 return back()->withErrors([
                     'email' => 'Tu cuenta aún no ha sido verificada. Revisa tu correo y haz clic en el enlace de verificación para activarla.',
                 ]);
@@ -47,6 +70,52 @@ class AuthController extends Controller
 
         return back()->withErrors([
             'email' => 'Las credenciales no coinciden con nuestros registros.',
+        ]);
+    }
+
+    public function showStaffLogin(): Response
+    {
+        return Inertia::render('Auth/StaffLogin');
+    }
+
+    public function staffLogin(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            /** @var User $user */
+            $user = Auth::user();
+
+            // Bloqueo estricto: /staff/login solo admite roles internos (Administrador, Chef, Mesero, Recepcionista, Repartidor)
+            if ($this->isClientUser($user)) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return back()->withErrors([
+                    'email' => 'Acceso exclusivo para personal autorizado. Si eres cliente, ingresa desde el Portal de Comensales (/login).',
+                ]);
+            }
+
+            if (! $user->is_active) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return back()->withErrors([
+                    'email' => 'Tu cuenta de personal se encuentra desactivada. Comunícate con el Administrador.',
+                ]);
+            }
+
+            $request->session()->regenerate();
+            return redirect()->intended('/dashboard');
+        }
+
+        return back()->withErrors([
+            'email' => 'Las credenciales corporativas no coinciden con nuestros registros.',
         ]);
     }
 
@@ -283,7 +352,15 @@ class AuthController extends Controller
             );
         }
 
-        // Usuario ya existente (Administrador, Chef, Mesero, Recepcionista, Repartidor o Cliente)
+        // Bloqueo estricto: Google OAuth es exclusivo para el Portal de Clientes (/login)
+        if (! $this->isClientUser($user)) {
+            return redirect()->route('staff.login')->with(
+                'error',
+                'Tu correo pertenece al equipo operativo. Por seguridad, el personal debe iniciar sesión exclusivamente en el Portal de Personal con su correo y contraseña.'
+            );
+        }
+
+        // Cliente ya existente
         if (!$user->is_active || !$user->email_verified_at) {
             $user->forceFill([
                 'is_active'         => true,

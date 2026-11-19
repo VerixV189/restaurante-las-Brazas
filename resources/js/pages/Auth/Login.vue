@@ -25,8 +25,8 @@ onMounted(() => {
 });
 
 const form = useForm({
-  email: 'admin@lasbrazas.com',
-  password: 'password123',
+  email: '',
+  password: '',
   remember: true,
 });
 
@@ -34,11 +34,6 @@ function submitLogin() {
   form.post('/login', {
     onFinish: () => form.reset('password'),
   });
-}
-
-function fillAdminCredentials() {
-  form.email = 'admin@lasbrazas.com';
-  form.password = 'password123';
 }
 </script>
 
@@ -82,8 +77,8 @@ function fillAdminCredentials() {
               class="w-28 h-28 rounded-2xl object-cover shadow-lg border border-slate-200 dark:border-slate-800 transition-all duration-300"
             />
           </div>
-          <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Acceso a Las Brazas</h1>
-          <p class="text-xs text-slate-500 dark:text-slate-400">Ingresa tus credenciales de comensal o personal administrativo</p>
+          <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Portal de Comensales</h1>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Inicia sesión para ordenar, reservar tu mesa y canjear cupones en Las Brazas</p>
         </div>
 
         <!-- Flash Messages (Registration or Verification Success) -->
@@ -93,19 +88,6 @@ function fillAdminCredentials() {
         <Message v-if="$page.props.flash?.error" severity="error" class="mb-4 text-xs">
           {{ $page.props.flash.error }}
         </Message>
-
-        <!-- Credentials Helper Box -->
-        <div class="mb-6 p-4 rounded-2xl bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800/40 flex items-start gap-3">
-          <KeyRound class="w-5 h-5 text-orange-600 dark:text-orange-400 shrink-0 mt-0.5" />
-          <div class="text-xs text-slate-700 dark:text-slate-300 flex-1">
-            <p class="font-bold text-orange-700 dark:text-orange-300">Credenciales Rápidas (Demo Admin):</p>
-            <p class="mt-1 font-mono text-[11px] text-slate-600 dark:text-slate-400">Email: <span class="font-semibold text-slate-900 dark:text-slate-200">admin@lasbrazas.com</span></p>
-            <p class="font-mono text-[11px] text-slate-600 dark:text-slate-400">Pass: <span class="font-semibold text-slate-900 dark:text-slate-200">password123</span></p>
-            <button type="button" @click="fillAdminCredentials" class="mt-2 text-orange-600 dark:text-orange-400 underline font-semibold hover:text-orange-500 text-[11px]">
-              Usar estas credenciales
-            </button>
-          </div>
-        </div>
 
         <!-- Error Message -->
         <Message v-if="form.errors.email" severity="error" class="mb-4 text-xs">
@@ -148,7 +130,7 @@ function fillAdminCredentials() {
                 v-model="form.email"
                 class="input-with-icon w-full h-11 text-sm rounded-xl focus:border-orange-500"
                 style="padding-left: 2.75rem !important;"
-                placeholder="admin@lasbrazas.com"
+                placeholder="tucorreo@gmail.com"
                 required
               />
             </div>
@@ -186,12 +168,20 @@ function fillAdminCredentials() {
           />
         </form>
 
-        <!-- Link to Register -->
-        <div class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-600 dark:text-slate-400">
-          ¿No tienes una cuenta de comensal?
-          <Link href="/register" class="text-orange-600 dark:text-orange-400 font-bold hover:underline ml-1">
-            Regístrate aquí
-          </Link>
+        <!-- Link to Register & Staff Portal -->
+        <div class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800 text-center space-y-2.5 text-xs text-slate-600 dark:text-slate-400">
+          <div>
+            ¿No tienes una cuenta de comensal?
+            <Link href="/register" class="text-orange-600 dark:text-orange-400 font-bold hover:underline ml-1">
+              Regístrate aquí
+            </Link>
+          </div>
+          <div class="text-[11px] text-slate-400 dark:text-slate-500">
+            ¿Eres parte del equipo de Las Brazas?
+            <Link href="/staff/login" class="text-slate-600 dark:text-slate-300 font-semibold hover:text-orange-500 underline ml-1">
+              Acceso Personal →
+            </Link>
+          </div>
         </div>
       </div>
     </div>
