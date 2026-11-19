@@ -4,7 +4,7 @@
  * autenticada, purgando los datos privados al cerrar sesión o cambiar de rol.
  * ============================================================================ */
 
-const STATIC_CACHE = 'lasbrazas-static-v1';
+const STATIC_CACHE = 'lasbrazas-static-v2';
 const SESSION_CACHE = 'lasbrazas-session-v1';
 
 const PRECACHE_URLS = [
@@ -163,6 +163,15 @@ self.addEventListener('fetch', (event) => {
     currentUserKey = 'guest';
     simulateOffline = false;
     event.waitUntil(purgeSessionCache());
+    return;
+  }
+
+  // Nunca interceptar flujos OAuth (/auth/*), verificación de correo ni endpoints API
+  if (
+    url.pathname.startsWith('/auth/') ||
+    url.pathname.startsWith('/verify-email/') ||
+    url.pathname.startsWith('/api/')
+  ) {
     return;
   }
 

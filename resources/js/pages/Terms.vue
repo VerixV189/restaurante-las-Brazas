@@ -79,9 +79,12 @@ onMounted(() => {
     <!-- Main Container -->
     <main class="max-w-4xl mx-auto px-6 py-12 space-y-10">
       <!-- Back Link -->
-      <div>
+      <div class="flex flex-wrap items-center justify-between gap-3">
         <Link href="/register" class="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-orange-500 transition-colors">
           <ArrowLeft class="w-4 h-4" /> Volver al formulario de registro
+        </Link>
+        <Link href="/privacy" class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">
+          <ShieldCheck class="w-3.5 h-3.5" /> Ver Política de Privacidad
         </Link>
       </div>
 

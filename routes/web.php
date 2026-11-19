@@ -29,6 +29,8 @@ Route::get('/pdf', [\App\Http\Controllers\ManualController::class, 'downloadPdf'
 Route::get('/descargar-pdf', [\App\Http\Controllers\ManualController::class, 'downloadPdf'])->name('manual.pdf.download');
 Route::get('/terms', [AuthController::class, 'showTerms'])->name('terms');
 Route::get('/terminos-y-condiciones', [AuthController::class, 'showTerms']);
+Route::get('/privacy', [AuthController::class, 'showPrivacy'])->name('privacy');
+Route::get('/politica-de-privacidad', [AuthController::class, 'showPrivacy']);
 Route::get('/verify-email/{id}/{hash}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
 
 // ─────────────────────────────────────────────────────────────────────────────

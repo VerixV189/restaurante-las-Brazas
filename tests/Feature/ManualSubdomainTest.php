@@ -75,9 +75,10 @@ class ManualSubdomainTest extends TestCase
         $this->assertFileExists(public_path('offline.html'));
 
         $swContent = (string) file_get_contents(public_path('sw.js'));
-        $this->assertStringContainsString('lasbrazas-static-v1', $swContent);
+        $this->assertStringContainsString('lasbrazas-static-v2', $swContent);
         $this->assertStringContainsString('lasbrazas-session-v1', $swContent);
         $this->assertStringContainsString('CLEAR_AUTH_CACHE', $swContent);
+        $this->assertStringContainsString("url.pathname.startsWith('/auth/')", $swContent);
 
         $role = \App\Models\Role::create([
             'name' => 'Administrador',
@@ -147,7 +148,21 @@ class ManualSubdomainTest extends TestCase
         \Illuminate\Support\Facades\Mail::assertSent(\App\Mail\ConditionsMail::class, function ($mail) {
             return $mail->hasTo('carlos.google@example.com');
         });
+        \Illuminate\Support\Facades\Mail::assertSent(\App\Mail\PrivacyPolicyMail::class, function ($mail) {
+            return $mail->hasTo('carlos.google@example.com');
+        });
         \Illuminate\Support\Facades\Mail::assertNotSent(\App\Mail\VerifyAccountMail::class);
+    }
+
+    public function test_privacy_policy_routes_render_dedicated_privacy_view(): void
+    {
+        $response = $this->get('/privacy');
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page->component('Privacy'));
+
+        $spanishAliasResponse = $this->get('/politica-de-privacidad');
+        $spanishAliasResponse->assertOk();
+        $spanishAliasResponse->assertInertia(fn ($page) => $page->component('Privacy'));
     }
 
     public function test_contact_form_validates_and_sends_email_to_configured_recipient(): void

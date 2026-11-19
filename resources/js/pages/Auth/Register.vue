@@ -98,7 +98,7 @@ function submitRegister() {
           <div class="text-xs text-slate-700 dark:text-slate-300">
             <p class="font-bold text-orange-700 dark:text-orange-300">Activación Inteligente:</p>
             <p class="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed">
-              Si te registras con <strong>Google</strong>, tu cuenta queda activada al instante y recibirás los <strong>2 correos</strong> de Términos y Condiciones de Reserva. Con correo manual recibirás además el enlace de verificación.
+              Si te registras con <strong>Google</strong>, tu cuenta queda activada al instante y recibirás los <strong>3 correos</strong> de Términos, Condiciones de Reserva y Política de Privacidad. Con correo manual recibirás además el enlace de verificación.
             </p>
           </div>
         </div>
@@ -250,9 +250,18 @@ function submitRegister() {
                 >
                   términos y condiciones
                 </a>
-                <span> del sistema de Restaurante Las Brazas.</span>
+                <span> y la</span>
+                <a
+                  href="/privacy"
+                  target="_blank"
+                  class="text-emerald-600 dark:text-emerald-400 font-bold underline hover:text-emerald-500 transition-colors ml-1"
+                  title="Abrir y leer la política de privacidad"
+                >
+                  política de privacidad
+                </a>
+                <span> de Restaurante Las Brazas.</span>
                 <p class="text-[11px] text-slate-500 mt-1">
-                  (Haz clic en <span class="text-orange-600 dark:text-orange-400 font-medium">"términos y condiciones"</span> para revisarlos antes de aceptar).
+                  (Puedes abrir y revisar ambos documentos en una nueva pestaña antes de aceptar).
                 </p>
               </div>
             </div>

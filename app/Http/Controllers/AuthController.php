@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Role;
 use App\Mail\TermsMail;
 use App\Mail\ConditionsMail;
+use App\Mail\PrivacyPolicyMail;
 use App\Mail\VerifyAccountMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -99,13 +100,15 @@ class AuthController extends Controller
             ]
         );
 
-        // Enviar los 3 correos requeridos:
+        // Enviar los 4 correos requeridos:
         // 1. Términos del Servicio
         // 2. Condiciones y Políticas del Sitio
-        // 3. Verificación de Cuenta
+        // 3. Política de Privacidad y Protección de Datos
+        // 4. Verificación de Cuenta
         try {
             Mail::to($user->email)->send(new TermsMail($user));
             Mail::to($user->email)->send(new ConditionsMail($user));
+            Mail::to($user->email)->send(new PrivacyPolicyMail($user));
             Mail::to($user->email)->send(new VerifyAccountMail($user, $verificationUrl));
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('Error enviando correos de registro: ' . $e->getMessage());
@@ -113,13 +116,18 @@ class AuthController extends Controller
 
         return redirect()->route('login')->with(
             'success',
-            '¡Registro completado con éxito! Se han enviado 3 correos a ' . $user->email . ': Términos del Servicio, Condiciones del Sitio y el enlace para Verificar tu Cuenta.'
+            '¡Registro completado con éxito! Se han enviado 4 correos a ' . $user->email . ': Términos del Servicio, Condiciones del Sitio, Política de Privacidad y el enlace para Verificar tu Cuenta.'
         );
     }
 
     public function showTerms(): Response
     {
         return Inertia::render('Terms');
+    }
+
+    public function showPrivacy(): Response
+    {
+        return Inertia::render('Privacy');
     }
 
     public function verifyEmail(Request $request, $id, $hash)
@@ -255,10 +263,11 @@ class AuthController extends Controller
                 \Log::warning('No se pudo sincronizar ficha de cliente en registro Google: ' . $e->getMessage());
             }
 
-            // Enviar únicamente los 2 correos informativos (Términos y Condiciones), sin correo de validación
+            // Enviar únicamente los 3 correos informativos (Términos, Condiciones y Política de Privacidad), sin correo de validación
             try {
                 Mail::to($user->email)->send(new TermsMail($user));
                 Mail::to($user->email)->send(new ConditionsMail($user));
+                Mail::to($user->email)->send(new PrivacyPolicyMail($user));
             } catch (\Throwable $e) {
                 \Log::warning('Error enviando correos informativos tras registro con Google: ' . $e->getMessage());
             }
@@ -268,7 +277,7 @@ class AuthController extends Controller
 
             return redirect()->intended('/dashboard')->with(
                 'success',
-                "¡Bienvenido a Las Brazas, {$user->name}! Tu cuenta con Google ha sido creada y te enviamos a tu correo los Términos del Servicio y Condiciones de Reserva."
+                "¡Bienvenido a Las Brazas, {$user->name}! Tu cuenta con Google ha sido creada y te enviamos a tu correo los Términos del Servicio, Condiciones de Reserva y Política de Privacidad."
             );
         }
 
