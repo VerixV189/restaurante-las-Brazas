@@ -1,9 +1,11 @@
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 import AdminLayout from '../../layouts/AdminLayout.vue';
 import { useToast } from 'primevue/usetoast';
+import { useVoiceRecorder } from '../../composables/useVoiceRecorder';
+import VoiceAudioBadge from '../../components/VoiceAudioBadge.vue';
 import {
   Flame,
   ShoppingCart,
@@ -28,7 +30,6 @@ import {
   Star,
   Send,
   Mic,
-  MicOff,
   Bot,
   UtensilsCrossed,
   ShieldCheck,
@@ -36,6 +37,10 @@ import {
   Armchair,
   ChevronRight,
   SlidersHorizontal,
+  PenLine,
+  Loader2,
+  AlertCircle,
+  X,
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -590,9 +595,57 @@ const aiMessages = ref([
   },
 ]);
 const aiInput = ref('');
+const aiInputRef = ref(null);
+const aiScrollRef = ref(null);
 const aiLoading = ref(false);
-const aiListening = ref(false);
-let speechRec = null;
+
+const {
+  isRecording: aiRecording,
+  isTranscribing: aiTranscribing,
+  formattedDuration: aiVoiceDuration,
+  audioLevels: aiAudioLevels,
+  voiceError: aiVoiceError,
+  startRecording: startAiRecording,
+  stopAndTranscribe: stopAiRecording,
+  cancelRecording: cancelAiRecording,
+  clearError: clearAiVoiceError,
+} = useVoiceRecorder({
+  endpoint: '/ai/transcribe',
+  context: 'portal',
+  maxDurationSec: 60,
+  onTranscribed: ({ transcript, mode, audioUrl, durationLabel }) => {
+    if (mode === 'dictate') {
+      aiInput.value = aiInput.value.trim()
+        ? `${aiInput.value.trim()} ${transcript}`
+        : transcript;
+      nextTick(() => aiInputRef.value?.focus());
+    } else {
+      sendAiPrompt(transcript, { audioUrl, audioDuration: durationLabel });
+    }
+  },
+  onError: (msg) => {
+    toast.add({
+      severity: 'warn',
+      summary: 'Micrófono',
+      detail: msg,
+      life: 4500,
+    });
+  },
+});
+
+watch(activeTab, (tab) => {
+  if (tab !== 'ai' && aiRecording.value) {
+    cancelAiRecording();
+  }
+});
+
+function scrollAiToBottom() {
+  nextTick(() => {
+    if (aiScrollRef.value) {
+      aiScrollRef.value.scrollTop = aiScrollRef.value.scrollHeight;
+    }
+  });
+}
 
 const aiPrompts = [
   '🛒 Pídeme una Arrachera término medio y una Cerveza Artesanal',
@@ -603,17 +656,21 @@ const aiPrompts = [
   '📦 ¿Cuál es el estado de mis pedidos recientes?',
 ];
 
-async function sendAiPrompt(preset = null) {
+async function sendAiPrompt(preset = null, voiceMeta = null) {
   const text = (preset ?? aiInput.value).trim();
   if (!text || aiLoading.value) return;
   aiInput.value = '';
+  clearAiVoiceError();
 
   aiMessages.value.push({
     id: 'u-' + Date.now(),
     role: 'user',
     text,
+    audioUrl: voiceMeta?.audioUrl || null,
+    audioDuration: voiceMeta?.audioDuration || null,
     timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
   });
+  scrollAiToBottom();
 
   aiLoading.value = true;
   try {
@@ -643,36 +700,8 @@ async function sendAiPrompt(preset = null) {
     });
   } finally {
     aiLoading.value = false;
+    scrollAiToBottom();
   }
-}
-
-function toggleAiVoice() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) {
-    toast.add({
-      severity: 'warn',
-      summary: 'Voz no soportada',
-      detail: 'Usa Chrome o Edge para dictar por voz.',
-      life: 3000,
-    });
-    return;
-  }
-  if (aiListening.value && speechRec) {
-    speechRec.stop();
-    aiListening.value = false;
-    return;
-  }
-  speechRec = new SR();
-  speechRec.lang = 'es-ES';
-  speechRec.onstart = () => (aiListening.value = true);
-  speechRec.onresult = (e) => {
-    const transcript = e.results[0][0].transcript;
-    aiListening.value = false;
-    sendAiPrompt(transcript);
-  };
-  speechRec.onerror = () => (aiListening.value = false);
-  speechRec.onend = () => (aiListening.value = false);
-  speechRec.start();
 }
 
 function addAiSuggestedItems(items, goToCheckout = false) {
@@ -1633,7 +1662,7 @@ onUnmounted(() => {
         </div>
 
         <!-- Hilo de Conversación -->
-        <div class="flex-1 p-5 overflow-y-auto space-y-4">
+        <div ref="aiScrollRef" class="flex-1 p-5 overflow-y-auto space-y-4">
           <div
             v-for="m in aiMessages"
             :key="m.id"
@@ -1650,6 +1679,11 @@ onUnmounted(() => {
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-tl-none border border-slate-200 dark:border-slate-700'
               ]"
             >
+              <VoiceAudioBadge
+                v-if="m.role === 'user' && m.audioUrl"
+                :audio-url="m.audioUrl"
+                :duration="m.audioDuration || '0:02'"
+              />
               <div v-html="formatAiMarkdown(m.text)"></div>
 
               <!-- Tarjetas de Platillos Detectados por el Agente -->
@@ -1706,34 +1740,108 @@ onUnmounted(() => {
           </div>
         </div>
 
-        <!-- Barra de Entrada + Voz -->
-        <form @submit.prevent="sendAiPrompt()" class="p-4 border-t border-slate-200 dark:border-slate-800 flex items-center gap-2">
-          <input
-            v-model="aiInput"
-            type="text"
-            placeholder="Ej: 'Pídeme una Arrachera término medio y una cerveza' o 'Reserva para 4 personas mañana a las 20:00'..."
-            class="flex-1 h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm focus:outline-none focus:border-orange-500"
-          />
-          <button
-            type="button"
-            @click="toggleAiVoice"
-            :class="[
-              'h-11 w-11 rounded-xl flex items-center justify-center border cursor-pointer',
-              aiListening ? 'bg-red-500 text-white border-red-400 animate-pulse' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
-            ]"
-            title="Dictar por voz"
-          >
-            <MicOff v-if="aiListening" class="w-4 h-4" />
-            <Mic v-else class="w-4 h-4" />
+        <!-- Aviso de error de micrófono -->
+        <div
+          v-if="aiVoiceError"
+          class="px-4 py-2 bg-red-50 dark:bg-red-950/60 border-t border-red-200 dark:border-red-900 text-xs text-red-700 dark:text-red-300 flex items-center justify-between gap-2"
+        >
+          <div class="flex items-center gap-1.5 min-w-0">
+            <AlertCircle class="w-4 h-4 shrink-0 text-red-500" />
+            <span>{{ aiVoiceError }}</span>
+          </div>
+          <button type="button" @click="clearAiVoiceError" class="p-0.5 hover:text-red-900 dark:hover:text-white cursor-pointer shrink-0">
+            <X class="w-3.5 h-3.5" />
           </button>
-          <button
-            type="submit"
-            :disabled="aiLoading || !aiInput.trim()"
-            class="h-11 px-5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 text-white font-bold text-xs flex items-center gap-1.5 disabled:opacity-40 cursor-pointer"
+        </div>
+
+        <!-- Barra de Entrada + Grabadora de Voz y Dictado -->
+        <div class="p-4 border-t border-slate-200 dark:border-slate-800">
+          <!-- Estado: Transcribiendo Audio -->
+          <div
+            v-if="aiTranscribing"
+            class="flex items-center justify-center gap-2.5 h-11 px-4 rounded-xl bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-500/30 text-xs font-semibold text-orange-700 dark:text-orange-300"
           >
-            <Send class="w-4 h-4" /> Enviar
-          </button>
-        </form>
+            <Loader2 class="w-4 h-4 animate-spin shrink-0" />
+            <span>Escuchando y transcribiendo tu audio con IA...</span>
+          </div>
+
+          <!-- Estado: Grabando Audio en Vivo -->
+          <div
+            v-else-if="aiRecording"
+            class="flex items-center gap-2 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-500/40 rounded-xl px-3 py-1.5 h-12"
+          >
+            <button
+              type="button"
+              @click="cancelAiRecording"
+              class="p-2 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors cursor-pointer shrink-0"
+              title="Cancelar grabación"
+            >
+              <Trash2 class="w-4 h-4" />
+            </button>
+
+            <div class="flex-1 flex items-center gap-2.5 min-w-0">
+              <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shrink-0"></span>
+              <span class="text-xs font-mono font-bold text-red-600 dark:text-red-400 shrink-0">{{ aiVoiceDuration }}</span>
+              <div class="flex items-center gap-1 h-6 flex-1 max-w-[140px]">
+                <span
+                  v-for="(lvl, i) in aiAudioLevels"
+                  :key="i"
+                  class="w-1 rounded-full bg-red-500/80 dark:bg-red-400 transition-all duration-75"
+                  :style="{ height: `${Math.max(20, lvl)}%` }"
+                ></span>
+              </div>
+              <span class="hidden sm:inline text-xs text-red-600/80 dark:text-red-300/80 truncate">Grabando nota de voz...</span>
+            </div>
+
+            <button
+              type="button"
+              @click="stopAiRecording('dictate')"
+              class="px-2.5 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-orange-500 hover:text-orange-600 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+              title="Transcribir al cuadro de texto para editar antes de enviar"
+            >
+              <PenLine class="w-3.5 h-3.5" />
+              <span class="hidden sm:inline">Solo dictar</span>
+            </button>
+
+            <button
+              type="button"
+              @click="stopAiRecording('send')"
+              class="px-4 py-2 rounded-lg bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white text-xs font-bold flex items-center gap-1.5 shadow-md cursor-pointer shrink-0"
+              title="Enviar nota de voz al Agente IA"
+            >
+              <Send class="w-3.5 h-3.5" />
+              <span>Enviar audio</span>
+            </button>
+          </div>
+
+          <!-- Estado Normal -->
+          <form v-else @submit.prevent="sendAiPrompt()" class="flex items-center gap-2">
+            <input
+              ref="aiInputRef"
+              v-model="aiInput"
+              type="text"
+              placeholder="Escribe o usa el micrófono: 'Pídeme una Arrachera' o 'Reserva para 4 mañana a las 20:00'..."
+              :disabled="aiLoading"
+              class="flex-1 min-w-0 h-11 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm focus:outline-none focus:border-orange-500 disabled:opacity-50"
+            />
+            <button
+              type="button"
+              @click="startAiRecording"
+              :disabled="aiLoading"
+              class="h-11 w-11 rounded-xl flex items-center justify-center border cursor-pointer bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:text-orange-500 hover:border-orange-500/40 shrink-0 disabled:opacity-45"
+              title="Grabar nota de voz o dictar por micrófono"
+            >
+              <Mic class="w-4 h-4" />
+            </button>
+            <button
+              type="submit"
+              :disabled="aiLoading || !aiInput.trim()"
+              class="h-11 px-4 sm:px-5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 text-white font-bold text-xs flex items-center gap-1.5 disabled:opacity-40 cursor-pointer shrink-0"
+            >
+              <Send class="w-4 h-4" /> <span class="hidden sm:inline">Enviar</span>
+            </button>
+          </form>
+        </div>
       </div>
 
       <!-- ═══════════════════════════════════════════════════════════════════ -->

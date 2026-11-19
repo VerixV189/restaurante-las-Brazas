@@ -18,8 +18,12 @@ import {
   RotateCcw,
   Info,
   Mic,
-  MicOff
+  PenLine,
+  Loader2,
+  AlertCircle
 } from 'lucide-vue-next';
+import { useVoiceRecorder } from '../composables/useVoiceRecorder';
+import VoiceAudioBadge from './VoiceAudioBadge.vue';
 
 const props = defineProps({
   visible: {
@@ -41,47 +45,34 @@ const isStaff = computed(() => ['Administrador', 'Chef', 'Mesero', 'Recepcionist
 const messages = ref([]);
 const inputMessage = ref('');
 const isLoading = ref(false);
-const isListening = ref(false);
 const chatContainer = ref(null);
 const inputRef = ref(null);
-let recognition = null;
 
-function toggleVoiceChat() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    alert('Tu navegador no soporta dictado por voz. Usa Chrome o Edge.');
-    return;
-  }
-
-  if (isListening.value && recognition) {
-    recognition.stop();
-    isListening.value = false;
-    return;
-  }
-
-  recognition = new SpeechRecognition();
-  recognition.lang = 'es-ES';
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 1;
-
-  recognition.onstart = () => {
-    isListening.value = true;
-  };
-  recognition.onresult = (event) => {
-    const transcript = event.results[0][0].transcript;
-    inputMessage.value = transcript;
-    isListening.value = false;
-    sendMessage();
-  };
-  recognition.onerror = () => {
-    isListening.value = false;
-  };
-  recognition.onend = () => {
-    isListening.value = false;
-  };
-
-  recognition.start();
-}
+const {
+  isRecording,
+  isTranscribing,
+  formattedDuration,
+  audioLevels,
+  voiceError,
+  startRecording,
+  stopAndTranscribe,
+  cancelRecording,
+  clearError: clearVoiceError,
+} = useVoiceRecorder({
+  endpoint: '/ai/transcribe',
+  context: isStaff.value ? 'staff' : 'portal',
+  maxDurationSec: 60,
+  onTranscribed: ({ transcript, mode, audioUrl, durationLabel }) => {
+    if (mode === 'dictate') {
+      inputMessage.value = inputMessage.value.trim()
+        ? `${inputMessage.value.trim()} ${transcript}`
+        : transcript;
+      nextTick(() => inputRef.value?.focus());
+    } else {
+      sendMessage(transcript, { audioUrl, audioDuration: durationLabel });
+    }
+  },
+});
 
 // Mensaje inicial de bienvenida
 function initWelcomeMessage() {
@@ -157,16 +148,19 @@ function sendSuggestion(prompt) {
   sendMessage();
 }
 
-async function sendMessage() {
-  const text = inputMessage.value.trim();
+async function sendMessage(presetPrompt = null, voiceMeta = null) {
+  const text = (presetPrompt ?? inputMessage.value).trim();
   if (!text || isLoading.value) return;
 
+  clearVoiceError();
   // Agregar mensaje del usuario
   const userMsgId = 'u-' + Date.now();
   messages.value.push({
     id: userMsgId,
     role: 'user',
     text: text,
+    audioUrl: voiceMeta?.audioUrl || null,
+    audioDuration: voiceMeta?.audioDuration || null,
     timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
   });
 
@@ -230,7 +224,7 @@ async function scrollToBottom() {
   }
 }
 
-// Enfocar input al abrir
+// Enfocar input al abrir / cancelar grabación al cerrar
 watch(() => props.visible, (val) => {
   if (val) {
     nextTick(() => {
@@ -239,6 +233,8 @@ watch(() => props.visible, (val) => {
         inputRef.value.focus();
       }
     });
+  } else if (isRecording.value) {
+    cancelRecording();
   }
 });
 
@@ -385,6 +381,11 @@ function renderMarkdown(text) {
                   : 'bg-white dark:bg-slate-800/90 text-slate-800 dark:text-slate-200 rounded-2xl rounded-tl-none border border-slate-200/80 dark:border-slate-700/60 shadow-sm'
               ]"
             >
+              <VoiceAudioBadge
+                v-if="msg.role === 'user' && msg.audioUrl"
+                :audio-url="msg.audioUrl"
+                :duration="msg.audioDuration || '0:02'"
+              />
               <div v-html="renderMarkdown(msg.text)" class="prose prose-sm dark:prose-invert max-w-none"></div>
 
               <!-- Tarjetas interactivas de platillos sugeridos por el Agente IA -->
@@ -482,15 +483,86 @@ function renderMarkdown(text) {
         </div>
       </div>
 
-      <!-- Input Bar -->
+      <!-- Aviso de error de micrófono -->
+      <div
+        v-if="voiceError"
+        class="px-4 py-2 bg-red-50 dark:bg-red-950/60 border-t border-red-200 dark:border-red-900 text-xs text-red-700 dark:text-red-300 flex items-center justify-between gap-2 shrink-0"
+      >
+        <div class="flex items-center gap-1.5 min-w-0">
+          <AlertCircle class="w-4 h-4 shrink-0 text-red-500" />
+          <span class="leading-snug">{{ voiceError }}</span>
+        </div>
+        <button type="button" @click="clearVoiceError" class="p-0.5 hover:text-red-900 dark:hover:text-white cursor-pointer shrink-0">
+          <X class="w-3.5 h-3.5" />
+        </button>
+      </div>
+
+      <!-- Input Bar / Grabadora de Audio y Dictado -->
       <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
-        <form @submit.prevent="sendMessage" class="flex items-center gap-2">
+        <!-- Estado: Transcribiendo Audio -->
+        <div
+          v-if="isTranscribing"
+          class="flex items-center justify-center gap-2.5 h-11 px-4 rounded-xl bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-500/30 text-xs font-semibold text-orange-700 dark:text-orange-300"
+        >
+          <Loader2 class="w-4 h-4 animate-spin shrink-0" />
+          <span>Escuchando y transcribiendo tu audio con IA...</span>
+        </div>
+
+        <!-- Estado: Grabando Audio en Vivo -->
+        <div
+          v-else-if="isRecording"
+          class="flex items-center gap-2 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-500/40 rounded-xl px-3 py-1.5 h-12"
+        >
+          <button
+            type="button"
+            @click="cancelRecording"
+            class="p-2 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors cursor-pointer shrink-0"
+            title="Cancelar grabación"
+          >
+            <Trash2 class="w-4 h-4" />
+          </button>
+
+          <div class="flex-1 flex items-center gap-2.5 min-w-0">
+            <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shrink-0"></span>
+            <span class="text-xs font-mono font-bold text-red-600 dark:text-red-400 shrink-0">{{ formattedDuration }}</span>
+            <div class="flex items-center gap-1 h-6 flex-1 max-w-[110px]">
+              <span
+                v-for="(lvl, i) in audioLevels"
+                :key="i"
+                class="w-1 rounded-full bg-red-500/80 dark:bg-red-400 transition-all duration-75"
+                :style="{ height: `${Math.max(20, lvl)}%` }"
+              ></span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            @click="stopAndTranscribe('dictate')"
+            class="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-orange-500 hover:text-orange-600 transition-colors cursor-pointer shrink-0"
+            title="Transcribir al cuadro de texto (para revisar antes de enviar)"
+          >
+            <PenLine class="w-4 h-4" />
+          </button>
+
+          <button
+            type="button"
+            @click="stopAndTranscribe('send')"
+            class="px-3.5 py-2 rounded-lg bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white text-xs font-bold flex items-center gap-1.5 shadow-md cursor-pointer shrink-0"
+            title="Enviar nota de voz al Chef Virtual"
+          >
+            <Send class="w-3.5 h-3.5" />
+            <span>Enviar</span>
+          </button>
+        </div>
+
+        <!-- Estado Normal -->
+        <form v-else @submit.prevent="sendMessage()" class="flex items-center gap-2">
           <div class="relative flex-1">
             <input
               ref="inputRef"
               type="text"
               v-model="inputMessage"
-              placeholder="Pregúntame sobre el menú, tus pedidos o reservas..."
+              placeholder="Escribe o usa el micrófono para dictar..."
               :disabled="isLoading"
               class="w-full h-11 pl-4 pr-10 text-xs sm:text-sm bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors disabled:opacity-60"
             />
@@ -506,17 +578,12 @@ function renderMarkdown(text) {
 
           <button
             type="button"
-            @click="toggleVoiceChat"
-            :title="isListening ? 'Detener dictado' : 'Hablar con el Agente IA por voz'"
-            :class="[
-              'h-11 w-11 rounded-xl flex items-center justify-center transition-all shrink-0 border cursor-pointer',
-              isListening
-                ? 'bg-red-500 text-white border-red-400 animate-pulse shadow-md shadow-red-500/30'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:text-orange-500 hover:border-orange-500/40'
-            ]"
+            @click="startRecording"
+            :disabled="isLoading"
+            title="Grabar nota de voz o dictar por micrófono"
+            class="h-11 w-11 rounded-xl flex items-center justify-center transition-all shrink-0 border cursor-pointer bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:text-orange-500 hover:border-orange-500/40 disabled:opacity-45"
           >
-            <MicOff v-if="isListening" class="w-4 h-4" />
-            <Mic v-else class="w-4 h-4" />
+            <Mic class="w-4 h-4" />
           </button>
 
           <Button
@@ -528,7 +595,7 @@ function renderMarkdown(text) {
           />
         </form>
         <p class="text-[10px] text-slate-400 text-center mt-2">
-          Presiona <kbd class="px-1 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-[9px] font-mono">Enter</kbd> para enviar • Las respuestas consideran únicamente tu cuenta y el menú oficial.
+          Presiona <kbd class="px-1 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-[9px] font-mono">Enter</kbd> o toca el micrófono para dictar / enviar audio.
         </p>
       </div>
     </aside>

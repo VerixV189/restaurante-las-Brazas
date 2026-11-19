@@ -79,6 +79,7 @@ Route::prefix('v1')->group(function () {
 
         // Asistente IA Móvil (RF-27)
         Route::post('/ai/chat', [AiChatController::class, 'sendMessage'])->name('api.ai.chat');
+        Route::post('/ai/transcribe', [AiChatController::class, 'transcribeAudio'])->middleware('throttle:30,1')->name('api.ai.transcribe');
     });
 
 });

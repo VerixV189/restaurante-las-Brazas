@@ -26,6 +26,7 @@ Route::post('/empresa/cotizacion', [HomeController::class, 'sendSaasQuote'])->mi
 Route::post('/reserve', [HomeController::class, 'reserve'])->name('public.reserve');
 Route::post('/contact', [HomeController::class, 'sendContact'])->middleware('throttle:10,1')->name('public.contact');
 Route::post('/ai/public-chat', [\App\Http\Controllers\AiChatController::class, 'sendPublicMessage'])->middleware('throttle:30,1')->name('ai.public.chat');
+Route::post('/ai/public-transcribe', [\App\Http\Controllers\AiChatController::class, 'transcribeAudio'])->middleware('throttle:20,1')->name('ai.public.transcribe');
 Route::get('/manual', [\App\Http\Controllers\ManualController::class, 'index'])->name('manual.index');
 Route::get('/manual/pdf', [\App\Http\Controllers\ManualController::class, 'downloadPdf'])->name('manual.pdf');
 Route::get('/pdf', [\App\Http\Controllers\ManualController::class, 'downloadPdf'])->name('manual.pdf.short');
@@ -75,6 +76,7 @@ Route::middleware('auth')->group(function () {
 
     // Chat de Asistente de IA (accesible por todos los roles autenticados)
     Route::post('/ai/chat', [\App\Http\Controllers\AiChatController::class, 'sendMessage'])->name('ai.chat');
+    Route::post('/ai/transcribe', [\App\Http\Controllers\AiChatController::class, 'transcribeAudio'])->middleware('throttle:30,1')->name('ai.transcribe');
 
     // ── Menú, Platillos y Fichas Técnicas / Recetas (Administrador, Chef) ──────
     Route::middleware('role:Administrador,Chef')->group(function () {

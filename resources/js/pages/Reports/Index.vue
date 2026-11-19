@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onBeforeUnmount } from 'vue';
+import { ref, computed } from 'vue';
 import axios from 'axios';
 import AdminLayout from '../../layouts/AdminLayout.vue';
 import Chart from 'primevue/chart';
@@ -13,6 +13,7 @@ import TabPanels from 'primevue/tabpanels';
 import TabPanel from 'primevue/tabpanel';
 import Button from 'primevue/button';
 import { useToast } from 'primevue/usetoast';
+import { useVoiceRecorder } from '../../composables/useVoiceRecorder';
 import {
   BarChart3,
   DollarSign,
@@ -31,7 +32,11 @@ import {
   RotateCcw,
   Zap,
   Mic,
-  MicOff,
+  Trash2,
+  PenLine,
+  Loader2,
+  Send,
+  X,
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -51,78 +56,42 @@ const aiResult = ref(null);
 const aiError = ref(null);
 const aiActiveChartType = ref('bar');
 
-// Reconocimiento de Voz (Web Speech API)
-const isListening = ref(false);
-let recognitionInstance = null;
-
-function toggleVoiceDictation() {
-  if (isListening.value && recognitionInstance) {
-    recognitionInstance.stop();
-    isListening.value = false;
-    return;
-  }
-
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    toast.add({
-      severity: 'warn',
-      summary: 'Dictado no compatible',
-      detail: 'Tu navegador no soporta reconocimiento de voz nativo (usa Chrome, Edge o Brave).',
-      life: 3500,
-    });
-    return;
-  }
-
-  recognitionInstance = new SpeechRecognition();
-  recognitionInstance.lang = 'es-ES';
-  recognitionInstance.continuous = false;
-  recognitionInstance.interimResults = true;
-
-  recognitionInstance.onstart = () => {
-    isListening.value = true;
-    aiError.value = null;
-    toast.add({
-      severity: 'info',
-      summary: '🎙️ Micrófono Activo',
-      detail: 'Habla ahora para dictar tu consulta de reporte...',
-      life: 2500,
-    });
-  };
-
-  recognitionInstance.onresult = (event) => {
-    let transcript = '';
-    for (let i = 0; i < event.results.length; i++) {
-      transcript += event.results[i][0].transcript;
-    }
+// Grabación real de micrófono + Transcripción IA (Gemini Multimodal / Whisper)
+const {
+  isRecording,
+  isTranscribing,
+  formattedDuration: voiceDuration,
+  audioLevels,
+  voiceError,
+  startRecording,
+  stopAndTranscribe,
+  cancelRecording,
+  clearError: clearVoiceError,
+} = useVoiceRecorder({
+  endpoint: '/ai/transcribe',
+  context: 'reports',
+  maxDurationSec: 60,
+  onTranscribed: ({ transcript, mode }) => {
     aiPrompt.value = transcript;
-  };
-
-  recognitionInstance.onerror = (event) => {
-    isListening.value = false;
-    if (event.error !== 'no-speech' && event.error !== 'aborted') {
+    if (mode === 'dictate') {
       toast.add({
-        severity: 'error',
-        summary: 'Error de Micrófono',
-        detail: 'Verifica los permisos del micrófono en tu navegador.',
+        severity: 'info',
+        summary: '🎙️ Dictado listo',
+        detail: 'Revisa el texto o presiona "Consultar IA".',
         life: 3000,
       });
-    }
-  };
-
-  recognitionInstance.onend = () => {
-    isListening.value = false;
-    if (aiPrompt.value.trim().length > 2) {
+    } else {
       sendAiQuery();
     }
-  };
-
-  recognitionInstance.start();
-}
-
-onBeforeUnmount(() => {
-  if (recognitionInstance && isListening.value) {
-    recognitionInstance.stop();
-  }
+  },
+  onError: (msg) => {
+    toast.add({
+      severity: 'warn',
+      summary: 'Micrófono',
+      detail: msg,
+      life: 4500,
+    });
+  },
 });
 
 const suggestedQueries = [
@@ -461,34 +430,86 @@ function getMarginBadge(margin) {
             </button>
           </div>
 
-          <!-- Input Box, Microphone Button & Send Button -->
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <!-- Input Box, Grabadora de Audio real & Send Button -->
+          <div v-if="isTranscribing" class="flex items-center justify-center gap-2.5 h-12 px-4 rounded-2xl bg-purple-100/80 dark:bg-purple-950/60 border-2 border-purple-300 dark:border-purple-500/40 text-xs sm:text-sm font-bold text-purple-800 dark:text-purple-200">
+            <Loader2 class="w-4 h-4 animate-spin shrink-0" />
+            <span>Escuchando y transcribiendo tu audio con IA...</span>
+          </div>
+
+          <div
+            v-else-if="isRecording"
+            class="flex flex-wrap sm:flex-nowrap items-center gap-2.5 bg-red-50 dark:bg-red-950/40 border-2 border-red-300 dark:border-red-500/50 rounded-2xl px-3.5 py-2.5 shadow-sm"
+          >
+            <button
+              type="button"
+              @click="cancelRecording"
+              class="p-2 rounded-xl text-slate-500 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors cursor-pointer shrink-0"
+              title="Cancelar grabación"
+            >
+              <Trash2 class="w-4 h-4" />
+            </button>
+
+            <div class="flex-1 flex items-center gap-2.5 min-w-[160px]">
+              <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shrink-0"></span>
+              <span class="text-xs font-mono font-extrabold text-red-600 dark:text-red-400 shrink-0">{{ voiceDuration }}</span>
+              <div class="flex items-center gap-1 h-6 flex-1 max-w-[140px]">
+                <span
+                  v-for="(lvl, i) in audioLevels"
+                  :key="i"
+                  class="w-1 rounded-full bg-red-500/80 dark:bg-red-400 transition-all duration-75"
+                  :style="{ height: `${Math.max(20, lvl)}%` }"
+                ></span>
+              </div>
+              <span class="hidden md:inline text-xs font-medium text-red-700/80 dark:text-red-300/80 truncate">
+                Grabando consulta de reporte...
+              </span>
+            </div>
+
+            <div class="flex items-center gap-2 ml-auto">
+              <button
+                type="button"
+                @click="stopAndTranscribe('dictate')"
+                class="px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-purple-500 hover:text-purple-600 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+                title="Transcribir al cuadro de texto para editar antes de consultar"
+              >
+                <PenLine class="w-3.5 h-3.5" />
+                <span>Solo dictar</span>
+              </button>
+
+              <button
+                type="button"
+                @click="stopAndTranscribe('send')"
+                class="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md cursor-pointer shrink-0"
+                title="Enviar audio y generar reporte con IA"
+              >
+                <Send class="w-3.5 h-3.5" />
+                <span>Consultar audio</span>
+              </button>
+            </div>
+          </div>
+
+          <div v-else class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <div class="relative flex-1">
               <input
                 v-model="aiPrompt"
                 @keyup.enter="sendAiQuery"
                 type="text"
-                :placeholder="isListening ? '🎙️ Escuchando tu voz... habla ahora...' : 'Ejemplo: ¿Cuánto vendimos de arrachera en los últimos 7 días en gráfico de barras?'"
-                class="w-full bg-white dark:bg-slate-950/90 border-2 border-purple-300 dark:border-purple-500/30 focus:border-purple-600 dark:focus:border-purple-500 rounded-2xl py-3 pl-4 pr-24 text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-colors shadow-xs"
+                placeholder="Ejemplo: ¿Cuánto vendimos de arrachera en los últimos 7 días en gráfico de barras?"
+                class="w-full bg-white dark:bg-slate-950/90 border-2 border-purple-300 dark:border-purple-500/30 focus:border-purple-600 dark:focus:border-purple-500 rounded-2xl py-3 pl-4 pr-28 text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-colors shadow-xs"
                 :disabled="aiLoading"
               />
 
-              <!-- Microphone Voice Dictation Button inside Input -->
+              <!-- Microphone Audio Recording Button inside Input -->
               <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                 <button
                   type="button"
-                  @click="toggleVoiceDictation"
-                  :class="[
-                    'p-2 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer',
-                    isListening
-                      ? 'bg-red-600 text-white animate-pulse shadow-md shadow-red-500/40'
-                      : 'bg-purple-100 hover:bg-purple-200 text-purple-700 dark:bg-purple-900/50 dark:hover:bg-purple-800 dark:text-purple-300'
-                  ]"
-                  :title="isListening ? 'Detener dictado por voz' : 'Dictar consulta por voz'"
+                  @click="startRecording"
+                  :disabled="aiLoading"
+                  class="px-2.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer bg-purple-100 hover:bg-purple-200 text-purple-700 dark:bg-purple-900/50 dark:hover:bg-purple-800 dark:text-purple-300 disabled:opacity-45"
+                  title="Grabar audio o dictar consulta por micrófono"
                 >
-                  <MicOff v-if="isListening" class="w-4 h-4" />
-                  <Mic v-else class="w-4 h-4" />
-                  <span class="hidden md:inline text-[11px]">{{ isListening ? 'Escuchando...' : 'Dictar' }}</span>
+                  <Mic class="w-4 h-4" />
+                  <span class="hidden md:inline text-[11px]">Dictar</span>
                 </button>
               </div>
             </div>
@@ -500,6 +521,17 @@ function getMarginBadge(margin) {
               class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 border-none text-white font-bold text-xs py-3.5 px-6 rounded-2xl shadow-lg shadow-purple-600/30 transition-all shrink-0"
               @click="sendAiQuery"
             />
+          </div>
+
+          <!-- Alerta de Error de Micrófono -->
+          <div v-if="voiceError" class="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-amber-800 dark:text-amber-300 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <AlertTriangle class="w-4 h-4 shrink-0 text-amber-500" />
+              <span>{{ voiceError }}</span>
+            </div>
+            <button type="button" @click="clearVoiceError" class="p-0.5 hover:text-amber-900 dark:hover:text-white cursor-pointer shrink-0">
+              <X class="w-3.5 h-3.5" />
+            </button>
           </div>
 
           <!-- Alerta de Error si ocurre -->

@@ -451,11 +451,11 @@ class AiChatService
                 $generationConfig = [
                     'maxOutputTokens' => 2048,
                 ];
-                if (str_starts_with($model, 'gemini-3')) {
+                if (str_starts_with($model, 'gemini-3') && !str_contains($model, 'lite')) {
                     $generationConfig['thinkingConfig'] = [
                         'thinkingLevel' => 'LOW',
                     ];
-                } else {
+                } elseif (!str_starts_with($model, 'gemini-3')) {
                     $generationConfig['temperature'] = 0.4;
                 }
 
@@ -1631,5 +1631,313 @@ PROMPT;
              . "• 📅 **Reservas y Delivery:** Zonas disponibles, tolerancia de 15 min, cupones y PIN de entrega.\n"
              . "• 📜 **Legal y Privacidad:** Términos y Condiciones, Política de Privacidad y registro con Google.\n"
              . "• 🚀 **Sitio Empresarial SaaS:** Misión, Visión y Planes BrazasTech para restaurantes.";
+    }
+
+    /**
+     * Transcribe audio grabado desde el micrófono usando Gemini Multimodal (inlineData)
+     * con fallback opcional a Groq Whisper u OpenAI Whisper.
+     *
+     * @return array{success: bool, transcript: string, engine: string, code: string, error: ?string}
+     */
+    public function transcribeAudio(string $audioBinary, string $mimeType, string $contextHint = 'general'): array
+    {
+        if (strlen($audioBinary) < 120) {
+            return [
+                'success'    => false,
+                'transcript' => '',
+                'engine'     => 'validation',
+                'code'       => 'too_short',
+                'error'      => 'El audio grabado es demasiado corto. Mantén hablando al menos un segundo e intenta de nuevo.',
+            ];
+        }
+
+        $normalizedMime = $this->normalizeAudioMimeType($mimeType);
+        $hasProvider = false;
+
+        $domainFocus = match ($contextHint) {
+            'corporate' => 'Enfócate en vocabulario SaaS y empresarial: BrazasTech, SaaS, Plan Parrilla Starter, Plan Steakhouse Pro, Plan Enterprise Multi-Sede, POS, KDS, SIAT, SEPREC, SENAPI, cotización, Bolivianos.',
+            'reports'   => 'Enfócate en consultas de analíticas y reportes de restaurante: ventas, barras, líneas, pastel, torta, hoy, ayer, semana, mes, últimos 30 días, Arrachera, Picaña, Tomahawk, Bife de Chorizo, Provoleta, Bolivianos.',
+            default     => 'Enfócate en vocabulario del restaurante y SaaS: Las Brazas, BrazasTech, Arrachera, Picaña, Tomahawk, Bife de Chorizo, Provoleta, Tuétanos, Cerveza Artesanal, reserva, mesa, delivery, cupón, Bolivianos, POS, KDS, SIAT.',
+        };
+
+        $transcriptionPrompt = "Eres un transcriptor de voz de máxima precisión en español (Bolivia / Latinoamérica).\n"
+            . "Escucha el audio adjunto y devuelve ÚNICAMENTE el texto literal, claro y bien puntuado que dijo la persona.\n"
+            . "Reglas obligatorias:\n"
+            . "1. NO respondas la pregunta, NO saludes, NO agregues comillas, ni explicaciones ni prefijos como 'Transcripción:'.\n"
+            . "2. {$domainFocus}\n"
+            . "3. Si el audio solo contiene silencio, ruido de fondo o es totalmente inaudible, devuelve exactamente: [SILENCIO]";
+
+        // 1. Google Gemini Multimodal (soporta audio/webm, audio/ogg, audio/wav, audio/m4a, audio/mpeg, audio/aac, audio/flac)
+        $geminiKey = trim((string) config('services.gemini.api_key'));
+        if ($geminiKey !== '') {
+            $hasProvider = true;
+            $configuredModel = trim((string) config('services.gemini.model', 'gemini-3.8-flash'));
+            $candidateModels = array_values(array_unique(array_filter([
+                $configuredModel,
+                'gemini-3.8-flash',
+                'gemini-3.6-flash',
+                'gemini-3.5-flash-lite',
+            ])));
+
+            $mimeCandidates = $normalizedMime === 'audio/m4a'
+                ? ['audio/m4a', 'audio/mp4', 'audio/aac']
+                : [$normalizedMime];
+
+            $audioBase64 = base64_encode($audioBinary);
+
+            foreach ($candidateModels as $model) {
+                $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent";
+                $engine = "gemini-{$model}";
+
+                $generationConfig = [
+                    'maxOutputTokens' => 512,
+                ];
+                if (str_starts_with($model, 'gemini-3') && !str_contains($model, 'lite')) {
+                    $generationConfig['thinkingConfig'] = [
+                        'thinkingLevel' => 'LOW',
+                    ];
+                } elseif (!str_starts_with($model, 'gemini-3')) {
+                    $generationConfig['temperature'] = 0.0;
+                }
+
+                foreach ($mimeCandidates as $tryMime) {
+                    $payload = [
+                        'contents' => [[
+                            'role'  => 'user',
+                            'parts' => [
+                                [
+                                    'inlineData' => [
+                                        'mimeType' => $tryMime,
+                                        'data'     => $audioBase64,
+                                    ],
+                                ],
+                                [
+                                    'text' => $transcriptionPrompt,
+                                ],
+                            ],
+                        ]],
+                        'generationConfig' => $generationConfig,
+                    ];
+
+                    try {
+                        $response = Http::timeout(30)
+                            ->withHeaders([
+                                'x-goog-api-key' => $geminiKey,
+                                'Content-Type'   => 'application/json',
+                            ])
+                            ->post($url, $payload);
+
+                        if ($response->successful()) {
+                            $parts = $response->json('candidates.0.content.parts', []);
+                            $text = '';
+                            if (is_array($parts)) {
+                                foreach ($parts as $part) {
+                                    if (!empty($part['thought'])) {
+                                        continue;
+                                    }
+                                    if (!empty($part['text'])) {
+                                        $text .= $part['text'];
+                                    }
+                                }
+                            }
+
+                            $transcript = $this->cleanTranscriptText($text);
+                            if ($transcript === null) {
+                                return [
+                                    'success'    => false,
+                                    'transcript' => '',
+                                    'engine'     => $engine,
+                                    'code'       => 'silence',
+                                    'error'      => 'No se escuchó voz clara en el audio. Habla un poco más cerca del micrófono e intenta nuevamente.',
+                                ];
+                            }
+
+                            $this->lastEngine = $engine;
+                            return [
+                                'success'    => true,
+                                'transcript' => $transcript,
+                                'engine'     => $engine,
+                                'code'       => 'ok',
+                                'error'      => null,
+                            ];
+                        }
+
+                        Log::warning('Audio transcription Gemini API error', [
+                            'engine' => $engine,
+                            'mime'   => $tryMime,
+                            'status' => $response->status(),
+                            'body'   => mb_substr((string) $response->body(), 0, 300),
+                        ]);
+
+                        // Solo reintentar otro MIME en este mismo modelo si el error es 400 (MIME inválido)
+                        if ($response->status() !== 400) {
+                            break;
+                        }
+                    } catch (\Throwable $e) {
+                        Log::warning("Audio transcription Gemini exception ({$engine}): " . $e->getMessage());
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 2. Fallback opcional: Groq Whisper (whisper-large-v3-turbo)
+        $groqKey = trim((string) config('services.groq.api_key'));
+        if ($groqKey !== '') {
+            $hasProvider = true;
+            $transcript = $this->callWhisperTranscription(
+                'https://api.groq.com/openai/v1/audio/transcriptions',
+                $groqKey,
+                'whisper-large-v3-turbo',
+                $audioBinary,
+                $normalizedMime,
+                'groq-whisper-large-v3-turbo'
+            );
+            if ($transcript !== null) {
+                $clean = $this->cleanTranscriptText($transcript);
+                if ($clean === null) {
+                    return [
+                        'success'    => false,
+                        'transcript' => '',
+                        'engine'     => 'groq-whisper-large-v3-turbo',
+                        'code'       => 'silence',
+                        'error'      => 'No se escuchó voz clara en el audio. Intenta nuevamente.',
+                    ];
+                }
+                return [
+                    'success'    => true,
+                    'transcript' => $clean,
+                    'engine'     => 'groq-whisper-large-v3-turbo',
+                    'code'       => 'ok',
+                    'error'      => null,
+                ];
+            }
+        }
+
+        // 3. Fallback opcional: OpenAI Whisper (whisper-1)
+        $openaiKey = trim((string) config('services.openai.api_key'));
+        if ($openaiKey !== '') {
+            $hasProvider = true;
+            $transcript = $this->callWhisperTranscription(
+                'https://api.openai.com/v1/audio/transcriptions',
+                $openaiKey,
+                'whisper-1',
+                $audioBinary,
+                $normalizedMime,
+                'openai-whisper-1'
+            );
+            if ($transcript !== null) {
+                $clean = $this->cleanTranscriptText($transcript);
+                if ($clean === null) {
+                    return [
+                        'success'    => false,
+                        'transcript' => '',
+                        'engine'     => 'openai-whisper-1',
+                        'code'       => 'silence',
+                        'error'      => 'No se escuchó voz clara en el audio. Intenta nuevamente.',
+                    ];
+                }
+                return [
+                    'success'    => true,
+                    'transcript' => $clean,
+                    'engine'     => 'openai-whisper-1',
+                    'code'       => 'ok',
+                    'error'      => null,
+                ];
+            }
+        }
+
+        if (!$hasProvider) {
+            return [
+                'success'    => false,
+                'transcript' => '',
+                'engine'     => 'none',
+                'code'       => 'no_provider',
+                'error'      => 'El servidor no tiene configurada una API de IA (GEMINI_API_KEY) para transcribir audio.',
+            ];
+        }
+
+        return [
+            'success'    => false,
+            'transcript' => '',
+            'engine'     => 'error',
+            'code'       => 'upstream_error',
+            'error'      => 'No se pudo transcribir el audio en este momento. Intenta nuevamente o escribe tu consulta.',
+        ];
+    }
+
+    private function normalizeAudioMimeType(string $mimeType): string
+    {
+        $base = strtolower(trim(explode(';', $mimeType)[0] ?? ''));
+
+        return match (true) {
+            str_contains($base, 'webm') || str_contains($base, 'matroska') => 'audio/webm',
+            str_contains($base, 'ogg') || str_contains($base, 'opus')      => 'audio/ogg',
+            str_contains($base, 'wav') || str_contains($base, 'wave')      => 'audio/wav',
+            str_contains($base, 'mpeg') || str_contains($base, 'mp3')      => 'audio/mpeg',
+            str_contains($base, 'm4a') || str_contains($base, 'mp4')       => 'audio/m4a',
+            str_contains($base, 'aac')                                     => 'audio/aac',
+            str_contains($base, 'flac')                                    => 'audio/flac',
+            default                                                        => 'audio/webm',
+        };
+    }
+
+    private function cleanTranscriptText(string $raw): ?string
+    {
+        $text = trim($raw);
+        $text = preg_replace('/^(transcripci[oó]n\s*:\s*)/iu', '', $text) ?? $text;
+        $text = trim($text, " \t\n\r\0\x0B\"'“”");
+
+        if ($text === '' || stripos($text, '[SILENCIO]') !== false || stripos($text, '[INAUDIBLE]') !== false) {
+            return null;
+        }
+
+        return mb_substr($text, 0, 1000);
+    }
+
+    private function callWhisperTranscription(
+        string $endpoint,
+        string $apiKey,
+        string $model,
+        string $audioBinary,
+        string $mimeType,
+        string $engineLabel
+    ): ?string {
+        $ext = match ($mimeType) {
+            'audio/ogg'  => 'ogg',
+            'audio/wav'  => 'wav',
+            'audio/mpeg' => 'mp3',
+            'audio/m4a'  => 'm4a',
+            'audio/aac'  => 'aac',
+            'audio/flac' => 'flac',
+            default      => 'webm',
+        };
+
+        try {
+            $response = Http::timeout(25)
+                ->withToken($apiKey)
+                ->attach('file', $audioBinary, "voice.{$ext}")
+                ->post($endpoint, [
+                    'model'    => $model,
+                    'language' => 'es',
+                ]);
+
+            if ($response->successful()) {
+                $text = trim((string) $response->json('text', ''));
+                if ($text !== '') {
+                    $this->lastEngine = $engineLabel;
+                    return $text;
+                }
+            } else {
+                Log::warning("Audio transcription {$engineLabel} error", [
+                    'status' => $response->status(),
+                    'body'   => mb_substr((string) $response->body(), 0, 300),
+                ]);
+            }
+        } catch (\Throwable $e) {
+            Log::warning("Audio transcription {$engineLabel} exception: " . $e->getMessage());
+        }
+
+        return null;
     }
 }

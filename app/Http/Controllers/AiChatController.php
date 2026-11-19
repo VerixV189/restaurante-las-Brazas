@@ -72,4 +72,48 @@ class AiChatController extends Controller
             'timestamp'         => now()->format('H:i'),
         ]);
     }
+
+    /**
+     * Recibe audio grabado desde el micrófono y lo transcribe a texto con IA (Gemini / Whisper).
+     * Usado por todos los chatbots (Landings, Sidebar Staff/Cliente, Portal Cliente y Reportes IA).
+     */
+    public function transcribeAudio(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'audio'     => 'required|file|max:5120',
+            'mime_type' => 'nullable|string|max:120',
+            'context'   => 'nullable|in:restaurant,corporate,portal,reports,staff,general',
+        ], [
+            'audio.required' => 'No se recibió ningún archivo de audio.',
+            'audio.file'     => 'El audio enviado no es un archivo válido.',
+            'audio.max'      => 'El audio excede el límite de 5 MB. Graba un mensaje más breve.',
+        ]);
+
+        $file = $request->file('audio');
+        $binary = (string) $file->get();
+        $mimeType = (string) ($validated['mime_type'] ?? $file->getClientMimeType() ?? $file->getMimeType() ?? 'audio/webm');
+        $context = (string) ($validated['context'] ?? 'general');
+
+        $result = $this->aiChatService->transcribeAudio($binary, $mimeType, $context);
+
+        if (!$result['success']) {
+            $status = match ($result['code']) {
+                'too_short', 'silence' => 422,
+                'no_provider'          => 503,
+                default                => 502,
+            };
+
+            return response()->json([
+                'success' => false,
+                'code'    => $result['code'],
+                'message' => $result['error'],
+            ], $status);
+        }
+
+        return response()->json([
+            'success'    => true,
+            'transcript' => $result['transcript'],
+            'engine'     => $result['engine'],
+        ]);
+    }
 }

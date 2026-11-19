@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue';
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import axios from 'axios';
 import {
@@ -8,12 +8,17 @@ import {
   X,
   Send,
   Mic,
-  MicOff,
   RotateCcw,
   ArrowUpRight,
   Flame,
-  Building2
+  Building2,
+  Trash2,
+  PenLine,
+  Loader2,
+  AlertCircle
 } from 'lucide-vue-next';
+import { useVoiceRecorder } from '../composables/useVoiceRecorder';
+import VoiceAudioBadge from './VoiceAudioBadge.vue';
 
 const props = defineProps({
   portal: {
@@ -24,14 +29,38 @@ const props = defineProps({
 
 const isOpen = ref(false);
 const isLoading = ref(false);
-const isListening = ref(false);
 const inputMessage = ref('');
 const messages = ref([]);
 const scrollAreaRef = ref(null);
 const inputRef = ref(null);
-let recognition = null;
 
 const isCorporate = computed(() => props.portal === 'corporate');
+
+const {
+  isRecording,
+  isTranscribing,
+  formattedDuration,
+  audioLevels,
+  voiceError,
+  startRecording,
+  stopAndTranscribe,
+  cancelRecording,
+  clearError: clearVoiceError,
+} = useVoiceRecorder({
+  endpoint: '/ai/public-transcribe',
+  context: props.portal,
+  maxDurationSec: 60,
+  onTranscribed: ({ transcript, mode, audioUrl, durationLabel }) => {
+    if (mode === 'dictate') {
+      inputMessage.value = inputMessage.value.trim()
+        ? `${inputMessage.value.trim()} ${transcript}`
+        : transcript;
+      nextTick(() => inputRef.value?.focus());
+    } else {
+      sendMessage(transcript, { audioUrl, audioDuration: durationLabel });
+    }
+  },
+});
 
 const quickPrompts = computed(() => {
   if (isCorporate.value) {
@@ -104,11 +133,12 @@ function scrollToBottom() {
   });
 }
 
-async function sendMessage(presetPrompt = null) {
+async function sendMessage(presetPrompt = null, voiceMeta = null) {
   const text = (presetPrompt ?? inputMessage.value).trim();
   if (!text || isLoading.value) return;
 
   inputMessage.value = '';
+  clearVoiceError();
   const historyPayload = messages.value
     .filter((m) => m.id !== 'welcome-rest' && m.id !== 'welcome-corp')
     .slice(-8)
@@ -118,6 +148,8 @@ async function sendMessage(presetPrompt = null) {
     id: 'u-' + Date.now(),
     role: 'user',
     text,
+    audioUrl: voiceMeta?.audioUrl || null,
+    audioDuration: voiceMeta?.audioDuration || null,
     timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
   });
   scrollToBottom();
@@ -154,46 +186,11 @@ async function sendMessage(presetPrompt = null) {
   }
 }
 
-function toggleVoiceInput() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    messages.value.push({
-      id: 'voice-info-' + Date.now(),
-      role: 'assistant',
-      text: 'Tu navegador no soporta dictado por voz. Escribe tu consulta en el campo inferior y te responderé al instante.',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    });
-    scrollToBottom();
-    return;
+watch(isOpen, (open) => {
+  if (!open && isRecording.value) {
+    cancelRecording();
   }
-
-  if (isListening.value && recognition) {
-    recognition.stop();
-    isListening.value = false;
-    return;
-  }
-
-  recognition = new SpeechRecognition();
-  recognition.lang = 'es-ES';
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 1;
-
-  recognition.onstart = () => {
-    isListening.value = true;
-  };
-  recognition.onresult = (event) => {
-    const transcript = event.results[0][0].transcript;
-    isListening.value = false;
-    sendMessage(transcript);
-  };
-  recognition.onerror = () => {
-    isListening.value = false;
-  };
-  recognition.onend = () => {
-    isListening.value = false;
-  };
-  recognition.start();
-}
+});
 
 function renderMarkdown(raw) {
   if (!raw) return '';
@@ -328,7 +325,14 @@ onUnmounted(() => {
               ]"
             >
               <div v-if="msg.role === 'assistant'" v-html="renderMarkdown(msg.text)"></div>
-              <div v-else>{{ msg.text }}</div>
+              <div v-else>
+                <VoiceAudioBadge
+                  v-if="msg.audioUrl"
+                  :audio-url="msg.audioUrl"
+                  :duration="msg.audioDuration || '0:02'"
+                />
+                <div>{{ msg.text }}</div>
+              </div>
 
               <!-- Botones de Acción Rápida sugeridos por la IA -->
               <div v-if="msg.actions && msg.actions.length" class="flex flex-wrap gap-1.5 mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800">
@@ -366,45 +370,114 @@ onUnmounted(() => {
           </div>
         </div>
 
-        <!-- Formulario de Envío -->
-        <form
-          @submit.prevent="sendMessage()"
-          class="p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-center gap-2 shrink-0"
+        <!-- Aviso de error de micrófono -->
+        <div
+          v-if="voiceError"
+          class="px-3 py-2 bg-red-50 dark:bg-red-950/60 border-t border-red-200 dark:border-red-900 text-[11px] text-red-700 dark:text-red-300 flex items-center justify-between gap-2 shrink-0"
         >
-          <button
-            type="button"
-            @click="toggleVoiceInput"
-            :class="[
-              'p-2.5 rounded-xl border transition-colors cursor-pointer shrink-0',
-              isListening
-                ? 'bg-red-500 text-white border-red-500 animate-pulse'
-                : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-orange-500'
-            ]"
-            :title="isListening ? 'Detener micrófono' : 'Hablar por micrófono'"
-          >
-            <MicOff v-if="isListening" class="w-4 h-4" />
-            <Mic v-else class="w-4 h-4" />
+          <div class="flex items-center gap-1.5 min-w-0">
+            <AlertCircle class="w-3.5 h-3.5 shrink-0 text-red-500" />
+            <span class="leading-snug">{{ voiceError }}</span>
+          </div>
+          <button type="button" @click="clearVoiceError" class="p-0.5 hover:text-red-900 dark:hover:text-white cursor-pointer shrink-0">
+            <X class="w-3.5 h-3.5" />
           </button>
+        </div>
 
-          <input
-            ref="inputRef"
-            v-model="inputMessage"
-            type="text"
-            maxlength="1000"
-            placeholder="Pregunta sobre menú, misión, planes SaaS..."
-            class="flex-1 min-w-0 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
-            :disabled="isLoading"
-          />
-
-          <button
-            type="submit"
-            :disabled="isLoading || !inputMessage.trim()"
-            class="p-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white shadow-md disabled:opacity-45 cursor-pointer shrink-0 transition-all"
-            title="Enviar mensaje"
+        <!-- Formulario de Envío / Grabadora de Audio y Dictado -->
+        <div class="p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shrink-0">
+          <!-- Estado: Transcribiendo Audio -->
+          <div
+            v-if="isTranscribing"
+            class="flex items-center justify-center gap-2.5 h-10 px-3 rounded-xl bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-500/30 text-xs font-semibold text-orange-700 dark:text-orange-300"
           >
-            <Send class="w-4 h-4" />
-          </button>
-        </form>
+            <Loader2 class="w-4 h-4 animate-spin shrink-0" />
+            <span>Procesando y transcribiendo tu audio...</span>
+          </div>
+
+          <!-- Estado: Grabando Audio en Vivo -->
+          <div
+            v-else-if="isRecording"
+            class="flex items-center gap-2 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-500/40 rounded-xl px-2.5 py-1.5"
+          >
+            <button
+              type="button"
+              @click="cancelRecording"
+              class="p-2 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors cursor-pointer shrink-0"
+              title="Cancelar grabación"
+            >
+              <Trash2 class="w-4 h-4" />
+            </button>
+
+            <div class="flex-1 flex items-center gap-2 min-w-0">
+              <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shrink-0"></span>
+              <span class="text-xs font-mono font-bold text-red-600 dark:text-red-400 shrink-0">{{ formattedDuration }}</span>
+              <div class="flex items-center gap-0.5 h-5 flex-1 max-w-[90px]">
+                <span
+                  v-for="(lvl, i) in audioLevels"
+                  :key="i"
+                  class="w-1 rounded-full bg-red-500/80 dark:bg-red-400 transition-all duration-75"
+                  :style="{ height: `${Math.max(20, lvl)}%` }"
+                ></span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              @click="stopAndTranscribe('dictate')"
+              class="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-orange-500 hover:text-orange-600 transition-colors cursor-pointer shrink-0"
+              title="Transcribir al cuadro de texto (para editar antes de enviar)"
+            >
+              <PenLine class="w-4 h-4" />
+            </button>
+
+            <button
+              type="button"
+              @click="stopAndTranscribe('send')"
+              class="px-3 py-2 rounded-lg bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white text-xs font-bold flex items-center gap-1 shadow-md cursor-pointer shrink-0"
+              title="Enviar nota de voz al asistente"
+            >
+              <Send class="w-3.5 h-3.5" />
+              <span>Enviar</span>
+            </button>
+          </div>
+
+          <!-- Estado Normal: Texto + Botón de Micrófono -->
+          <form
+            v-else
+            @submit.prevent="sendMessage()"
+            class="flex items-center gap-2"
+          >
+            <button
+              type="button"
+              @click="startRecording"
+              :disabled="isLoading"
+              class="p-2.5 rounded-xl border bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-orange-500 hover:border-orange-400 transition-colors cursor-pointer shrink-0 disabled:opacity-45"
+              title="Dictar o enviar audio por micrófono"
+            >
+              <Mic class="w-4 h-4" />
+            </button>
+
+            <input
+              ref="inputRef"
+              v-model="inputMessage"
+              type="text"
+              maxlength="1000"
+              placeholder="Escribe o usa el micrófono para dictar..."
+              class="flex-1 min-w-0 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
+              :disabled="isLoading"
+            />
+
+            <button
+              type="submit"
+              :disabled="isLoading || !inputMessage.trim()"
+              class="p-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white shadow-md disabled:opacity-45 cursor-pointer shrink-0 transition-all"
+              title="Enviar mensaje"
+            >
+              <Send class="w-4 h-4" />
+            </button>
+          </form>
+        </div>
       </div>
     </transition>
 
