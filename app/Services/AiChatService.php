@@ -444,28 +444,36 @@ class AiChatService
                 'parts' => [['text' => $message]],
             ];
 
-            $payload = [
-                'systemInstruction' => [
-                    'parts' => [['text' => $systemPrompt]],
-                ],
-                'contents' => $contents,
-                'generationConfig' => [
-                    'temperature'     => 0.4,
-                    'maxOutputTokens' => 2048,
-                ],
-            ];
-
             foreach ($candidateModels as $model) {
                 $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent";
                 $engine = "gemini-{$model}";
 
+                $generationConfig = [
+                    'maxOutputTokens' => 2048,
+                ];
+                if (str_starts_with($model, 'gemini-3')) {
+                    $generationConfig['thinkingConfig'] = [
+                        'thinkingLevel' => 'LOW',
+                    ];
+                } else {
+                    $generationConfig['temperature'] = 0.4;
+                }
+
+                $modelPayload = [
+                    'systemInstruction' => [
+                        'parts' => [['text' => $systemPrompt]],
+                    ],
+                    'contents'         => $contents,
+                    'generationConfig' => $generationConfig,
+                ];
+
                 try {
-                    $response = Http::timeout(20)
+                    $response = Http::timeout(28)
                         ->withHeaders([
                             'x-goog-api-key' => $geminiKey,
                             'Content-Type'   => 'application/json',
                         ])
-                        ->post($url, $payload);
+                        ->post($url, $modelPayload);
 
                     if ($response->successful()) {
                         $parts = $response->json('candidates.0.content.parts', []);

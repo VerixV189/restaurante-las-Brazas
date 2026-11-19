@@ -201,10 +201,11 @@ function renderMarkdown(raw) {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
+    .replace(/^###\s+(.*)$/gm, '<h4 class="font-bold text-xs uppercase tracking-wider text-orange-600 dark:text-orange-400 mt-2 mb-1">$1</h4>')
+    .replace(/^\s*[\*\-]\s+/gm, '• ')
     .replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-[11px] font-mono">$1</code>')
     .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-slate-900 dark:text-white">$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    .replace(/^### (.*)$/gm, '<h4 class="font-bold text-xs uppercase tracking-wider text-orange-600 dark:text-orange-400 mt-2 mb-1">$1</h4>')
+    .replace(/\*([^*\n]+)\*/g, '<em>$1</em>')
     .replace(/\n/g, '<br />');
 }
 
