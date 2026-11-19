@@ -36,6 +36,11 @@ class Reservation extends Model
         return $this->belongsTo(Table::class);
     }
 
+    public function area(): BelongsTo
+    {
+        return $this->belongsTo(Area::class);
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

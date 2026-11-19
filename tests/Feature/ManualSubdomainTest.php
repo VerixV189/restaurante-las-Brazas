@@ -336,4 +336,53 @@ class ManualSubdomainTest extends TestCase
             ->assertSessionHas('error');
         $this->assertGuest();
     }
+
+    public function test_client_can_create_reservation_and_reload_portal_without_500_error(): void
+    {
+        $clientRole = \App\Models\Role::firstOrCreate(['name' => 'Cliente'], ['description' => 'Cliente']);
+        $client = \App\Models\User::create([
+            'role_id'           => $clientRole->id,
+            'name'              => 'Julio Montano',
+            'email'             => 'julio.reserva@gmail.com',
+            'password'          => bcrypt('password123'),
+            'is_active'         => true,
+            'email_verified_at' => now(),
+        ]);
+
+        $area = \App\Models\Area::create([
+            'name'        => 'Terraza Jardín',
+            'description' => 'Zona exterior',
+            'is_active'   => true,
+        ]);
+
+        \App\Models\Table::create([
+            'area_id'      => $area->id,
+            'table_number' => 'T-01',
+            'capacity'     => 6,
+            'status'       => 'available',
+        ]);
+
+        $storeResp = $this->actingAs($client)->postJson('/client/reservations', [
+            'reservation_date' => now()->addDays(2)->setTime(20, 0)->toIso8601String(),
+            'adults'           => 4,
+            'children'         => 1,
+            'area_id'          => $area->id,
+            'special_requests' => 'Mesa cerca de la parrilla',
+        ]);
+
+        $storeResp->assertStatus(201)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.area_name', 'Terraza Jardín');
+
+        // Recargar /dashboard con la reserva ya creada no debe arrojar 500
+        $dashboardResp = $this->actingAs($client)->get('/dashboard');
+        $dashboardResp->assertOk();
+        $dashboardResp->assertInertia(fn ($page) => $page
+            ->component('Client/Portal')
+            ->has('reservations', 1)
+        );
+
+        // Si el cliente ya logueado entra a /login, redirige limpiamente sin 500
+        $this->actingAs($client)->get('/login')->assertStatus(302);
+    }
 }

@@ -328,7 +328,7 @@ class AuthController extends Controller
             try {
                 \App\Models\Customer::firstOrCreate(
                     ['email' => $user->email],
-                    ['name' => $user->name, 'loyalty_points' => 0]
+                    ['name' => $user->name, 'phone' => $user->phone]
                 );
             } catch (\Throwable $e) {
                 \Log::warning('No se pudo sincronizar ficha de cliente en registro Google: ' . $e->getMessage());
