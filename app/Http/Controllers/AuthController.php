@@ -10,6 +10,7 @@ use App\Mail\PrivacyPolicyMail;
 use App\Mail\VerifyAccountMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
@@ -229,16 +230,45 @@ class AuthController extends Controller
         );
     }
 
+    protected function mobileGoogleRedirectResponse(array $params, bool $isError = false, ?string $displayMessage = null)
+    {
+        $query = http_build_query($params, '', '&', PHP_QUERY_RFC3986);
+        $deepLinkUrl = 'lasbrazas://auth/callback?' . $query;
+        $intentUrl = 'intent://auth/callback?' . $query . '#Intent;scheme=lasbrazas;package=com.example.restaurante_movil;end';
+
+        $text = $displayMessage
+            ?? ($isError
+                ? (string) ($params['error'] ?? 'No se pudo completar el inicio de sesión con Google.')
+                : 'Te estamos redirigiendo automáticamente a la aplicación móvil de Restaurante Las Brazas...');
+
+        return response()
+            ->view('auth.mobile-google-callback', [
+                'deepLinkUrl'    => $deepLinkUrl,
+                'intentUrl'      => $intentUrl,
+                'isError'        => $isError,
+                'displayMessage' => $text,
+            ], 200)
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    }
+
     public function redirectToGoogle(Request $request)
     {
+        $isMobile = strtolower((string) $request->query('source', '')) === 'mobile';
+
+        // En el navegador web normal, si el usuario ya está autenticado, mantener redirección a /dashboard
+        if (!$isMobile && Auth::check()) {
+            return redirect('/dashboard');
+        }
+
         $clientId = config('services.google.client_id');
         $clientSecret = config('services.google.client_secret');
 
         if (empty($clientId) || empty($clientSecret)) {
-            return redirect()->route('login')->with(
-                'error',
-                'El inicio de sesión con Google está listo para activarse. Configura GOOGLE_CLIENT_ID y GOOGLE_CLIENT_SECRET en el archivo .env del servidor.'
-            );
+            $missingMsg = 'El inicio de sesión con Google está listo para activarse. Configura GOOGLE_CLIENT_ID y GOOGLE_CLIENT_SECRET en el archivo .env del servidor.';
+            if ($isMobile) {
+                return $this->mobileGoogleRedirectResponse(['error' => $missingMsg], true);
+            }
+            return redirect()->route('login')->with('error', $missingMsg);
         }
 
         $redirectUri = config('services.google.redirect');
@@ -246,8 +276,13 @@ class AuthController extends Controller
             $redirectUri = url($redirectUri ?: '/auth/google/callback');
         }
 
-        $state = Str::random(40);
+        $state = ($isMobile ? 'mobile_' : 'web_') . Str::random(32);
         $request->session()->put('google_oauth_state', $state);
+
+        // Respaldo de un solo uso en caché para flujo móvil (evita fallo si Chrome en Android cambia cookies entre redirecciones)
+        if ($isMobile) {
+            Cache::put("google_oauth_mobile_state:{$state}", true, now()->addMinutes(10));
+        }
 
         $query = http_build_query([
             'client_id'     => $clientId,
@@ -263,13 +298,35 @@ class AuthController extends Controller
 
     public function handleGoogleCallback(Request $request)
     {
+        $returnedState = (string) $request->input('state', '');
+        $expectedState = (string) $request->session()->pull('google_oauth_state', '');
+        $isMobile = str_starts_with($returnedState, 'mobile_') || str_starts_with($expectedState, 'mobile_');
+
         if ($request->filled('error')) {
-            return redirect()->route('login')->with('error', 'Inicio de sesión con Google cancelado por el usuario.');
+            if ($isMobile && $returnedState !== '') {
+                Cache::forget("google_oauth_mobile_state:{$returnedState}");
+            }
+            $cancelMsg = 'Inicio de sesión con Google cancelado por el usuario.';
+            if ($isMobile) {
+                return $this->mobileGoogleRedirectResponse(['error' => $cancelMsg], true);
+            }
+            return redirect()->route('login')->with('error', $cancelMsg);
         }
 
-        $expectedState = $request->session()->pull('google_oauth_state');
-        if (!$expectedState || $request->input('state') !== $expectedState || !$request->filled('code')) {
-            return redirect()->route('login')->with('error', 'La sesión de seguridad con Google expiró. Inténtalo nuevamente.');
+        $stateValid = $expectedState !== '' && hash_equals($expectedState, $returnedState);
+        if (!$stateValid && $isMobile && $returnedState !== '') {
+            // Verificar respaldo atómico de un solo uso en caché si Chrome Android perdió la cookie de sesión
+            $stateValid = (bool) Cache::pull("google_oauth_mobile_state:{$returnedState}");
+        } elseif ($isMobile && $returnedState !== '') {
+            Cache::forget("google_oauth_mobile_state:{$returnedState}");
+        }
+
+        if (!$stateValid || !$request->filled('code')) {
+            $expiredMsg = 'La sesión de seguridad con Google expiró. Inténtalo nuevamente.';
+            if ($isMobile) {
+                return $this->mobileGoogleRedirectResponse(['error' => $expiredMsg], true);
+            }
+            return redirect()->route('login')->with('error', $expiredMsg);
         }
 
         $clientId = config('services.google.client_id');
@@ -289,7 +346,11 @@ class AuthController extends Controller
             ]);
 
             if (!$tokenResponse->successful() || empty($tokenResponse->json('access_token'))) {
-                return redirect()->route('login')->with('error', 'No se pudo validar el token de acceso con Google.');
+                $tokenErr = 'No se pudo validar el token de acceso con Google.';
+                if ($isMobile) {
+                    return $this->mobileGoogleRedirectResponse(['error' => $tokenErr], true);
+                }
+                return redirect()->route('login')->with('error', $tokenErr);
             }
 
             $userInfoResponse = Http::withToken($tokenResponse->json('access_token'))
@@ -297,7 +358,11 @@ class AuthController extends Controller
                 ->get('https://www.googleapis.com/oauth2/v3/userinfo');
 
             if (!$userInfoResponse->successful() || empty($userInfoResponse->json('email'))) {
-                return redirect()->route('login')->with('error', 'No se pudo obtener la información de perfil desde Google.');
+                $profileErr = 'No se pudo obtener la información de perfil desde Google.';
+                if ($isMobile) {
+                    return $this->mobileGoogleRedirectResponse(['error' => $profileErr], true);
+                }
+                return redirect()->route('login')->with('error', $profileErr);
             }
 
             $googleProfile = $userInfoResponse->json();
@@ -305,7 +370,11 @@ class AuthController extends Controller
             $name = trim($googleProfile['name'] ?? ($googleProfile['given_name'] ?? explode('@', $email)[0]));
         } catch (\Throwable $e) {
             \Log::warning('Error autenticando con Google OAuth: ' . $e->getMessage());
-            return redirect()->route('login')->with('error', 'Error de conexión al comunicarse con los servidores de Google.');
+            $connErr = 'Error de conexión al comunicarse con los servidores de Google.';
+            if ($isMobile) {
+                return $this->mobileGoogleRedirectResponse(['error' => $connErr], true);
+            }
+            return redirect()->route('login')->with('error', $connErr);
         }
 
         $user = User::where('email', $email)->first();
@@ -343,17 +412,36 @@ class AuthController extends Controller
                 \Log::warning('Error enviando correos informativos tras registro con Google: ' . $e->getMessage());
             }
 
+            $welcomeMsg = "¡Bienvenido a Las Brazas, {$user->name}! Tu cuenta con Google ha sido creada y te enviamos a tu correo los Términos del Servicio, Condiciones de Reserva y Política de Privacidad.";
+
+            if ($isMobile) {
+                $user->loadMissing('role');
+                $plainToken = $user->createToken('flutter_google_mobile')->plainTextToken;
+
+                return $this->mobileGoogleRedirectResponse([
+                    'token'   => $plainToken,
+                    'id'      => (string) $user->id,
+                    'name'    => $user->name,
+                    'email'   => $user->email,
+                    'role'    => $user->role?->name ?? 'Cliente',
+                    'is_new'  => '1',
+                    'message' => $welcomeMsg,
+                ], false, $welcomeMsg);
+            }
+
             Auth::login($user, true);
             $request->session()->regenerate();
 
-            return redirect()->intended('/dashboard')->with(
-                'success',
-                "¡Bienvenido a Las Brazas, {$user->name}! Tu cuenta con Google ha sido creada y te enviamos a tu correo los Términos del Servicio, Condiciones de Reserva y Política de Privacidad."
-            );
+            return redirect()->intended('/dashboard')->with('success', $welcomeMsg);
         }
 
-        // Bloqueo estricto: Google OAuth es exclusivo para el Portal de Clientes (/login)
+        // Bloqueo estricto: Google OAuth es exclusivo para el Portal de Clientes (/login y App Móvil)
         if (! $this->isClientUser($user)) {
+            $staffErr = 'Tu correo pertenece al equipo operativo. Por seguridad, el personal debe iniciar sesión exclusivamente con su correo y contraseña.';
+            if ($isMobile) {
+                return $this->mobileGoogleRedirectResponse(['error' => $staffErr], true);
+            }
+
             return redirect()->route('staff.login')->with(
                 'error',
                 'Tu correo pertenece al equipo operativo. Por seguridad, el personal debe iniciar sesión exclusivamente en el Portal de Personal con su correo y contraseña.'
@@ -366,6 +454,22 @@ class AuthController extends Controller
                 'is_active'         => true,
                 'email_verified_at' => $user->email_verified_at ?? now(),
             ])->save();
+        }
+
+        if ($isMobile) {
+            $user->loadMissing('role');
+            $plainToken = $user->createToken('flutter_google_mobile')->plainTextToken;
+            $returningMsg = "¡Bienvenido de vuelta a Las Brazas, {$user->name}!";
+
+            return $this->mobileGoogleRedirectResponse([
+                'token'   => $plainToken,
+                'id'      => (string) $user->id,
+                'name'    => $user->name,
+                'email'   => $user->email,
+                'role'    => $user->role?->name ?? 'Cliente',
+                'is_new'  => '0',
+                'message' => $returningMsg,
+            ], false, $returningMsg);
         }
 
         Auth::login($user, true);

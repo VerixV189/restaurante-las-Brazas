@@ -47,9 +47,12 @@ Route::middleware('guest')->group(function () {
     Route::post('/staff/login', [AuthController::class, 'staffLogin'])->name('staff.login.submit');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
-    Route::get('/auth/google/redirect', [AuthController::class, 'redirectToGoogle'])->name('auth.google.redirect');
-    Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 });
+
+// Google OAuth 2.0 (fuera de middleware 'guest' para soportar retorno desde App Móvil Flutter
+// incluso si Chrome ya tiene una sesión web activa; en web normal redirige a /dashboard si ya está autenticado)
+Route::get('/auth/google/redirect', [AuthController::class, 'redirectToGoogle'])->name('auth.google.redirect');
+Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
