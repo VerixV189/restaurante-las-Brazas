@@ -387,9 +387,6 @@ onBeforeUnmount(() => {
                 <span class="font-extrabold text-sm sm:text-base tracking-tight truncate text-slate-900 dark:text-white">
                   Las Brazas <span class="text-orange-600 dark:text-orange-400">Ayuda</span>
                 </span>
-                <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/25">
-                  v{{ appVersion }}
-                </span>
                 <span v-if="isSubdomain" class="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25">
                   <Globe class="w-3 h-3" /> Centro de Ayuda Oficial
                 </span>

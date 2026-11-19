@@ -393,7 +393,6 @@ function isUrlActive(url) {
           <Link href="/" class="hidden md:flex text-xs text-slate-500 dark:text-slate-400 hover:text-orange-500 dark:hover:text-orange-400 transition-colors items-center gap-1 whitespace-nowrap">
             <span>Ver Menú Público</span>
           </Link>
-          <Tag value="Las Brazas" severity="warn" class="hidden xl:inline-flex bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20" />
         </div>
       </header>
 
