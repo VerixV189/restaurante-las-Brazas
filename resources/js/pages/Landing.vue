@@ -40,7 +40,9 @@ import {
   ThumbsUp,
   Plus,
   Sun,
-  Moon
+  Moon,
+  Mail,
+  Send
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -208,6 +210,51 @@ function submitReservation() {
   });
 }
 
+// Formulario Contáctenos (envío directo a Gmail vía SMTP)
+const contactSentSuccess = ref(false);
+const contactSubjectOptions = [
+  'Consulta General',
+  'Reserva Grupal o Evento Corporativo',
+  'Pedidos & Delivery',
+  'Sugerencia o Felicitación',
+  'Cotización / Proveedores',
+];
+
+const contactForm = useForm({
+  name: '',
+  email: '',
+  phone: '',
+  subject: 'Consulta General',
+  message: '',
+  website: '',
+});
+
+function submitContactForm() {
+  contactSentSuccess.value = false;
+  contactForm.post('/contact', {
+    preserveScroll: true,
+    onSuccess: () => {
+      contactSentSuccess.value = true;
+      contactForm.reset('name', 'email', 'phone', 'message', 'website');
+      contactForm.subject = 'Consulta General';
+      toast.add({
+        severity: 'success',
+        summary: '¡Mensaje Enviado!',
+        detail: 'Tu consulta fue enviada directamente a nuestro correo oficial. Te responderemos muy pronto.',
+        life: 5000,
+      });
+    },
+    onError: () => {
+      toast.add({
+        severity: 'warn',
+        summary: 'Verifica los datos',
+        detail: 'Por favor revisa los campos marcados en el formulario de contacto.',
+        life: 4000,
+      });
+    },
+  });
+}
+
 function getDishImage(dish) {
   if (dish.image_url) return dish.image_url;
   if (dish.name.toLowerCase().includes('arrachera')) return '/images/arrachera.png';
@@ -365,13 +412,13 @@ function submitTestimonial() {
 
         <!-- Navigation Links -->
         <nav class="hidden lg:flex items-center gap-5 xl:gap-7 text-xs xl:text-sm font-medium text-slate-600 dark:text-slate-300">
+          <a href="#sobre-nosotros" class="whitespace-nowrap hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Sobre Nosotros</a>
           <a href="#menu" class="whitespace-nowrap hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Menú</a>
-          <a href="#identidad" class="whitespace-nowrap hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Misión & Visión</a>
           <a href="#tecnologia" class="whitespace-nowrap hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Fortalezas</a>
           <a href="#experiencia" class="whitespace-nowrap hover:text-orange-600 dark:hover:text-orange-400 transition-colors">La Experiencia</a>
           <a href="#testimonios" class="whitespace-nowrap hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Testimonios</a>
           <a href="#modelo-saas" class="whitespace-nowrap px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold hover:bg-orange-500/20 transition-colors">Modelo SaaS</a>
-          <a href="#contacto" class="whitespace-nowrap hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Contacto</a>
+          <a href="#contacto" class="whitespace-nowrap hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Contáctenos</a>
         </nav>
 
         <!-- Action Buttons -->
@@ -462,16 +509,61 @@ function submitTestimonial() {
       </div>
     </section>
 
-    <!-- Tarjetas de Identidad: Misión y Visión -->
-    <section id="identidad" class="relative max-w-7xl mx-auto px-6 py-24">
-      <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold uppercase tracking-widest">
-          <Sparkles class="w-3.5 h-3.5" /> BrazasTech & Las Brazas
+    <!-- Sección Sobre Nosotros: Nuestra Historia, Misión y Visión -->
+    <section id="sobre-nosotros" class="relative max-w-7xl mx-auto px-6 py-24">
+      <div id="identidad" class="text-center max-w-3xl mx-auto mb-16 space-y-3">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold uppercase tracking-widest">
+          <Sparkles class="w-3.5 h-3.5" /> Sobre Nosotros • Tradición & Hospitalidad
         </div>
-        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white">Identidad & Filosofía Corporativa</h2>
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white">
+          Sobre Nosotros: Pasión por las <span class="bg-gradient-to-r from-orange-600 to-amber-500 dark:from-orange-400 dark:to-amber-300 bg-clip-text text-transparent">Brasas</span>
+        </h2>
         <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base leading-relaxed">
-          La fusión perfecta entre nuestra parrilla artesanal y tecnología moderna para ofrecer un servicio ágil y sin esperas.
+          Conoce la historia de <strong>Restaurante Las Brazas Steakhouse</strong>, nuestra identidad gastronómica y el compromiso con cada comensal que nos visita.
         </p>
+      </div>
+
+      <!-- Bloque Principal: Nuestra Historia y Cifras de Trayectoria -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 sm:p-10 mb-10 shadow-sm hover:shadow-xl transition-all duration-300">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div class="lg:col-span-7 space-y-4">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-600 dark:text-orange-400 text-xs font-bold uppercase tracking-wider">
+              <Flame class="w-3.5 h-3.5" /> Nuestra Historia en Santa Cruz de la Sierra
+            </div>
+            <h3 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white leading-tight">
+              El Arte del Verdadero Asado a la Leña con Atención de Primer Nivel
+            </h3>
+            <p class="text-slate-600 dark:text-slate-300 text-sm sm:text-base leading-relaxed">
+              <strong>Restaurante Las Brazas Steakhouse</strong> nació con una visión clara: honrar la tradición del asado artesanal utilizando cortes seleccionados de exportación, maduración controlada y cocción lenta a base de carbón vegetal y leña seleccionada.
+            </p>
+            <p class="text-slate-600 dark:text-slate-400 text-xs sm:text-sm leading-relaxed">
+              Hoy combinamos la calidez de nuestros maestros parrilleros con una plataforma digital propia que permite reservar tu mesa favorita en segundos, hacer pedidos a domicilio con confirmación segura por PIN y disfrutar de una atención sin demoras en nuestro Salón Principal, Terraza Jardín y Área VIP.
+            </p>
+          </div>
+
+          <div class="lg:col-span-5 grid grid-cols-2 gap-4">
+            <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 text-center space-y-1">
+              <span class="text-2xl sm:text-3xl font-black text-orange-600 dark:text-orange-400">+12 Años</span>
+              <p class="text-xs font-semibold text-slate-700 dark:text-slate-300">Tradición Parrillera</p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">Cortes madurados y recetas de autor</p>
+            </div>
+            <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 text-center space-y-1">
+              <span class="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400">4.9 / 5</span>
+              <p class="text-xs font-semibold text-slate-700 dark:text-slate-300">Calificación Clientes</p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">+45,000 comensales atendidos</p>
+            </div>
+            <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 text-center space-y-1">
+              <span class="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400">100%</span>
+              <p class="text-xs font-semibold text-slate-700 dark:text-slate-300">Leña & Carbón Selecto</p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">Ahumado natural y término exacto</p>
+            </div>
+            <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 text-center space-y-1">
+              <span class="text-2xl sm:text-3xl font-black text-blue-600 dark:text-blue-400">3 Zonas</span>
+              <p class="text-xs font-semibold text-slate-700 dark:text-slate-300">Ambientes Exclusivos</p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">Salón Principal, Terraza y Área VIP</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
@@ -1156,8 +1248,225 @@ function submitTestimonial() {
       </div>
     </section>
 
+    <!-- ═══════════════════════════════════════════════════════════════════════════
+         SECCIÓN CONTÁCTENOS (ENVÍO DIRECTO A GMAIL VÍA SMTP)
+         ═══════════════════════════════════════════════════════════════════════════ -->
+    <section id="contacto" class="max-w-7xl mx-auto px-6 py-24">
+      <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-600 dark:text-orange-400 text-xs font-bold uppercase tracking-widest">
+          <Mail class="w-3.5 h-3.5" /> Atención Directa al Comensal
+        </div>
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white">
+          Contáctenos
+        </h2>
+        <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base leading-relaxed">
+          ¿Tienes alguna consulta sobre nuestra carta, deseas cotizar una cena corporativa, celebrar un evento especial o enviarnos una sugerencia? Escríbenos y tu mensaje llegará directamente a nuestro correo oficial.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+        <!-- Columna Izquierda: Información de Ubicación, Teléfonos y Horarios -->
+        <div class="lg:col-span-5 space-y-5">
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-7 space-y-6 shadow-sm">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-widest text-orange-600 dark:text-orange-400">Canales Oficiales</span>
+              <h3 class="text-xl font-black text-slate-900 dark:text-white mt-1">Estamos para Atenderte</h3>
+              <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+                Respondemos todas las solicitudes recibidas por correo electrónico o teléfono durante nuestro horario de atención continua.
+              </p>
+            </div>
+
+            <div class="space-y-4">
+              <div class="flex items-start gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800">
+                <div class="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0 border border-orange-500/20">
+                  <MapPin class="w-5 h-5" />
+                </div>
+                <div class="text-xs space-y-0.5">
+                  <p class="font-bold text-slate-900 dark:text-white">Dirección del Restaurante</p>
+                  <p class="text-slate-600 dark:text-slate-400">Av. Las Brazas #120, Zona Equipetrol Norte</p>
+                  <p class="text-slate-500 dark:text-slate-500">Santa Cruz de la Sierra, Bolivia</p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20">
+                  <Phone class="w-5 h-5" />
+                </div>
+                <div class="text-xs space-y-0.5">
+                  <p class="font-bold text-slate-900 dark:text-white">Reservas & Atención Telefónica</p>
+                  <p class="text-slate-600 dark:text-slate-400">Teléfono Fijo: +591 (3) 345-6789</p>
+                  <p class="text-slate-600 dark:text-slate-400">WhatsApp Atención: +591 700-45678</p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/20">
+                  <Clock class="w-5 h-5" />
+                </div>
+                <div class="text-xs space-y-0.5">
+                  <p class="font-bold text-slate-900 dark:text-white">Horarios de Atención</p>
+                  <p class="text-slate-600 dark:text-slate-400">Lunes a Jueves: 1:00 PM – 10:00 PM</p>
+                  <p class="text-slate-600 dark:text-slate-400">Viernes y Sábado: 1:00 PM – 11:30 PM</p>
+                  <p class="text-slate-600 dark:text-slate-400">Domingo Familiar: 1:00 PM – 9:00 PM</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center gap-3 text-xs text-slate-700 dark:text-slate-300">
+              <ShieldCheck class="w-5 h-5 text-orange-600 dark:text-orange-400 shrink-0" />
+              <span>
+                Recepción directa en nuestra bandeja oficial de <strong>Gmail</strong> con respuesta directa a tu correo electrónico.
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Columna Derecha: Formulario Contáctenos -->
+        <div class="lg:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 sm:p-10 shadow-lg">
+          <div class="mb-6">
+            <h3 class="text-2xl font-black text-slate-900 dark:text-white">Envíanos un Mensaje</h3>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
+              Completa el formulario y nuestro equipo te responderá directamente a tu correo electrónico o teléfono.
+            </p>
+          </div>
+
+          <!-- Aviso de envío exitoso -->
+          <div
+            v-if="contactSentSuccess"
+            class="mb-6 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-start gap-3 text-xs text-emerald-800 dark:text-emerald-200"
+          >
+            <CheckCircle2 class="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+            <div>
+              <p class="font-bold text-sm">¡Hemos recibido tu mensaje correctamente!</p>
+              <p class="mt-0.5 text-emerald-700 dark:text-emerald-300">
+                Tu consulta ya fue entregada en nuestro correo electrónico. Nuestro equipo de atención al cliente te responderá a la brevedad.
+              </p>
+            </div>
+          </div>
+
+          <form @submit.prevent="submitContactForm" class="space-y-5">
+            <!-- Honeypot oculto anti-spam -->
+            <input
+              v-model="contactForm.website"
+              type="text"
+              name="website"
+              tabindex="-1"
+              autocomplete="off"
+              class="hidden"
+              aria-hidden="true"
+            />
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1.5">
+                  Nombre Completo *
+                </label>
+                <InputText
+                  v-model="contactForm.name"
+                  class="w-full"
+                  placeholder="Ej: Carlos Mendoza"
+                  :invalid="!!contactForm.errors.name"
+                  required
+                />
+                <p v-if="contactForm.errors.name" class="text-red-500 text-[11px] mt-1">
+                  {{ contactForm.errors.name }}
+                </p>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1.5">
+                  Correo Electrónico *
+                </label>
+                <InputText
+                  v-model="contactForm.email"
+                  type="email"
+                  class="w-full"
+                  placeholder="tucorreo@gmail.com"
+                  :invalid="!!contactForm.errors.email"
+                  required
+                />
+                <p v-if="contactForm.errors.email" class="text-red-500 text-[11px] mt-1">
+                  {{ contactForm.errors.email }}
+                </p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1.5">
+                  Teléfono / WhatsApp *
+                </label>
+                <InputText
+                  v-model="contactForm.phone"
+                  class="w-full"
+                  placeholder="Ej: +591 700-12345"
+                  :invalid="!!contactForm.errors.phone"
+                  required
+                />
+                <p v-if="contactForm.errors.phone" class="text-red-500 text-[11px] mt-1">
+                  {{ contactForm.errors.phone }}
+                </p>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1.5">
+                  Motivo de Contacto *
+                </label>
+                <Select
+                  v-model="contactForm.subject"
+                  :options="contactSubjectOptions"
+                  placeholder="Selecciona un motivo"
+                  class="w-full"
+                />
+                <p v-if="contactForm.errors.subject" class="text-red-500 text-[11px] mt-1">
+                  {{ contactForm.errors.subject }}
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase">
+                  Tu Mensaje o Consulta *
+                </label>
+                <span class="text-[11px] text-slate-400 dark:text-slate-500">
+                  {{ contactForm.message.length }} / 2000
+                </span>
+              </div>
+              <Textarea
+                v-model="contactForm.message"
+                rows="4"
+                maxlength="2000"
+                class="w-full"
+                placeholder="Escribe aquí tu consulta, detalles de tu evento o comentario..."
+                :invalid="!!contactForm.errors.message"
+                required
+              />
+              <p v-if="contactForm.errors.message" class="text-red-500 text-[11px] mt-1">
+                {{ contactForm.errors.message }}
+              </p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+              <span class="text-[11px] text-slate-500 dark:text-slate-400">
+                Tus datos están protegidos conforme a nuestros <Link href="/terms" class="text-orange-600 dark:text-orange-400 underline">Términos y Privacidad</Link>.
+              </span>
+
+              <Button
+                type="submit"
+                label="Enviar Mensaje Ahora"
+                icon="pi pi-send"
+                :loading="contactForm.processing"
+                class="!bg-gradient-to-r !from-orange-600 !to-amber-500 !border-none !text-white font-bold rounded-xl px-7 py-3 text-xs shadow-lg shadow-orange-600/25 hover:scale-[1.01] transition-all w-full sm:w-auto"
+              />
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
     <!-- Footer Section -->
-    <footer id="contacto" class="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800/80 py-16 px-6 transition-colors duration-200">
+    <footer class="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800/80 py-16 px-6 transition-colors duration-200">
       <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
         <div class="space-y-4">
           <div class="flex items-center gap-3">

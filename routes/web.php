@@ -22,6 +22,7 @@ use App\Http\Controllers\InventoryMovementController;
 // ─────────────────────────────────────────────────────────────────────────────
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::post('/reserve', [HomeController::class, 'reserve'])->name('public.reserve');
+Route::post('/contact', [HomeController::class, 'sendContact'])->middleware('throttle:10,1')->name('public.contact');
 Route::get('/manual', [\App\Http\Controllers\ManualController::class, 'index'])->name('manual.index');
 Route::get('/manual/pdf', [\App\Http\Controllers\ManualController::class, 'downloadPdf'])->name('manual.pdf');
 Route::get('/pdf', [\App\Http\Controllers\ManualController::class, 'downloadPdf'])->name('manual.pdf.short');

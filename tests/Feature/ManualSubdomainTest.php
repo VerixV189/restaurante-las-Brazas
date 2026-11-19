@@ -149,4 +149,28 @@ class ManualSubdomainTest extends TestCase
         });
         \Illuminate\Support\Facades\Mail::assertNotSent(\App\Mail\VerifyAccountMail::class);
     }
+
+    public function test_contact_form_validates_and_sends_email_to_configured_recipient(): void
+    {
+        \Illuminate\Support\Facades\Mail::fake();
+        config(['mail.contact_to' => 'restaurante.lasbrazas@gmail.com']);
+
+        $response = $this->from('/')->post('/contact', [
+            'name'    => 'Valeria Hurtado',
+            'email'   => 'valeria.cliente@gmail.com',
+            'phone'   => '+591 700-98765',
+            'subject' => 'Reserva Grupal o Evento Corporativo',
+            'message' => 'Hola, quisiera cotizar una cena corporativa para 20 personas este viernes.',
+            'website' => '',
+        ]);
+
+        $response->assertRedirect('/');
+        $response->assertSessionHas('success');
+
+        \Illuminate\Support\Facades\Mail::assertSent(\App\Mail\ContactMessageMail::class, function ($mail) {
+            return $mail->hasTo('restaurante.lasbrazas@gmail.com')
+                && ($mail->contactData['email'] ?? null) === 'valeria.cliente@gmail.com'
+                && ($mail->contactData['subject'] ?? null) === 'Reserva Grupal o Evento Corporativo';
+        });
+    }
 }
