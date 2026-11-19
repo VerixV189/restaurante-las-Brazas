@@ -750,13 +750,13 @@ onUnmounted(() => {
   <AdminLayout>
     <template #header>
       <div class="flex items-center justify-between gap-4 flex-wrap">
-        <div class="flex items-center gap-2.5">
-          <span class="font-extrabold text-slate-900 dark:text-white">
-            Marketplace & Portal del Cliente
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="font-extrabold text-slate-900 dark:text-white truncate">
+            Portal del Cliente
           </span>
           <span
             v-if="userProfile?.email_verified_at"
-            class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30"
+            class="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 shrink-0"
           >
             <ShieldCheck class="w-3.5 h-3.5" /> Correo Verificado
           </span>
@@ -813,7 +813,7 @@ onUnmounted(() => {
         </div>
 
         <!-- Puntos Las Brazas & Acceso rápido al Carrito -->
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
           <button
             type="button"
             @click="switchTab('promos')"

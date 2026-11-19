@@ -152,17 +152,17 @@ function submitSaasQuote() {
 
     <!-- Navbar Empresarial -->
     <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 transition-colors duration-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-3">
+      <div class="max-w-7xl mx-auto px-3 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-3">
         <!-- Brand -->
-        <Link href="/empresa" class="flex items-center gap-2.5 group shrink-0">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-slate-900 via-blue-800 to-orange-500 flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
+        <Link href="/empresa" class="flex items-center gap-2 sm:gap-2.5 group shrink-0">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-slate-900 via-blue-800 to-orange-500 flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
             <Building2 class="w-5 h-5" />
           </div>
           <div class="leading-tight">
-            <span class="font-extrabold text-lg sm:text-xl tracking-wide bg-gradient-to-r from-slate-900 via-blue-700 to-orange-600 dark:from-white dark:via-blue-300 dark:to-orange-400 bg-clip-text text-transparent block">
+            <span class="font-extrabold text-base sm:text-xl tracking-wide bg-gradient-to-r from-slate-900 via-blue-700 to-orange-600 dark:from-white dark:via-blue-300 dark:to-orange-400 bg-clip-text text-transparent block">
               BrazasTech
             </span>
-            <p class="text-[9px] tracking-widest text-slate-500 dark:text-slate-400 uppercase font-semibold">Soluciones Cloud SaaS</p>
+            <p class="hidden sm:block text-[9px] tracking-widest text-slate-500 dark:text-slate-400 uppercase font-semibold">Soluciones Cloud SaaS</p>
           </div>
         </Link>
 

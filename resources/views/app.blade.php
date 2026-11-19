@@ -6,6 +6,7 @@
 
         <title inertia>{{ config('app.name', 'Restaurante Las Brazas') }}</title>
         <meta name="theme-color" content="#ea580c">
+        <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <link rel="icon" type="image/jpeg" href="/images/logo-dark.jpg">
@@ -37,7 +38,7 @@
         @vite(['resources/js/app.js'])
         @inertiaHead
     </head>
-    <body class="font-sans antialiased bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen transition-colors duration-200">
+    <body class="font-sans antialiased bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen overflow-x-hidden transition-colors duration-200">
         @inertia
     </body>
 </html>

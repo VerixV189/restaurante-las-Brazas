@@ -35,10 +35,17 @@ import {
 } from 'lucide-vue-next';
 
 const page = usePage();
-const sidebarOpen = ref(true);
+const isDesktopViewport = () => (typeof window !== 'undefined' ? window.innerWidth >= 1024 : true);
+const sidebarOpen = ref(isDesktopViewport());
 const aiChatOpen = ref(false);
 const { isDark, initTheme, toggleTheme } = useTheme();
 const { isOfflineMode, simulatedOffline, toggleSimulatedOffline, purgeOfflineSessionData } = useOfflinePwa();
+
+function closeSidebarOnMobile() {
+  if (!isDesktopViewport()) {
+    sidebarOpen.value = false;
+  }
+}
 
 async function handleSecureLogout() {
   await purgeOfflineSessionData('Sesión cerrada: datos offline eliminados por seguridad');
@@ -47,6 +54,7 @@ async function handleSecureLogout() {
 
 onMounted(() => {
   initTheme();
+  sidebarOpen.value = isDesktopViewport();
 });
 
 // All navigation items with their allowed roles (empty = all roles)
@@ -225,24 +233,24 @@ function isUrlActive(url) {
 
 
 <template>
-  <div class="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 flex font-sans transition-colors duration-200">
+  <div class="min-h-screen w-full overflow-x-hidden bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 flex font-sans transition-colors duration-200">
     <Toast />
     <ConfirmDialog />
 
     <!-- Sidebar -->
     <aside
       :class="[
-        'bg-white border-r border-slate-200 dark:bg-slate-900 dark:border-slate-800 flex flex-col transition-all duration-300 z-30 fixed lg:static inset-y-0 left-0 shadow-sm lg:shadow-none',
-        sidebarOpen ? 'w-64 translate-x-0' : 'w-20 -translate-x-full lg:translate-x-0'
+        'bg-white border-r border-slate-200 dark:bg-slate-900 dark:border-slate-800 flex flex-col transition-all duration-300 z-30 fixed lg:static inset-y-0 left-0 shadow-lg lg:shadow-none',
+        sidebarOpen ? 'w-64 translate-x-0' : 'w-64 lg:w-20 -translate-x-full lg:translate-x-0'
       ]"
     >
       <!-- Logo Header -->
       <div class="h-20 flex items-center justify-between px-4 border-b border-slate-200 dark:border-slate-800">
-        <Link href="/" class="flex items-center gap-3 overflow-hidden group">
+        <Link href="/" @click="closeSidebarOnMobile" class="flex items-center gap-3 overflow-hidden group">
           <img
             :src="isDark ? '/images/logo-dark.jpg' : '/images/logo-light.jpg'"
             alt="Logo Las Brazas Steakhouse"
-            class="w-12 h-12 rounded-xl object-cover shrink-0 shadow-sm border border-slate-200 dark:border-slate-700 group-hover:scale-105 transition-transform"
+            class="w-11 h-11 rounded-xl object-cover shrink-0 shadow-sm border border-slate-200 dark:border-slate-700 group-hover:scale-105 transition-transform"
           />
           <div v-if="sidebarOpen" class="overflow-hidden">
             <span class="block font-extrabold text-base tracking-wide bg-gradient-to-r from-orange-600 to-amber-500 dark:from-orange-400 dark:to-amber-200 bg-clip-text text-transparent truncate">
@@ -253,6 +261,15 @@ function isUrlActive(url) {
             </span>
           </div>
         </Link>
+
+        <button
+          type="button"
+          @click="sidebarOpen = false"
+          class="lg:hidden p-2 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+          aria-label="Cerrar menú lateral"
+        >
+          <X class="w-5 h-5" />
+        </button>
       </div>
 
       <!-- Navigation Links -->
@@ -261,6 +278,7 @@ function isUrlActive(url) {
           v-for="item in navItems"
           :key="item.name"
           :href="item.href"
+          @click="closeSidebarOnMobile"
           :title="!sidebarOpen ? item.name : ''"
           :class="[
             'flex items-center gap-3 rounded-xl font-medium text-sm transition-all duration-200 group',
@@ -326,43 +344,45 @@ function isUrlActive(url) {
     ></div>
 
     <!-- Main Content Container -->
-    <div class="flex-1 flex flex-col min-w-0">
+    <div class="flex-1 flex flex-col min-w-0 w-full">
       <!-- Top Navbar -->
-      <header class="min-h-16 py-2.5 bg-white/90 dark:bg-slate-900/80 backdrop-blur border-b border-slate-200 dark:border-slate-800 px-6 flex items-center justify-between gap-4 sticky top-0 z-10 transition-colors duration-200">
-        <div class="flex items-center gap-3 flex-1 min-w-0">
+      <header class="min-h-16 py-2 bg-white/95 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800 px-3 sm:px-6 flex items-center justify-between gap-2 sm:gap-4 sticky top-0 z-10 transition-colors duration-200">
+        <div class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
           <button
             @click="sidebarOpen = !sidebarOpen"
-            class="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 transition-colors shrink-0"
+            class="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 transition-colors shrink-0 cursor-pointer"
             title="Alternar Menú"
           >
-            <Menu class="w-6 h-6" />
+            <Menu class="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
-          <div class="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100 flex-1 min-w-0 truncate">
+          <div class="text-sm sm:text-lg font-bold text-slate-800 dark:text-slate-100 flex-1 min-w-0 truncate">
             <slot name="header">Panel de Administración</slot>
           </div>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
           <!-- Indicador / Control de Modo Online y Offline (PWA) -->
-          <NetworkStatusBadge />
+          <div class="hidden sm:flex">
+            <NetworkStatusBadge />
+          </div>
 
           <!-- AI Assistant Navbar Button -->
           <button
             @click="aiChatOpen = !aiChatOpen"
             type="button"
-            class="flex items-center gap-2 px-3 py-1.5 rounded-xl border font-medium text-xs transition-all duration-200 shadow-sm bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-orange-500/10 border-orange-500/30 text-orange-600 hover:border-orange-500 hover:bg-orange-500/20 dark:from-orange-500/20 dark:via-amber-500/20 dark:to-orange-500/20 dark:border-orange-500/40 dark:text-orange-300 dark:hover:border-orange-400 group cursor-pointer"
+            class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border font-medium text-xs transition-all duration-200 shadow-sm bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-orange-500/10 border-orange-500/30 text-orange-600 hover:border-orange-500 hover:bg-orange-500/20 dark:from-orange-500/20 dark:via-amber-500/20 dark:to-orange-500/20 dark:border-orange-500/40 dark:text-orange-300 dark:hover:border-orange-400 group cursor-pointer"
             title="Abrir Asistente Virtual IA"
             id="btn-open-ai-chat"
           >
             <Sparkles class="w-3.5 h-3.5 text-amber-500 animate-pulse group-hover:scale-110 transition-transform" />
-            <span class="font-semibold hidden sm:inline">Asistente IA</span>
+            <span class="font-semibold hidden md:inline">Asistente IA</span>
           </button>
 
           <!-- Theme Switcher Button -->
           <button
             @click="toggleTheme"
             type="button"
-            class="p-2 rounded-xl border transition-all duration-200 flex items-center justify-center text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border-slate-300 dark:text-slate-300 dark:hover:text-amber-400 dark:bg-slate-800/90 dark:hover:bg-slate-800 dark:border-slate-700 shadow-sm"
+            class="p-2 rounded-xl border transition-all duration-200 flex items-center justify-center text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border-slate-300 dark:text-slate-300 dark:hover:text-amber-400 dark:bg-slate-800/90 dark:hover:bg-slate-800 dark:border-slate-700 shadow-sm cursor-pointer"
             :title="isDark ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'"
             aria-label="Alternar tema"
           >
@@ -370,17 +390,17 @@ function isUrlActive(url) {
             <Moon v-else class="w-4 h-4 text-slate-700" />
           </button>
 
-          <Link href="/" class="text-xs text-slate-500 dark:text-slate-400 hover:text-orange-500 dark:hover:text-orange-400 transition-colors flex items-center gap-1">
-            <span>Ver Landing / Menú Público</span>
+          <Link href="/" class="hidden md:flex text-xs text-slate-500 dark:text-slate-400 hover:text-orange-500 dark:hover:text-orange-400 transition-colors items-center gap-1 whitespace-nowrap">
+            <span>Ver Menú Público</span>
           </Link>
-          <Tag value="Sistema Restaurante v1.0" severity="warn" class="hidden sm:inline-flex bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20" />
+          <Tag value="Las Brazas" severity="warn" class="hidden xl:inline-flex bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20" />
         </div>
       </header>
 
       <!-- Banner de aviso cuando está en Modo Offline -->
       <div
         v-if="isOfflineMode"
-        class="bg-amber-500/15 dark:bg-amber-500/20 border-b border-amber-500/30 px-6 py-2 flex flex-wrap items-center justify-between gap-2 text-xs text-amber-800 dark:text-amber-200"
+        class="bg-amber-500/15 dark:bg-amber-500/20 border-b border-amber-500/30 px-3 sm:px-6 py-2 flex flex-wrap items-center justify-between gap-2 text-xs text-amber-800 dark:text-amber-200"
       >
         <span>
           <strong>Modo Offline Activo:</strong> Estás navegando con los datos guardados en la caché segura de tu sesión actual ({{ userRole || 'Usuario' }}). Al cerrar sesión estos datos se eliminan automáticamente.
@@ -396,7 +416,7 @@ function isUrlActive(url) {
       </div>
 
       <!-- Page Content -->
-      <main class="flex-1 p-6 overflow-y-auto">
+      <main class="flex-1 p-3 sm:p-6 overflow-y-auto overflow-x-hidden">
         <slot />
       </main>
     </div>
@@ -406,12 +426,12 @@ function isUrlActive(url) {
       v-if="!aiChatOpen"
       @click="aiChatOpen = true"
       type="button"
-      class="fixed bottom-6 right-6 z-40 flex items-center gap-2.5 px-4 py-3 rounded-full bg-gradient-to-r from-orange-600 to-amber-500 text-white font-medium text-sm shadow-xl shadow-orange-500/30 hover:shadow-orange-500/50 hover:scale-105 active:scale-95 transition-all duration-200 group cursor-pointer"
+      class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 flex items-center gap-2 px-3.5 py-3 sm:px-4 rounded-full bg-gradient-to-r from-orange-600 to-amber-500 text-white font-medium text-xs sm:text-sm shadow-xl shadow-orange-500/30 hover:shadow-orange-500/50 hover:scale-105 active:scale-95 transition-all duration-200 group cursor-pointer"
       title="Preguntar al Asistente IA"
       id="fab-open-ai-chat"
     >
       <Sparkles class="w-5 h-5 text-amber-200 animate-pulse group-hover:rotate-12 transition-transform" />
-      <span class="font-bold tracking-wide">Asistente IA</span>
+      <span class="hidden sm:inline font-bold tracking-wide">Asistente IA</span>
     </button>
 
     <!-- AI Chat Sidebar Drawer -->

@@ -15,15 +15,51 @@
 }
 
 /* ========================================================
+   SOPORTE RESPONSIVO GLOBAL (MÓVIL & TABLET)
+   ======================================================== */
+html,
+body {
+    max-width: 100%;
+    overflow-x: clip;
+}
+
+.p-datatable-table-container,
+.p-datatable-wrapper {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+}
+
+.p-paginator {
+    flex-wrap: wrap !important;
+}
+
+@media (max-width: 640px) {
+    .p-dialog {
+        width: calc(100vw - 1.5rem) !important;
+        max-width: calc(100vw - 1.5rem) !important;
+        margin: 0.75rem !important;
+    }
+
+    .p-dialog .p-dialog-header,
+    .p-dialog .p-dialog-content,
+    .p-dialog .p-dialog-footer {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+}
+
+/* ========================================================
    ESTILOS GLOBAIS DE TABLAS PRIMEVUE (DARK & LIGHT MODE)
    ======================================================== */
 
 .p-datatable {
     font-family: inherit !important;
     border-radius: 0.75rem !important;
-    overflow: hidden !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
     border: none !important;
     width: 100% !important;
+    max-width: 100% !important;
 }
 
 .p-datatable .p-datatable-table {

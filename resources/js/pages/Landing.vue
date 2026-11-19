@@ -270,19 +270,19 @@ function submitTestimonial() {
 
     <!-- Navbar Exclusivo del Restaurante -->
     <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 transition-colors duration-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-2 xl:gap-4">
+      <div class="max-w-7xl mx-auto px-3 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-2 xl:gap-4">
         <!-- Logo -->
-        <Link href="/" class="flex items-center gap-2.5 group shrink-0">
+        <Link href="/" class="flex items-center gap-2 sm:gap-2.5 group shrink-0">
           <img
             :src="isDark ? '/images/logo-dark.jpg' : '/images/logo-light.jpg'"
             alt="Las Brazas Steakhouse"
-            class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl object-cover shadow-sm border border-slate-200 dark:border-slate-800 group-hover:scale-105 transition-transform"
+            class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl object-cover shadow-sm border border-slate-200 dark:border-slate-800 group-hover:scale-105 transition-transform"
           />
           <div class="leading-tight">
-            <span class="font-extrabold text-lg sm:text-xl tracking-wide bg-gradient-to-r from-orange-600 to-amber-500 dark:from-orange-400 dark:via-amber-300 dark:to-yellow-200 bg-clip-text text-transparent block">
+            <span class="font-extrabold text-base sm:text-xl tracking-wide bg-gradient-to-r from-orange-600 to-amber-500 dark:from-orange-400 dark:via-amber-300 dark:to-yellow-200 bg-clip-text text-transparent block">
               Las Brazas
             </span>
-            <p class="text-[9px] tracking-widest text-slate-500 dark:text-slate-400 uppercase font-semibold">Steakhouse & Grill</p>
+            <p class="hidden sm:block text-[9px] tracking-widest text-slate-500 dark:text-slate-400 uppercase font-semibold">Steakhouse & Grill</p>
           </div>
         </Link>
 
@@ -318,27 +318,40 @@ function submitTestimonial() {
             label="Reservar"
             icon="pi pi-calendar"
             severity="warn"
-            class="!px-3 !py-2 !bg-gradient-to-r !from-orange-600 !to-amber-500 !border-none font-semibold !text-white shadow-md shadow-orange-600/20 hover:shadow-orange-600/40 hover:scale-[1.02] transition-all !text-xs whitespace-nowrap"
+            class="hidden sm:inline-flex !px-3 !py-2 !bg-gradient-to-r !from-orange-600 !to-amber-500 !border-none font-semibold !text-white shadow-md shadow-orange-600/20 hover:shadow-orange-600/40 hover:scale-[1.02] transition-all !text-xs whitespace-nowrap"
             @click="openReservationModal()"
           />
-          <Link href="/register" class="hidden md:inline-block shrink-0">
-            <Button
-              icon="pi pi-user-plus"
-              label="Registrarse"
-              severity="warn"
-              outlined
-              class="!px-3 !py-2 !text-orange-600 dark:!text-orange-400 !border-orange-500/40 hover:!bg-orange-500/10 !text-xs whitespace-nowrap"
-            />
-          </Link>
-          <Link href="/login" class="shrink-0">
-            <Button
-              icon="pi pi-user"
-              label="Iniciar Sesión"
-              severity="secondary"
-              outlined
-              class="!px-3 !py-2 !text-slate-700 dark:!text-slate-300 !border-slate-300 dark:!border-slate-700 hover:!bg-slate-100 dark:hover:!bg-slate-800 !text-xs whitespace-nowrap"
-            />
-          </Link>
+          <template v-if="$page.props.auth?.user">
+            <Link href="/dashboard" class="shrink-0">
+              <Button
+                icon="pi pi-th-large"
+                label="Mi Portal"
+                severity="secondary"
+                outlined
+                class="!px-2.5 sm:!px-3.5 !py-1.5 sm:!py-2 !text-slate-700 dark:!text-slate-200 !border-slate-300 dark:!border-slate-700 hover:!bg-slate-100 dark:hover:!bg-slate-800 !text-[11px] sm:!text-xs font-semibold whitespace-nowrap"
+              />
+            </Link>
+          </template>
+          <template v-else>
+            <Link href="/register" class="hidden md:inline-block shrink-0">
+              <Button
+                icon="pi pi-user-plus"
+                label="Registrarse"
+                severity="warn"
+                outlined
+                class="!px-3 !py-2 !text-orange-600 dark:!text-orange-400 !border-orange-500/40 hover:!bg-orange-500/10 !text-xs whitespace-nowrap"
+              />
+            </Link>
+            <Link href="/login" class="shrink-0">
+              <Button
+                icon="pi pi-user"
+                label="Iniciar Sesión"
+                severity="secondary"
+                outlined
+                class="!px-2.5 sm:!px-3 !py-1.5 sm:!py-2 !text-slate-700 dark:!text-slate-300 !border-slate-300 dark:!border-slate-700 hover:!bg-slate-100 dark:hover:!bg-slate-800 !text-[11px] sm:!text-xs whitespace-nowrap"
+              />
+            </Link>
+          </template>
 
           <!-- Botón menú hamburguesa (< XL) -->
           <button
@@ -365,11 +378,20 @@ function submitTestimonial() {
           <a href="#testimonios" @click="mobileMenuOpen = false" class="px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-900">Testimonios</a>
           <a href="#contacto" @click="mobileMenuOpen = false" class="px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-900">Contáctenos</a>
         </div>
-        <div class="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-800 sm:hidden">
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-200 dark:border-slate-800 sm:hidden">
           <NetworkStatusBadge />
-          <Link href="/register" class="text-xs font-bold text-orange-600 dark:text-orange-400 underline">
-            Crear Cuenta →
-          </Link>
+          <div class="flex items-center gap-3">
+            <button
+              type="button"
+              @click="mobileMenuOpen = false; openReservationModal()"
+              class="text-xs font-bold text-orange-600 dark:text-orange-400"
+            >
+              Reservar Mesa
+            </button>
+            <Link v-if="!$page.props.auth?.user" href="/register" class="text-xs font-bold text-slate-700 dark:text-slate-200 underline">
+              Crear Cuenta →
+            </Link>
+          </div>
         </div>
       </div>
     </header>
@@ -932,7 +954,7 @@ function submitTestimonial() {
           <InputText v-model="form.customer_name" class="w-full" placeholder="Ej: Carlos Mendoza" required />
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Teléfono Móvil</label>
             <InputText v-model="form.customer_phone" class="w-full" placeholder="555-0000" required />
@@ -943,7 +965,7 @@ function submitTestimonial() {
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase mb-1">Fecha y Hora</label>
             <DatePicker v-model="form.reservation_date" showTime hourFormat="12" class="w-full" required />
