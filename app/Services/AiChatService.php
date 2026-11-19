@@ -458,8 +458,8 @@ class AiChatService
             foreach ($candidateModels as $model) {
                 $endpoints = $isVertexExpressKey
                     ? [
-                        ['url' => "https://aiplatform.googleapis.com/v1/publishers/google/models/{$model}:generateContent", 'engine' => "vertex-{$model}"],
                         ['url' => "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent", 'engine' => "gemini-{$model}"],
+                        ['url' => "https://aiplatform.googleapis.com/v1/publishers/google/models/{$model}:generateContent", 'engine' => "vertex-{$model}"],
                     ]
                     : [
                         ['url' => "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent", 'engine' => "gemini-{$model}"],
