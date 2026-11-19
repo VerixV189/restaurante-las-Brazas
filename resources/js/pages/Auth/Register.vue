@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useForm, Link } from '@inertiajs/vue3';
 import Card from 'primevue/card';
 import InputText from 'primevue/inputtext';
@@ -35,10 +35,27 @@ const form = useForm({
   password: '',
   password_confirmation: '',
   terms: false,
+  privacy: false,
 });
 
+const bothPoliciesAccepted = computed(() => Boolean(form.terms && form.privacy));
+const googleConsentWarning = ref(false);
+
+function handleGoogleRegisterClick(event) {
+  if (!bothPoliciesAccepted.value) {
+    event.preventDefault();
+    googleConsentWarning.value = true;
+    const el = document.getElementById('legal-consents');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    return;
+  }
+  googleConsentWarning.value = false;
+}
+
 function submitRegister() {
-  if (!form.terms) {
+  if (!bothPoliciesAccepted.value) {
     return;
   }
 
@@ -109,15 +126,27 @@ function submitRegister() {
         </Message>
 
         <!-- General / Server Error Messages -->
-        <Message v-if="form.errors.terms" severity="error" class="mb-4 text-xs">
+        <Message v-if="form.errors.terms" severity="error" class="mb-3 text-xs">
           {{ form.errors.terms }}
+        </Message>
+        <Message v-if="form.errors.privacy" severity="error" class="mb-4 text-xs">
+          {{ form.errors.privacy }}
+        </Message>
+        <Message v-if="googleConsentWarning && !bothPoliciesAccepted" severity="warn" class="mb-4 text-xs font-medium">
+          Para registrarte con Google debes marcar primero las dos casillas de abajo: Términos y Condiciones y Política de Privacidad.
         </Message>
 
         <!-- Botón de Registro en 1 clic con Google OAuth 2.0 -->
         <div class="mb-5">
           <a
             href="/auth/google/redirect"
-            class="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 font-semibold text-sm shadow-sm hover:shadow transition-all duration-200"
+            @click="handleGoogleRegisterClick"
+            :class="[
+              'w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border font-semibold text-sm shadow-sm transition-all duration-200',
+              bothPoliciesAccepted
+                ? 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/80 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 hover:shadow cursor-pointer'
+                : 'bg-slate-100 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700/60 text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-75'
+            ]"
           >
             <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
               <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/>
@@ -228,9 +257,16 @@ function submitRegister() {
             </div>
           </div>
 
-          <!-- Mandatory Terms & Conditions Checkbox -->
-          <div class="pt-2">
-            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 flex items-start gap-3 transition-colors" :class="{ 'border-orange-400 dark:border-orange-500/50 bg-orange-50/50 dark:bg-orange-950/15': form.terms }">
+          <!-- Mandatory Separate Checkboxes: Terms & Conditions + Privacy Policy -->
+          <div id="legal-consents" class="pt-2 space-y-3">
+            <!-- Check 1: Términos y Condiciones -->
+            <div
+              class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 flex items-start gap-3 transition-colors"
+              :class="{
+                'border-orange-400 dark:border-orange-500/50 bg-orange-50/50 dark:bg-orange-950/15': form.terms,
+                'border-amber-400 ring-2 ring-amber-400/25': googleConsentWarning && !form.terms
+              }"
+            >
               <Checkbox
                 v-model="form.terms"
                 :binary="true"
@@ -241,52 +277,69 @@ function submitRegister() {
                 <label for="terms_checkbox" class="cursor-pointer">
                   He leído y acepto los
                 </label>
-                <!-- Clickable text redirecting directly to Terms and Conditions page -->
                 <a
                   href="/terms"
                   target="_blank"
                   class="text-orange-600 dark:text-orange-400 font-bold underline hover:text-orange-500 transition-colors ml-1"
                   title="Abrir y leer los términos y condiciones"
                 >
-                  términos y condiciones
+                  Términos y Condiciones
                 </a>
-                <span> y la</span>
+                <span> del sistema de Restaurante Las Brazas. *</span>
+              </div>
+            </div>
+
+            <!-- Check 2: Política de Privacidad -->
+            <div
+              class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 flex items-start gap-3 transition-colors"
+              :class="{
+                'border-emerald-400 dark:border-emerald-500/50 bg-emerald-50/50 dark:bg-emerald-950/15': form.privacy,
+                'border-amber-400 ring-2 ring-amber-400/25': googleConsentWarning && !form.privacy
+              }"
+            >
+              <Checkbox
+                v-model="form.privacy"
+                :binary="true"
+                inputId="privacy_checkbox"
+                class="mt-0.5"
+              />
+              <div class="text-xs text-slate-700 dark:text-slate-300 select-none">
+                <label for="privacy_checkbox" class="cursor-pointer">
+                  He leído y acepto la
+                </label>
                 <a
                   href="/privacy"
                   target="_blank"
                   class="text-emerald-600 dark:text-emerald-400 font-bold underline hover:text-emerald-500 transition-colors ml-1"
                   title="Abrir y leer la política de privacidad"
                 >
-                  política de privacidad
+                  Política de Privacidad
                 </a>
-                <span> de Restaurante Las Brazas.</span>
-                <p class="text-[11px] text-slate-500 mt-1">
-                  (Puedes abrir y revisar ambos documentos en una nueva pestaña antes de aceptar).
-                </p>
+                <span> y el tratamiento de mis datos personales. *</span>
               </div>
             </div>
           </div>
 
-          <!-- Submit Button - Disabled until terms is checked -->
+          <!-- Submit Button - Disabled until BOTH terms AND privacy are checked -->
           <div class="pt-2">
             <Button
               type="submit"
               label="Registrarse y Crear Cuenta"
               icon="pi pi-user-plus"
-              :disabled="!form.terms || form.processing"
+              :disabled="!bothPoliciesAccepted || form.processing"
               :loading="form.processing"
               :class="[
                 'w-full h-12 font-bold rounded-xl border-none transition-all duration-200',
-                form.terms
-                  ? 'bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white shadow-lg shadow-orange-600/30 cursor-pointer hover:scale-[1.01]'
-                  : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 opacity-60 cursor-not-allowed border border-slate-300 dark:border-slate-700'
+                bothPoliciesAccepted
+                  ? '!bg-gradient-to-r !from-orange-600 !to-amber-500 hover:!from-orange-500 hover:!to-amber-400 !text-white shadow-lg shadow-orange-600/30 cursor-pointer hover:scale-[1.01]'
+                  : '!bg-slate-200 dark:!bg-slate-800 !text-slate-400 dark:!text-slate-500 opacity-60 cursor-not-allowed !border !border-slate-300 dark:!border-slate-700'
               ]"
             />
 
             <!-- Warning note if button is disabled -->
-            <p v-if="!form.terms" class="text-center text-[11px] text-amber-600 dark:text-amber-500 mt-2 flex items-center justify-center gap-1.5 font-medium">
-              <AlertTriangle class="w-3.5 h-3.5" />
-              Debes marcar la casilla de aceptación para poder registrarte.
+            <p v-if="!bothPoliciesAccepted" class="text-center text-[11px] text-amber-600 dark:text-amber-500 mt-2 flex items-center justify-center gap-1.5 font-medium">
+              <AlertTriangle class="w-3.5 h-3.5 shrink-0" />
+              Debes aceptar los Términos y Condiciones y la Política de Privacidad para registrarte.
             </p>
           </div>
         </form>

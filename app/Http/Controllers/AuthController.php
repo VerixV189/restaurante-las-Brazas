@@ -63,6 +63,7 @@ class AuthController extends Controller
             'phone'                 => 'nullable|string|max:30',
             'password'              => 'required|string|min:8|confirmed',
             'terms'                 => 'accepted',
+            'privacy'               => 'accepted',
         ], [
             'name.required'         => 'El nombre completo es obligatorio.',
             'email.required'        => 'El correo electrónico es obligatorio.',
@@ -72,6 +73,7 @@ class AuthController extends Controller
             'password.min'          => 'La contraseña debe contener al menos 8 caracteres.',
             'password.confirmed'    => 'Las contraseñas no coinciden.',
             'terms.accepted'        => 'Debe aceptar los términos y condiciones del sistema para continuar.',
+            'privacy.accepted'      => 'Debe aceptar la política de privacidad para continuar.',
         ]);
 
         // Asegurar que exista el rol "Cliente" para registrar al usuario

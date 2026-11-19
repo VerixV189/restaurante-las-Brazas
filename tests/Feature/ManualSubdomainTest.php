@@ -165,6 +165,42 @@ class ManualSubdomainTest extends TestCase
         $spanishAliasResponse->assertInertia(fn ($page) => $page->component('Privacy'));
     }
 
+    public function test_manual_registration_requires_both_terms_and_privacy_checkboxes_and_sends_four_emails(): void
+    {
+        \Illuminate\Support\Facades\Mail::fake();
+
+        // Falla si solo marca términos sin política de privacidad
+        $failResponse = $this->from('/register')->post('/register', [
+            'name'                  => 'Ana Prueba',
+            'email'                 => 'ana.prueba@example.com',
+            'phone'                 => '+591 700-11111',
+            'password'              => 'secret1234',
+            'password_confirmation' => 'secret1234',
+            'terms'                 => true,
+            'privacy'               => false,
+        ]);
+        $failResponse->assertRedirect('/register');
+        $failResponse->assertSessionHasErrors(['privacy']);
+        $this->assertNull(\App\Models\User::where('email', 'ana.prueba@example.com')->first());
+
+        // Pasa cuando marca ambos checkboxes y envía los 4 correos
+        $okResponse = $this->from('/register')->post('/register', [
+            'name'                  => 'Ana Prueba',
+            'email'                 => 'ana.prueba@example.com',
+            'phone'                 => '+591 700-11111',
+            'password'              => 'secret1234',
+            'password_confirmation' => 'secret1234',
+            'terms'                 => true,
+            'privacy'               => true,
+        ]);
+        $okResponse->assertRedirect('/login');
+
+        \Illuminate\Support\Facades\Mail::assertSent(\App\Mail\TermsMail::class);
+        \Illuminate\Support\Facades\Mail::assertSent(\App\Mail\ConditionsMail::class);
+        \Illuminate\Support\Facades\Mail::assertSent(\App\Mail\PrivacyPolicyMail::class);
+        \Illuminate\Support\Facades\Mail::assertSent(\App\Mail\VerifyAccountMail::class);
+    }
+
     public function test_contact_form_validates_and_sends_email_to_configured_recipient(): void
     {
         \Illuminate\Support\Facades\Mail::fake();
