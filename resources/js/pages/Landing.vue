@@ -42,7 +42,9 @@ import {
   Sun,
   Moon,
   Mail,
-  Send
+  Send,
+  Menu,
+  X
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -61,6 +63,7 @@ const selectedCategory = ref('all');
 const reserveModalOpen = ref(false);
 const testimonialModalOpen = ref(false);
 const saasModalOpen = ref(false);
+const mobileMenuOpen = ref(false);
 const billingCycle = ref('monthly'); // 'monthly' | 'annual'
 
 const saasPlans = [
@@ -389,42 +392,43 @@ function submitTestimonial() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 font-sans selection:bg-orange-500 selection:text-white transition-colors duration-200">
+  <div class="min-h-screen overflow-x-hidden bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 font-sans selection:bg-orange-500 selection:text-white transition-colors duration-200">
     <Toast />
 
     <!-- Navbar -->
-    <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-950/85 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 transition-colors duration-200">
-      <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between gap-4">
+    <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 transition-colors duration-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-2 xl:gap-4">
         <!-- Logo -->
-        <Link href="/" class="flex items-center gap-3 group shrink-0">
+        <Link href="/" class="flex items-center gap-2.5 group shrink-0">
           <img
             :src="isDark ? '/images/logo-dark.jpg' : '/images/logo-light.jpg'"
             alt="Las Brazas Steakhouse"
-            class="w-12 h-12 rounded-2xl object-cover shadow-sm border border-slate-200 dark:border-slate-800 group-hover:scale-105 transition-transform"
+            class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl object-cover shadow-sm border border-slate-200 dark:border-slate-800 group-hover:scale-105 transition-transform"
           />
-          <div>
-            <span class="font-extrabold text-xl sm:text-2xl tracking-wide bg-gradient-to-r from-orange-600 to-amber-500 dark:from-orange-400 dark:via-amber-300 dark:to-yellow-200 bg-clip-text text-transparent">
+          <div class="leading-tight">
+            <span class="font-extrabold text-lg sm:text-xl tracking-wide bg-gradient-to-r from-orange-600 to-amber-500 dark:from-orange-400 dark:via-amber-300 dark:to-yellow-200 bg-clip-text text-transparent block">
               Las Brazas
             </span>
-            <p class="text-[10px] tracking-widest text-slate-500 dark:text-slate-400 uppercase font-semibold">Steakhouse & Grill</p>
+            <p class="text-[9px] tracking-widest text-slate-500 dark:text-slate-400 uppercase font-semibold">Steakhouse & Grill</p>
           </div>
         </Link>
 
-        <!-- Navigation Links -->
-        <nav class="hidden lg:flex items-center gap-5 xl:gap-7 text-xs xl:text-sm font-medium text-slate-600 dark:text-slate-300">
-          <a href="#sobre-nosotros" class="whitespace-nowrap hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Sobre Nosotros</a>
+        <!-- Navigation Links (Desktop XL+) -->
+        <nav class="hidden xl:flex items-center gap-3.5 2xl:gap-5 text-xs font-medium text-slate-600 dark:text-slate-300 min-w-0">
+          <a href="#sobre-nosotros" class="whitespace-nowrap hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Nosotros</a>
           <a href="#menu" class="whitespace-nowrap hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Menú</a>
-          <a href="#tecnologia" class="whitespace-nowrap hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Fortalezas</a>
-          <a href="#experiencia" class="whitespace-nowrap hover:text-orange-600 dark:hover:text-orange-400 transition-colors">La Experiencia</a>
+          <a href="#experiencia" class="whitespace-nowrap hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Experiencia</a>
           <a href="#testimonios" class="whitespace-nowrap hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Testimonios</a>
-          <a href="#modelo-saas" class="whitespace-nowrap px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold hover:bg-orange-500/20 transition-colors">Modelo SaaS</a>
+          <a href="#modelo-saas" class="whitespace-nowrap px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold hover:bg-orange-500/20 transition-colors">SaaS</a>
           <a href="#contacto" class="whitespace-nowrap hover:text-orange-600 dark:hover:text-orange-400 transition-colors">Contáctenos</a>
         </nav>
 
         <!-- Action Buttons -->
-        <div class="flex items-center gap-2 shrink-0">
+        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <!-- Indicador Online / Offline PWA -->
-          <NetworkStatusBadge />
+          <div class="hidden sm:flex">
+            <NetworkStatusBadge />
+          </div>
 
           <!-- Theme Switcher -->
           <button
@@ -439,19 +443,19 @@ function submitTestimonial() {
           </button>
 
           <Button
-            label="Reservar Mesa"
+            label="Reservar"
             icon="pi pi-calendar"
             severity="warn"
-            class="!bg-gradient-to-r !from-orange-600 !to-amber-500 !border-none font-semibold !text-white shadow-md shadow-orange-600/20 hover:shadow-orange-600/40 hover:scale-[1.02] transition-all text-xs whitespace-nowrap"
+            class="!px-3 !py-2 !bg-gradient-to-r !from-orange-600 !to-amber-500 !border-none font-semibold !text-white shadow-md shadow-orange-600/20 hover:shadow-orange-600/40 hover:scale-[1.02] transition-all !text-xs whitespace-nowrap"
             @click="openReservationModal()"
           />
-          <Link href="/register" class="hidden sm:inline-block shrink-0">
+          <Link href="/register" class="hidden md:inline-block shrink-0">
             <Button
               icon="pi pi-user-plus"
               label="Registrarse"
               severity="warn"
               outlined
-              class="!text-orange-600 dark:!text-orange-400 !border-orange-500/40 hover:!bg-orange-500/10 text-xs whitespace-nowrap"
+              class="!px-3 !py-2 !text-orange-600 dark:!text-orange-400 !border-orange-500/40 hover:!bg-orange-500/10 !text-xs whitespace-nowrap"
             />
           </Link>
           <Link href="/login" class="shrink-0">
@@ -460,8 +464,41 @@ function submitTestimonial() {
               label="Iniciar Sesión"
               severity="secondary"
               outlined
-              class="!text-slate-700 dark:!text-slate-300 !border-slate-300 dark:!border-slate-700 hover:!bg-slate-100 dark:hover:!bg-slate-800 text-xs whitespace-nowrap"
+              class="!px-3 !py-2 !text-slate-700 dark:!text-slate-300 !border-slate-300 dark:!border-slate-700 hover:!bg-slate-100 dark:hover:!bg-slate-800 !text-xs whitespace-nowrap"
             />
+          </Link>
+
+          <!-- Botón menú hamburguesa para pantallas menores a XL -->
+          <button
+            type="button"
+            @click="mobileMenuOpen = !mobileMenuOpen"
+            class="xl:hidden p-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer shrink-0"
+            aria-label="Abrir menú de navegación"
+          >
+            <X v-if="mobileMenuOpen" class="w-4 h-4" />
+            <Menu v-else class="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      <!-- Menú desplegable responsivo (< XL) -->
+      <div
+        v-if="mobileMenuOpen"
+        class="xl:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-6 py-4 space-y-3 shadow-lg"
+      >
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200">
+          <a href="#sobre-nosotros" @click="mobileMenuOpen = false" class="px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-900">Sobre Nosotros</a>
+          <a href="#menu" @click="mobileMenuOpen = false" class="px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-900">Menú</a>
+          <a href="#tecnologia" @click="mobileMenuOpen = false" class="px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-900">Fortalezas</a>
+          <a href="#experiencia" @click="mobileMenuOpen = false" class="px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-900">La Experiencia</a>
+          <a href="#testimonios" @click="mobileMenuOpen = false" class="px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-900">Testimonios</a>
+          <a href="#modelo-saas" @click="mobileMenuOpen = false" class="px-3 py-2 rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400">Modelo SaaS</a>
+          <a href="#contacto" @click="mobileMenuOpen = false" class="px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-900">Contáctenos</a>
+        </div>
+        <div class="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-800 sm:hidden">
+          <NetworkStatusBadge />
+          <Link href="/register" class="text-xs font-bold text-orange-600 dark:text-orange-400 underline">
+            Crear Cuenta →
           </Link>
         </div>
       </div>
@@ -496,13 +533,13 @@ function submitTestimonial() {
             <Button
               label="Explorar Menú Digital"
               icon="pi pi-arrow-down"
-              class="px-8 py-3.5 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-2xl shadow-xl shadow-orange-600/30 border-none transition-all"
+              class="!px-8 !py-3.5 !bg-gradient-to-r !from-orange-600 !to-amber-500 hover:!from-orange-500 hover:!to-amber-400 !text-white font-bold !rounded-2xl shadow-xl shadow-orange-600/30 !border-none transition-all"
             />
           </a>
           <Button
             label="Apartar tu Mesa Ahora"
             icon="pi pi-calendar-plus"
-            class="px-8 py-3.5 bg-slate-900/90 hover:bg-slate-800 text-slate-100 font-bold rounded-2xl border border-slate-700 backdrop-blur transition-all"
+            class="!px-8 !py-3.5 !bg-slate-900/90 hover:!bg-slate-800 !text-slate-100 font-bold !rounded-2xl !border !border-slate-700 backdrop-blur transition-all"
             @click="openReservationModal()"
           />
         </div>
@@ -1449,7 +1486,7 @@ function submitTestimonial() {
 
             <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
               <span class="text-[11px] text-slate-500 dark:text-slate-400">
-                Tus datos están protegidos conforme a nuestros <Link href="/terms" class="text-orange-600 dark:text-orange-400 underline">Términos y Privacidad</Link>.
+                Tus datos están protegidos conforme a nuestra <Link href="/privacy" class="text-orange-600 dark:text-orange-400 underline">Política de Privacidad</Link> y <Link href="/terms" class="text-orange-600 dark:text-orange-400 underline">Términos</Link>.
               </span>
 
               <Button
@@ -1517,6 +1554,9 @@ function submitTestimonial() {
             <Link href="/terms" class="hover:text-orange-600 dark:hover:text-orange-400 transition-colors">
               → Términos y Condiciones
             </Link>
+            <Link href="/privacy" class="hover:text-orange-600 dark:hover:text-orange-400 transition-colors">
+              → Política de Privacidad
+            </Link>
             <Link href="/login" class="hover:text-orange-600 dark:hover:text-orange-400 transition-colors">
               → Iniciar Sesión / Personal y POS
             </Link>
@@ -1526,9 +1566,12 @@ function submitTestimonial() {
 
       <div class="max-w-7xl mx-auto pt-10 mt-10 border-t border-slate-200 dark:border-slate-900 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
         <span>© 2026 Restaurante Las Brazas Steakhouse & BrazasTech Soluciones de Software S.R.L. Todos los derechos reservados.</span>
-        <div class="flex items-center gap-6">
+        <div class="flex flex-wrap items-center gap-5">
           <Link href="/terms" class="hover:text-orange-600 dark:hover:text-orange-400 transition-colors underline">
-            Términos del Servicio y Condiciones
+            Términos y Condiciones
+          </Link>
+          <Link href="/privacy" class="hover:text-orange-600 dark:hover:text-orange-400 transition-colors underline">
+            Política de Privacidad
           </Link>
           <Link href="/register" class="hover:text-orange-600 dark:hover:text-orange-400 transition-colors underline">
             Registro de Usuarios
